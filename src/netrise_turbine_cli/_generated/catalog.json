@@ -1,0 +1,1761 @@
+[
+  {
+    "name": "add-asset-groups-to-assets",
+    "operation": "mutation_add_asset_groups_to_assets",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Associate a list of existing asset groups with selected assets.",
+    "risk": "write",
+    "return_type": "MutationAddAssetGroupsToAssets",
+    "input_model": "AddAssetGroupsToAssetsInput",
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "add-assets-to-asset-group",
+    "operation": "mutation_add_assets_to_asset_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Add specified assets to an existing asset group for organization.",
+    "risk": "write",
+    "return_type": "MutationAddAssetsToAssetGroup",
+    "input_model": "AddAssetsToAssetGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": "group add-assets"
+  },
+  {
+    "name": "asset-add-dependency",
+    "operation": "mutation_asset_add_dependency",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Manually inject a missing dependency component into an asset's inventory.",
+    "risk": "write",
+    "return_type": "MutationAssetAddDependency",
+    "input_model": "AddDependencyInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "composed-asset-id",
+      "reason"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "asset-modify-dependency",
+    "operation": "mutation_asset_modify_dependency",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update metadata or details for a manually added asset dependency.",
+    "risk": "write",
+    "return_type": "MutationAssetModifyDependency",
+    "input_model": "ModifyDependencyInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "reason"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "asset-remove-dependencies",
+    "operation": "mutation_asset_remove_dependencies",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Remove specific dependencies from the component list of an asset.",
+    "risk": "write",
+    "return_type": "MutationAssetRemoveDependencies",
+    "input_model": "IdentificationInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "asset-submit",
+    "operation": "mutation_asset_submit",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Upload firmware or SBOMs with metadata, group assignments, and CPEs.",
+    "risk": "write",
+    "return_type": "MutationAssetSubmit",
+    "input_model": "SubmitAssetInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "name",
+      "manufacturer",
+      "model",
+      "version",
+      "asset-cpe",
+      "architecture",
+      "kernel-version",
+      "os",
+      "bitness",
+      "family",
+      "type",
+      "sbom-type",
+      "sbom-version",
+      "sbom-format",
+      "license"
+    ],
+    "curated_alias": "asset submit"
+  },
+  {
+    "name": "asset-update",
+    "operation": "mutation_asset_update",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Modify metadata such as name, vendor, or version for assets.",
+    "risk": "write",
+    "return_type": "MutationAssetUpdate",
+    "input_model": "UpdateAssetInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id",
+      "vendor",
+      "name",
+      "version",
+      "product"
+    ],
+    "curated_alias": "asset update"
+  },
+  {
+    "name": "create-asset-comparison-report",
+    "operation": "mutation_create_asset_comparison_report",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Create a new comparison report to diff vulnerabilities and components between two assets.",
+    "risk": "write",
+    "return_type": "MutationCreateAssetComparisonReport",
+    "input_model": "CreateAssetComparisonReportInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-a",
+      "asset-b"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "create-asset-group",
+    "operation": "mutation_create_asset_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Create a new named group to organize and track assets.",
+    "risk": "write",
+    "return_type": "MutationCreateAssetGroup",
+    "input_model": "CreateAssetGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "name",
+      "description"
+    ],
+    "curated_alias": "group create"
+  },
+  {
+    "name": "create-notification-configuration",
+    "operation": "mutation_create_notification_configuration",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Create a notification configuration defining channel, scopes, and triggers for alerts.",
+    "risk": "write",
+    "return_type": "MutationCreateNotificationConfiguration",
+    "input_model": "CreateNotificationConfigurationInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "delete-asset-comparison-report",
+    "operation": "mutation_delete_asset_comparison_report",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Permanently delete an asset comparison report by its ID.",
+    "risk": "destructive",
+    "return_type": "MutationDeleteAssetComparisonReport",
+    "input_model": "DeleteAssetComparisonReportInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "report-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "delete-asset-group",
+    "operation": "mutation_delete_asset_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Permanently remove an asset group while keeping contained assets intact.",
+    "risk": "destructive",
+    "return_type": "MutationDeleteAssetGroup",
+    "input_model": "DeleteAssetGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": "group delete"
+  },
+  {
+    "name": "delete-notification-configuration",
+    "operation": "mutation_delete_notification_configuration",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Permanently delete a notification configuration by its ID.",
+    "risk": "destructive",
+    "return_type": "MutationDeleteNotificationConfiguration",
+    "input_model": "DeleteNotificationConfigurationInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "notify-notification-configuration",
+    "operation": "mutation_notify_notification_configuration",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Send a test notification using an existing notification configuration.",
+    "risk": "write",
+    "return_type": "MutationNotifyNotificationConfiguration",
+    "input_model": "NotifyNotificationConfigurationInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "remediate-all-asset-vulnerabilities",
+    "operation": "mutation_remediate_all_asset_vulnerabilities",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Apply a remediation status to all vulnerabilities matching specific filters.",
+    "risk": "destructive",
+    "return_type": "MutationRemediateAllAssetVulnerabilities",
+    "input_model": "CreateAllAssetVulnerabilitiesRemediationInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id",
+      "justification",
+      "description",
+      "status"
+    ],
+    "curated_alias": "vuln remediate --all"
+  },
+  {
+    "name": "remediate-asset-vulnerabilities",
+    "operation": "mutation_remediate_asset_vulnerabilities",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Bulk apply VEX remediation status to multiple vulnerabilities on assets.",
+    "risk": "destructive",
+    "return_type": "MutationRemediateAssetVulnerabilities",
+    "input_model": "CreateAssetVulnerabilityRemediationsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id",
+      "justification",
+      "description",
+      "status"
+    ],
+    "curated_alias": "vuln remediate --bulk"
+  },
+  {
+    "name": "remediate-asset-vulnerability",
+    "operation": "mutation_remediate_asset_vulnerability",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update remediation status and justification for a single asset vulnerability.",
+    "risk": "destructive",
+    "return_type": "MutationRemediateAssetVulnerability",
+    "input_model": "CreateAssetVulnerabilityRemediationInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id",
+      "justification",
+      "description",
+      "status"
+    ],
+    "curated_alias": "vuln remediate"
+  },
+  {
+    "name": "remediate-certificates",
+    "operation": "mutation_remediate_certificates",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update remediation status and notes for certificate issues found in assets.",
+    "risk": "destructive",
+    "return_type": "MutationRemediateCertificates",
+    "input_model": "RemediateCertificatesInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "status",
+      "details"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "remediate-license-issues",
+    "operation": "mutation_remediate_license_issues",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update status and add notes to resolve identified license issues.",
+    "risk": "destructive",
+    "return_type": "MutationRemediateLicenseIssues",
+    "input_model": "RemediateLicenseIssuesInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "status",
+      "details"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "remediate-private-keys",
+    "operation": "mutation_remediate_private_keys",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Apply remediation status to private key exposures discovered in assets.",
+    "risk": "destructive",
+    "return_type": "MutationRemediatePrivateKeys",
+    "input_model": "RemediatePrivateKeysInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id",
+      "status",
+      "details"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "remediate-public-keys",
+    "operation": "mutation_remediate_public_keys",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update remediation status for public key issues identified in assets.",
+    "risk": "destructive",
+    "return_type": "MutationRemediatePublicKeys",
+    "input_model": "RemediatePublicKeysInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id",
+      "status",
+      "details"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "remediate-secrets",
+    "operation": "mutation_remediate_secrets",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Apply remediation status and justification to exposed secrets in assets.",
+    "risk": "destructive",
+    "return_type": "MutationRemediateSecrets",
+    "input_model": "CreateSecretsRemediationInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "status",
+      "description"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "remove-all-asset-groups-from-assets",
+    "operation": "mutation_remove_all_asset_groups_from_assets",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Disassociate all asset groups from a specified list of assets.",
+    "risk": "destructive",
+    "return_type": "MutationRemoveAllAssetGroupsFromAssets",
+    "input_model": "RemoveAllAssetGroupsFromAssetsInput",
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "remove-assets-from-asset-group",
+    "operation": "mutation_remove_assets_from_asset_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Remove selected assets from a specific asset group container configuration.",
+    "risk": "destructive",
+    "return_type": "MutationRemoveAssetsFromAssetGroup",
+    "input_model": "RemoveAssetsFromAssetGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": "group remove-assets"
+  },
+  {
+    "name": "set-asset-groups-to-asset",
+    "operation": "mutation_set_asset_groups_to_asset",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Replace all current group associations for an asset with new ones.",
+    "risk": "write",
+    "return_type": "MutationSetAssetGroupsToAsset",
+    "input_model": "SetAssetGroupsToAssetInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "set-assets-to-asset-group",
+    "operation": "mutation_set_assets_to_asset_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Overwrite the member list of an asset group with new assets.",
+    "risk": "write",
+    "return_type": "MutationSetAssetsToAssetGroup",
+    "input_model": "SetAssetsToAssetGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "group-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "submit-rise-ai-analysis",
+    "operation": "mutation_submit_rise_ai_analysis",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Request a RISE AI analysis for an eligible asset to generate insights.",
+    "risk": "write",
+    "return_type": "MutationSubmitRiseAIAnalysis",
+    "input_model": "RiseAIAnalysisDataInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "update-asset-group",
+    "operation": "mutation_update_asset_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Rename or update the description of an existing asset group.",
+    "risk": "write",
+    "return_type": "MutationUpdateAssetGroup",
+    "input_model": "UpdateAssetGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id",
+      "name",
+      "description"
+    ],
+    "curated_alias": "group update"
+  },
+  {
+    "name": "update-notification-configuration",
+    "operation": "mutation_update_notification_configuration",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update channel, scopes, triggers, or status for an existing notification configuration.",
+    "risk": "write",
+    "return_type": "MutationUpdateNotificationConfiguration",
+    "input_model": "UpdateNotificationConfigurationInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "update-org-level-settings",
+    "operation": "mutation_update_org_level_settings",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Configure global organization settings such as idle session timeout duration.",
+    "risk": "write",
+    "return_type": "MutationUpdateOrgLevelSettings",
+    "input_model": "OrgLevelSettingsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "symbol-index-enabled",
+      "kernel-module-enabled",
+      "curated-hash-enabled",
+      "legacy-hash-enabled",
+      "package-manifest-enabled",
+      "signature-enabled",
+      "pe-meta-data-enabled",
+      "library-version-enabled",
+      "library-name-enabled",
+      "binary-fingerprint-enabled",
+      "idle-timout-enabled",
+      "idle-timeout-seconds",
+      "rise-ai-conversational-gpt-enabled",
+      "rise-ai-insights-report-enabled"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "user-action",
+    "operation": "mutation_user_action",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Perform administrative actions like enabling or disabling specific user accounts.",
+    "risk": "write",
+    "return_type": "MutationUserAction",
+    "input_model": "UserActionInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "type",
+      "user-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "user-delete",
+    "operation": "mutation_user_delete",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Permanently delete a user account and remove their access rights.",
+    "risk": "destructive",
+    "return_type": "MutationUserDelete",
+    "input_model": "UserInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": "user delete"
+  },
+  {
+    "name": "user-invite",
+    "operation": "mutation_user_invite",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Invite a new user to the organization with a specific role.",
+    "risk": "write",
+    "return_type": "MutationUserInvite",
+    "input_model": "InviteUserInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "email",
+      "role"
+    ],
+    "curated_alias": "user invite"
+  },
+  {
+    "name": "user-remove",
+    "operation": "mutation_user_remove",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Remove a user from the organization without deleting their account.",
+    "risk": "destructive",
+    "return_type": "MutationUserRemove",
+    "input_model": "UserInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": "user remove"
+  },
+  {
+    "name": "user-reset-password",
+    "operation": "mutation_user_reset_password",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Trigger a password reset email for a specific user account.",
+    "risk": "write",
+    "return_type": "MutationUserResetPassword",
+    "input_model": "UserInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "user-set-user-role",
+    "operation": "mutation_user_set_user_role",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Assign a new permission role like Owner or Operator to users.",
+    "risk": "write",
+    "return_type": "MutationUserSetUserRole",
+    "input_model": "SetUserRoleInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "next-role",
+      "user-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "user-update-user",
+    "operation": "mutation_user_update_user",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Modify user profile information including name and contact email details.",
+    "risk": "write",
+    "return_type": "MutationUserUpdateUser",
+    "input_model": "UpdateUserInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "user-id",
+      "name",
+      "confirm",
+      "password"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "activity",
+    "operation": "query_activity",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve a comprehensive log of actions and events for assets.",
+    "risk": "read",
+    "return_type": "QueryActivity",
+    "input_model": "ActivityInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "analytics",
+    "operation": "query_analytics",
+    "group": "api",
+    "kind": "query",
+    "summary": "Access high-level risk data and charts for organization dashboards.",
+    "risk": "read",
+    "return_type": "QueryAnalytics",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "asset",
+    "operation": "query_asset",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve detailed metadata and risk information for a single asset.",
+    "risk": "read",
+    "return_type": "QueryAsset",
+    "input_model": "AssetInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": "asset get"
+  },
+  {
+    "name": "asset-group-analytics",
+    "operation": "query_asset_group_analytics",
+    "group": "api",
+    "kind": "query",
+    "summary": "View risk metrics and exploit counts for a specific group.",
+    "risk": "read",
+    "return_type": "QueryAssetGroupAnalytics",
+    "input_model": "AssetGroupAnalyticsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "group-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "asset-group-members",
+    "operation": "query_asset_group_members",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all assets associated with a specific asset group container.",
+    "risk": "read",
+    "return_type": "QueryAssetGroupMembers",
+    "input_model": "AssetGroupMembersInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "group-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "asset-groups",
+    "operation": "query_asset_groups",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve a detailed paginated list of all asset groups available.",
+    "risk": "read",
+    "return_type": "QueryAssetGroups",
+    "input_model": "AssetGroupsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "filter"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "asset-status",
+    "operation": "query_asset_status",
+    "group": "api",
+    "kind": "query",
+    "summary": "Check if an asset is currently processing or has finished.",
+    "risk": "read",
+    "return_type": "QueryAssetStatus",
+    "input_model": "AssetStatusInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": "asset status"
+  },
+  {
+    "name": "asset-upload",
+    "operation": "query_asset_upload",
+    "group": "api",
+    "kind": "query",
+    "summary": "Obtain a secure pre-signed URL to upload files for analysis.",
+    "risk": "read",
+    "return_type": "QueryAssetUpload",
+    "input_model": "AssetUploadInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "upload-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "asset-vulnerability-remediation",
+    "operation": "query_asset_vulnerability_remediation",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve current VEX status and justification for a specific vulnerability.",
+    "risk": "read",
+    "return_type": "QueryAssetVulnerabilityRemediation",
+    "input_model": "AssetVulnerabilityRemediationInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "remediation-id",
+      "vulnerability-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "assets-overview",
+    "operation": "query_assets_overview",
+    "group": "api",
+    "kind": "query",
+    "summary": "View high-level risk and threat exposure metrics for multiple assets.",
+    "risk": "read",
+    "return_type": "QueryAssetsOverview",
+    "input_model": "AssetOverviewInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "assets-relay",
+    "operation": "query_assets_relay",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve a paginated, sortable list of assets with filtering options.",
+    "risk": "read",
+    "return_type": "QueryAssetsRelay",
+    "input_model": "AssetsRelayInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "assets-relay-lite",
+    "operation": "query_assets_relay_lite",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve assets with trimmed fields \u2014 keeps identity, status, risk score, and analytic rollups; drops filesystems, SHA-256, exploit trees, and credential counts.",
+    "risk": "read",
+    "return_type": "QueryAssetsRelayLite",
+    "input_model": "AssetsRelayInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "assets-relay-summary",
+    "operation": "query_assets_relay_summary",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve minimal asset data \u2014 ID, name, and analytic counts only \u2014 for fast org-wide sweeps to decide which assets need deeper queries.",
+    "risk": "read",
+    "return_type": "QueryAssetsRelaySummary",
+    "input_model": "AssetsRelayInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "binary-protections",
+    "operation": "query_binary_protections",
+    "group": "api",
+    "kind": "query",
+    "summary": "List security hardening details for binaries found within the asset.",
+    "risk": "read",
+    "return_type": "QueryBinaryProtections",
+    "input_model": "BinaryProtectionsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "binary-protections-summary",
+    "operation": "query_binary_protections_summary",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get aggregated counts of binary hardening features like NX or PIE.",
+    "risk": "read",
+    "return_type": "QueryBinaryProtectionsSummary",
+    "input_model": "BinaryProtectionsSummaryInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "caas-availability",
+    "operation": "query_caas_availability",
+    "group": "api",
+    "kind": "query",
+    "summary": "Check for the availability of the RISE AI analysis report.",
+    "risk": "read",
+    "return_type": "QueryCaasAvailability",
+    "input_model": "RiseAIAnalysisDataInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "certificate-external-filters",
+    "operation": "query_certificate_external_filters",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve available filter options for certificate queries.",
+    "risk": "read",
+    "return_type": "QueryCertificateExternalFilters",
+    "input_model": "CertificateExternalFiltersInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "certificates",
+    "operation": "query_certificates",
+    "group": "api",
+    "kind": "query",
+    "summary": "List X.509 certificates and validity status found in the asset.",
+    "risk": "read",
+    "return_type": "QueryCertificates",
+    "input_model": "CertificatesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "credentials",
+    "operation": "query_credentials",
+    "group": "api",
+    "kind": "query",
+    "summary": "Identify user accounts and password hashes discovered within the filesystem.",
+    "risk": "read",
+    "return_type": "QueryCredentials",
+    "input_model": "CredentialsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "dependencies",
+    "operation": "query_dependencies",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all software components and libraries identified in the asset.",
+    "risk": "read",
+    "return_type": "QueryDependencies",
+    "input_model": "DependencyInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "composed-asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "dependencies-lite",
+    "operation": "query_dependencies_lite",
+    "group": "api",
+    "kind": "query",
+    "summary": "List dependencies with trimmed fields \u2014 keeps identity, version, license, purls, and analytic rollups; drops file metadata, digests, and nested correlation details.",
+    "risk": "read",
+    "return_type": "QueryDependenciesLite",
+    "input_model": "DependencyInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "composed-asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "dependency-known-exploits",
+    "operation": "query_dependency_known_exploits",
+    "group": "api",
+    "kind": "query",
+    "summary": "Check if specific dependencies are linked to known public exploits.",
+    "risk": "read",
+    "return_type": "QueryDependencyKnownExploits",
+    "input_model": "DependencyKnownExploitsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "detailed-vulnerabilities",
+    "operation": "query_detailed_vulnerabilities",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve in-depth vulnerability data including descriptions and CVSS vector strings.",
+    "risk": "read",
+    "return_type": "QueryDetailedVulnerabilities",
+    "input_model": "PaginatedDetailedVulnerabilitiesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "detailed-vulnerabilities-lite",
+    "operation": "query_detailed_vulnerabilities_lite",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve vulnerability descriptions with preferred CVSS v3.1 scores only \u2014 drops full v2/v4 impact blocks, exploit timelines, references, and problem type details.",
+    "risk": "read",
+    "return_type": "QueryDetailedVulnerabilitiesLite",
+    "input_model": "PaginatedDetailedVulnerabilitiesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "download-extracted-firmware",
+    "operation": "query_download_extracted_firmware",
+    "group": "api",
+    "kind": "query",
+    "summary": "Generate a URL to download the full unpacked file system.",
+    "risk": "read",
+    "return_type": "QueryDownloadExtractedFirmware",
+    "input_model": "ExtractedFirmwareDownloadInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "filesystem-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "download-file",
+    "operation": "query_download_file",
+    "group": "api",
+    "kind": "query",
+    "summary": "Create a secure link to download a specific individual file.",
+    "risk": "read",
+    "return_type": "QueryDownloadFile",
+    "input_model": "FileDownloadInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "filesystem-id",
+      "file-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "download-file-list",
+    "operation": "query_download_file_list",
+    "group": "api",
+    "kind": "query",
+    "summary": "Generate a URL to download a list of all files.",
+    "risk": "read",
+    "return_type": "QueryDownloadFileList",
+    "input_model": "FileListDownloadInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "download-firmware",
+    "operation": "query_download_firmware",
+    "group": "api",
+    "kind": "query",
+    "summary": "Generate a link to download the original uploaded firmware image.",
+    "risk": "read",
+    "return_type": "QueryDownloadFirmware",
+    "input_model": "FirmwareDownloadInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "get-ai-model-data",
+    "operation": "query_get_ai_model_data",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve configuration and metadata for a specific AI model integration.",
+    "risk": "read",
+    "return_type": "QueryGetAiModelData",
+    "input_model": "GetAiModelDataInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id",
+      "component-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "get-asset-comparison-report",
+    "operation": "query_get_asset_comparison_report",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve a completed asset comparison report including vulnerability, component, and summary diffs.",
+    "risk": "read",
+    "return_type": "QueryGetAssetComparisonReport",
+    "input_model": "GetAssetComparisonReportInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "report-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "get-certificate-reachability",
+    "operation": "query_get_certificate_reachability",
+    "group": "api",
+    "kind": "query",
+    "summary": "Determine whether discovered certificates are reachable via executable scripts or system paths.",
+    "risk": "read",
+    "return_type": "QueryGetCertificateReachability",
+    "input_model": "GetCertificateReachabilityInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id",
+      "file-path",
+      "sha256"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "get-dependency-reachability",
+    "operation": "query_get_dependency_reachability",
+    "group": "api",
+    "kind": "query",
+    "summary": "Determine whether a dependency is reachable via executable scripts or system paths.",
+    "risk": "read",
+    "return_type": "QueryGetDependencyReachability",
+    "input_model": "GetDependencyReachabilityInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id",
+      "component-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "get-secret-reachability",
+    "operation": "query_get_secret_reachability",
+    "group": "api",
+    "kind": "query",
+    "summary": "Determine whether discovered secrets are reachable via executable scripts or system paths.",
+    "risk": "read",
+    "return_type": "QueryGetSecretReachability",
+    "input_model": "GetSecretReachabilityInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id",
+      "secret-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "get-vuln-reachability",
+    "operation": "query_get_vuln_reachability",
+    "group": "api",
+    "kind": "query",
+    "summary": "Determine if a vulnerability can be executed via system paths.",
+    "risk": "read",
+    "return_type": "QueryGetVulnReachability",
+    "input_model": "GetVulnReachabilityInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "advisory-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "grouped-dependencies",
+    "operation": "query_grouped_dependencies",
+    "group": "api",
+    "kind": "query",
+    "summary": "View dependencies aggregated by vendor, license, or specific component type.",
+    "risk": "read",
+    "return_type": "QueryGroupedDependencies",
+    "input_model": "GroupedDependenciesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "composed-asset-id",
+      "grouped-by"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "hashes",
+    "operation": "query_hashes",
+    "group": "api",
+    "kind": "query",
+    "summary": "List cryptographic hashes for files identified within the asset filesystem.",
+    "risk": "read",
+    "return_type": "QueryHashes",
+    "input_model": "HashesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "identified-components-preview",
+    "operation": "query_identified_components_preview",
+    "group": "api",
+    "kind": "query",
+    "summary": "Return organization-wide component counts filtered by enabled identification methods, with before/after deltas when verification settings change.",
+    "risk": "read",
+    "return_type": "QueryIdentifiedComponentsPreview",
+    "input_model": "IdentifiedComponentsPreviewInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "symbol-index-enabled",
+      "kernel-module-enabled",
+      "curated-hash-enabled",
+      "legacy-hash-enabled",
+      "package-manifest-enabled",
+      "signature-enabled",
+      "pe-meta-data-enabled",
+      "library-version-enabled",
+      "library-name-enabled",
+      "binary-fingerprint-enabled"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "license",
+    "operation": "query_license",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve detailed information for a specific software license.",
+    "risk": "read",
+    "return_type": "QueryLicense",
+    "input_model": "LicenseInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "spdx-id",
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "license-issue",
+    "operation": "query_license_issue",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get details about a specific license compliance issue.",
+    "risk": "read",
+    "return_type": "QueryLicenseIssue",
+    "input_model": "LicenseIssueInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "issue-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "license-issues",
+    "operation": "query_license_issues",
+    "group": "api",
+    "kind": "query",
+    "summary": "List license compliance issues identified across asset components.",
+    "risk": "read",
+    "return_type": "QueryLicenseIssues",
+    "input_model": "LicenseIssuesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "license-issues-external-filters",
+    "operation": "query_license_issues_external_filters",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve available filter options for license issue queries.",
+    "risk": "read",
+    "return_type": "QueryLicenseIssuesExternalFilters",
+    "input_model": "LicenseIssuesExternalFiltersInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "licenses-spdx-ids",
+    "operation": "query_licenses_spdx_ids",
+    "group": "api",
+    "kind": "query",
+    "summary": "List available SPDX license identifiers for filtering and reference.",
+    "risk": "read",
+    "return_type": "QueryLicensesSpdxIds",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "list-ai-providers",
+    "operation": "query_list_ai_providers",
+    "group": "api",
+    "kind": "query",
+    "summary": "List available AI provider integrations and their current status.",
+    "risk": "read",
+    "return_type": "QueryListAiProviders",
+    "input_model": "ListAiProvidersInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "list-asset-comparison-reports",
+    "operation": "query_list_asset_comparison_reports",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all asset comparison reports with pagination, filtering, and sorting.",
+    "risk": "read",
+    "return_type": "QueryListAssetComparisonReports",
+    "input_model": "ListAssetComparisonReportsInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "list-asset-correlations",
+    "operation": "query_list_asset_correlations",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve cross-asset correlation data linking shared components and vulnerabilities.",
+    "risk": "read",
+    "return_type": "QueryListAssetCorrelations",
+    "input_model": "ListAssetCorrelationsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "composed-asset-id",
+      "identifier",
+      "correlation-type"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "list-asset-crypto-libraries",
+    "operation": "query_list_asset_crypto_libraries",
+    "group": "api",
+    "kind": "query",
+    "summary": "List cryptographic libraries and algorithms detected within an asset.",
+    "risk": "read",
+    "return_type": "QueryListAssetCryptoLibraries",
+    "input_model": "ListAssetCryptoLibrariesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id",
+      "filter"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "list-notification-configurations",
+    "operation": "query_list_notification_configurations",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all notification configurations with their channels, scopes, and triggers.",
+    "risk": "read",
+    "return_type": "QueryListNotificationConfigurations",
+    "input_model": "ListNotificationConfigurationsInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "list-notification-logs",
+    "operation": "query_list_notification_logs",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve a paginated log of notification delivery events and their statuses.",
+    "risk": "read",
+    "return_type": "QueryListNotificationLogs",
+    "input_model": "ListNotificationLogsInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "match-vulnerabilities",
+    "operation": "query_match_vulnerabilities",
+    "group": "api",
+    "kind": "query",
+    "summary": "Find specific vulnerabilities matching a provided component identifier or package.",
+    "risk": "read",
+    "return_type": "QueryMatchVulnerabilities",
+    "input_model": "MatchVulnerabilitiesInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "identifier"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "metrics",
+    "operation": "query_metrics",
+    "group": "api",
+    "kind": "query",
+    "summary": "View organization-wide statistics on asset counts, processing, and risk.",
+    "risk": "read",
+    "return_type": "QueryMetrics",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "misconfigurations",
+    "operation": "query_misconfigurations",
+    "group": "api",
+    "kind": "query",
+    "summary": "List failed security checks and configuration risks found in assets.",
+    "risk": "read",
+    "return_type": "QueryMisconfigurations",
+    "input_model": "MisconfigurationsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "misconfigurations-lite",
+    "operation": "query_misconfigurations_lite",
+    "group": "api",
+    "kind": "query",
+    "summary": "List misconfigurations with trimmed fields \u2014 keeps check ID, name, severity, result, and correlation count; drops nested correlation objects.",
+    "risk": "read",
+    "return_type": "QueryMisconfigurationsLite",
+    "input_model": "MisconfigurationsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "org-level-information",
+    "operation": "query_org_level_information",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve organization-level metadata such as last-updated time, optionally scoped by asset groups.",
+    "risk": "read",
+    "return_type": "QueryOrgLevelInformation",
+    "input_model": "OrgLevelInformationInput",
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "org-level-settings",
+    "operation": "query_org_level_settings",
+    "group": "api",
+    "kind": "query",
+    "summary": "Check how the tenant organization is configured.",
+    "risk": "read",
+    "return_type": "QueryOrgLevelSettings",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "package-dependencies-by-id",
+    "operation": "query_package_dependencies_by_id",
+    "group": "api",
+    "kind": "query",
+    "summary": "View the dependency tree hierarchy for a specific software package.",
+    "risk": "read",
+    "return_type": "QueryPackageDependenciesById",
+    "input_model": "packageDependenciesByIdInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "composed-asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "private-key-external-filters",
+    "operation": "query_private_key_external_filters",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve available filter options for private key queries.",
+    "risk": "read",
+    "return_type": "QueryPrivateKeyExternalFilters",
+    "input_model": "PrivateKeyExternalFiltersInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "private-keys",
+    "operation": "query_private_keys",
+    "group": "api",
+    "kind": "query",
+    "summary": "Detect private cryptographic keys stored insecurely on the asset filesystem.",
+    "risk": "read",
+    "return_type": "QueryPrivateKeys",
+    "input_model": "PrivateKeysInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "public-key-external-filters",
+    "operation": "query_public_key_external_filters",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve available filter options for public key queries.",
+    "risk": "read",
+    "return_type": "QueryPublicKeyExternalFilters",
+    "input_model": "PublicKeyExternalFiltersInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "public-keys",
+    "operation": "query_public_keys",
+    "group": "api",
+    "kind": "query",
+    "summary": "List public cryptographic keys found within the asset's file system.",
+    "risk": "read",
+    "return_type": "QueryPublicKeys",
+    "input_model": "PublicKeysInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "rise-ai-analysis-data",
+    "operation": "query_rise_ai_analysis_data",
+    "group": "api",
+    "kind": "query",
+    "summary": "Check for the contents of the RISE AI analysis report.",
+    "risk": "read",
+    "return_type": "QueryRiseAIAnalysisData",
+    "input_model": "RiseAIAnalysisDataInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "rise-ai-availability",
+    "operation": "query_rise_ai_availability",
+    "group": "api",
+    "kind": "query",
+    "summary": "Check eligibility and status of RISE AI analysis for an asset.",
+    "risk": "read",
+    "return_type": "QueryRiseAIAvailability",
+    "input_model": "RiseAIAnalysisDataInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "search",
+    "operation": "query_search",
+    "group": "api",
+    "kind": "query",
+    "summary": "Execute keyword searches across all artifacts and files in organization.",
+    "risk": "read",
+    "return_type": "QuerySearch",
+    "input_model": "SearchInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "query",
+      "artifacts"
+    ],
+    "curated_alias": "search"
+  },
+  {
+    "name": "secret",
+    "operation": "query_secret",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve detailed information about a specific discovered secret.",
+    "risk": "read",
+    "return_type": "QuerySecret",
+    "input_model": "SecretInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id",
+      "reveal-secret"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "secret-categories-summary",
+    "operation": "query_secret_categories_summary",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get aggregated counts of secrets grouped by category type.",
+    "risk": "read",
+    "return_type": "QuerySecretCategoriesSummary",
+    "input_model": "SecretCategoriesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "secret-status-count",
+    "operation": "query_secret_status_count",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve counts of secrets grouped by remediation status.",
+    "risk": "read",
+    "return_type": "QuerySecretStatusCount",
+    "input_model": "SecretStatusCountInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "secret-types-and-count",
+    "operation": "query_secret_types_and_count",
+    "group": "api",
+    "kind": "query",
+    "summary": "List secret types discovered with their occurrence counts.",
+    "risk": "read",
+    "return_type": "QuerySecretTypesAndCount",
+    "input_model": "SecretTypesAndCountInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "secrets",
+    "operation": "query_secrets",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all secrets and sensitive data discovered within an asset.",
+    "risk": "read",
+    "return_type": "QuerySecrets",
+    "input_model": "SecretsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "secrets-summary",
+    "operation": "query_secrets_summary",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get a high-level overview of secret findings and exposure metrics.",
+    "risk": "read",
+    "return_type": "QuerySecretsSummary",
+    "input_model": "SecretsSummaryInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "sift",
+    "operation": "query_sift",
+    "group": "api",
+    "kind": "query",
+    "summary": "Perform fuzzy hash matching to find similar code or files.",
+    "risk": "read",
+    "return_type": "QuerySift",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "user-orgs",
+    "operation": "query_user_orgs",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all organizations the current user is authorized to access.",
+    "risk": "read",
+    "return_type": "QueryUserOrgs",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "users",
+    "operation": "query_users",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve a detailed list of all users and their assigned roles.",
+    "risk": "read",
+    "return_type": "QueryUsers",
+    "input_model": "UsersInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "vulnerabilities",
+    "operation": "query_vulnerabilities",
+    "group": "api",
+    "kind": "query",
+    "summary": "List CVEs and associated risks for components in an asset.",
+    "risk": "read",
+    "return_type": "QueryVulnerabilities",
+    "input_model": "PaginatedVulnerabilitiesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "vulnerabilities-lite",
+    "operation": "query_vulnerabilities_lite",
+    "group": "api",
+    "kind": "query",
+    "summary": "List vulnerabilities with trimmed fields \u2014 keeps CVE, severity, CVSS/EPSS scores, fix versions, and correlation count; drops nested correlations and remediation details.",
+    "risk": "read",
+    "return_type": "QueryVulnerabilitiesLite",
+    "input_model": "PaginatedVulnerabilitiesInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "vulnerabilities-overview",
+    "operation": "query_vulnerabilities_overview",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get a summary of vulnerability counts and severity across assets.",
+    "risk": "read",
+    "return_type": "QueryVulnerabilitiesOverview",
+    "input_model": "VulnerabilityOverviewInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "vulnerability",
+    "operation": "query_vulnerability",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve detailed metadata, scores, and descriptions for a specific vulnerability.",
+    "risk": "read",
+    "return_type": "QueryVulnerability",
+    "input_model": "VulnerabilityInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": "vuln get"
+  },
+  {
+    "name": "vulnerability-external-filters",
+    "operation": "query_vulnerability_external_filters",
+    "group": "api",
+    "kind": "query",
+    "summary": "Count vulnerabilities matching external threat feeds like CISA or botnets.",
+    "risk": "read",
+    "return_type": "QueryVulnerabilityExternalFilters",
+    "input_model": "VulnerabilityExternalFiltersInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "vulnerability-lite",
+    "operation": "query_vulnerability_lite",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve a single vulnerability with preferred CVSS v3.1 score only \u2014 drops full v2/v4 impact blocks, exploit references, and problem type details.",
+    "risk": "read",
+    "return_type": "QueryVulnerabilityLite",
+    "input_model": "VulnerabilityInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "id"
+    ],
+    "curated_alias": "vuln get --detail lite"
+  }
+]

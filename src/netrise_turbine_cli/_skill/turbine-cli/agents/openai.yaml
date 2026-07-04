@@ -1,0 +1,4 @@
+interface:
+  display_name: "Turbine CLI"
+  short_description: "Query and mutate the NetRise Turbine platform (assets, vulnerabilities, SBOMs, secrets, remediation) via the `turbine` CLI."
+  default_prompt: "Use the turbine CLI to inspect Turbine assets and vulnerabilities."

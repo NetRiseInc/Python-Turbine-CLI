@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "netrise-turbine-cli"
+version = "0.1.0"
+description = "Turbine GraphQL CLI for human operators and AI agents"
+authors = ["NetRise <anthony.feddersen@netrise.io>"]
+readme = "README.md"
+packages = [{ include = "netrise_turbine_cli", from = "src" }]
+# Bundled agent skill (installed via `turbine skill install`)
+include = [{ path = "src/netrise_turbine_cli/_skill/**/*", format = ["sdist", "wheel"] }]
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+netrise-turbine-sdk = ">=0.1.17,<0.2.0"
+typer = ">=0.12.0,<1.0.0"
+rich = ">=13.0.0,<15.0.0"
+rich-click = ">=1.8.0,<2.0.0"
+click = ">=8.1.0,<9.0.0"
+pydantic = ">=2.0.0,<3.0.0"
+python-dotenv = ">=1.0.0,<2.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0.0,<9.0.0"
+
+[tool.poetry.scripts]
+turbine = "netrise_turbine_cli.cli:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

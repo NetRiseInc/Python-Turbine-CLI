@@ -1,0 +1,273 @@
+"""CLI unit and smoke tests."""
+
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+CLI_ROOT = Path(__file__).resolve().parents[1]
+SRC = CLI_ROOT / "src"
+sys.path.insert(0, str(SRC))
+
+from netrise_turbine_cli.errors import format_validation_error
+from netrise_turbine_cli.fields import project_fields
+
+
+def test_project_fields_dot_path() -> None:
+    data = {"asset": {"id": "a1", "name": "fw"}, "score": 9}
+    out = project_fields(data, ["asset.id", "score"])
+    assert out == {"asset": {"id": "a1"}, "score": 9}
+
+
+def test_project_fields_strict_unknown() -> None:
+    with pytest.raises(ValueError, match="Unknown field"):
+        project_fields({"a": 1}, ["missing"], strict=True)
+
+
+def test_format_validation_error() -> None:
+    from pydantic import BaseModel, Field
+
+    class M(BaseModel):
+        asset_id: str = Field(alias="assetId")
+
+    try:
+        M.model_validate({})
+    except Exception as exc:
+        msg = format_validation_error(exc)  # type: ignore[arg-type]
+        assert "asset" in msg.lower()
+
+
+def _run_turbine(args: list[str]) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(SRC)
+    return subprocess.run(
+        [sys.executable, "-m", "netrise_turbine_cli.cli", *args],
+        cwd=CLI_ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+
+def test_root_help() -> None:
+    proc = _run_turbine(["--help"])
+    assert proc.returncode == 0
+    assert "asset" in proc.stdout
+    assert "api" in proc.stdout
+
+
+def test_asset_list_dry_run_json() -> None:
+    proc = _run_turbine(["asset", "list", "--dry-run", "-o", "json"])
+    assert proc.returncode == 0
+    data = json.loads(proc.stdout.strip())
+    assert data["dry_run"] is True
+    assert data["operation"] == "iter_assets_relay_lite"
+
+
+def test_output_flag_anywhere() -> None:
+    proc = _run_turbine(["asset", "list", "--dry-run", "--output", "json"])
+    assert proc.returncode == 0
+    assert json.loads(proc.stdout.strip())["dry_run"] is True
+
+
+def test_explicit_table_output_survives_pipe() -> None:
+    """-o table must render a table even when stdout is piped (P0 bug)."""
+    proc = _run_turbine(["asset", "list", "--dry-run", "-o", "table"])
+    assert proc.returncode == 0
+    with pytest.raises(json.JSONDecodeError):
+        json.loads(proc.stdout.strip())
+    assert "dry_run" in proc.stdout
+
+
+def test_search_invocation_works() -> None:
+    """The documented `turbine search <term>` form must work (P0 bug)."""
+    proc = _run_turbine(["search", "router", "--dry-run", "-o", "json"])
+    assert proc.returncode == 0
+    data = json.loads(proc.stdout.strip())
+    assert data["dry_run"] is True
+    assert data["operation"] == "query_search"
+    assert data["kwargs"]["search_args"]["query"] == "router"
+
+
+def test_api_graphql_error_no_traceback() -> None:
+    """api graphql must emit a structured error, never a traceback (P0 bug)."""
+    env_overrides = {
+        "TURBINE_ENDPOINT": "http://127.0.0.1:1/graphql",
+        "TURBINE_DOMAIN": "http://127.0.0.1:1",
+        "TURBINE_AUDIENCE": "http://127.0.0.1:1/",
+        "TURBINE_CLIENT_ID": "x",
+        "TURBINE_CLIENT_SECRET": "x",
+        "TURBINE_ORGANIZATION_ID": "x",
+    }
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(SRC)
+    env.update(env_overrides)
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "netrise_turbine_cli.cli",
+            "api",
+            "graphql",
+            "-q",
+            "query { __typename }",
+            "-o",
+            "json",
+        ],
+        cwd=CLI_ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    assert proc.returncode != 0
+    assert "Traceback" not in proc.stderr
+    assert "Traceback" not in proc.stdout
+    payload = json.loads(proc.stderr.strip().splitlines()[-1])
+    assert "error" in payload
+    assert "code" in payload
+
+
+def test_api_catalog_help() -> None:
+    proc = _run_turbine(["api", "catalog", "--help"])
+    assert proc.returncode == 0
+
+
+def test_catalog_json_generated() -> None:
+    catalog = SRC / "netrise_turbine_cli" / "_generated" / "catalog.json"
+    data = json.loads(catalog.read_text(encoding="utf-8"))
+    assert len(data) >= 100
+    assert all(row["group"] == "api" for row in data)
+
+
+def test_asset_get_requires_id() -> None:
+    proc = _run_turbine(["asset", "get"])
+    assert proc.returncode != 0
+    assert "ASSET_ID" in proc.stderr or "Missing" in proc.stderr
+
+
+def test_asset_get_dry_run_with_flag() -> None:
+    proc = _run_turbine(["asset", "get", "--asset", "test-id", "--dry-run", "-o", "json"])
+    assert proc.returncode == 0
+    data = json.loads(proc.stdout.strip())
+    assert data["dry_run"] is True
+
+
+def test_load_cli_config_from_dotenv(tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".env").write_text('endpoint="https://example.test/graphql"\n', encoding="utf-8")
+    from netrise_turbine_cli.config import load_cli_config
+
+    import netrise_turbine_cli.config as config_mod
+
+    config_mod._env_loaded = False
+    monkeypatch.delenv("endpoint", raising=False)
+    monkeypatch.delenv("TURBINE_ENDPOINT", raising=False)
+    cfg = load_cli_config()
+    assert cfg.endpoint == "https://example.test/graphql"
+
+
+def test_coverage_manifest() -> None:
+    coverage = SRC / "netrise_turbine_cli" / "_generated" / "coverage.json"
+    data = json.loads(coverage.read_text(encoding="utf-8"))
+    assert data["api_count"] >= 100
+    assert len(data["curated"]) >= 25
+
+
+# --- Tiered install: packaged skill and `turbine skill` commands ---
+
+
+def _run_turbine_home(args: list[str], home: Path) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(SRC)
+    env["HOME"] = str(home)
+    return subprocess.run(
+        [sys.executable, "-m", "netrise_turbine_cli.cli", *args],
+        cwd=CLI_ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+
+def test_packaged_skill_present_and_portable() -> None:
+    """The wheel bundles a self-contained skill with no repo-relative links."""
+    from netrise_turbine_cli.commands.skill import packaged_skill_dir
+
+    skill_dir = packaged_skill_dir()
+    skill_md = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    assert skill_md.startswith("---")
+    assert "name:" in skill_md
+    assert "docs/agent.md" not in skill_md  # rewritten to references/
+    assert "](references/agent.md)" in skill_md
+    assert (skill_dir / "references" / "agent.md").is_file()
+    assert (skill_dir / "references" / "reference.md").is_file()
+    assert (skill_dir / "agents" / "openai.yaml").is_file()
+
+
+@pytest.mark.parametrize(
+    ("agent", "base"),
+    [("cursor", ".cursor"), ("claude", ".claude"), ("codex", ".agents")],
+)
+def test_skill_install_per_agent(tmp_path, agent, base) -> None:
+    proc = _run_turbine_home(["-o", "json", "skill", "install", "--agent", agent], tmp_path)
+    assert proc.returncode == 0, proc.stderr
+    result = json.loads(proc.stdout.strip())
+    assert result["results"][0]["action"] == "installed"
+    installed = tmp_path / base / "skills" / result["skill"] / "SKILL.md"
+    assert installed.is_file()
+    assert "](references/agent.md)" in installed.read_text(encoding="utf-8")
+
+
+def test_skill_install_all_detects_and_force(tmp_path) -> None:
+    (tmp_path / ".claude").mkdir()
+
+    proc = _run_turbine_home(["-o", "json", "skill", "install"], tmp_path)
+    assert proc.returncode == 0, proc.stderr
+    result = json.loads(proc.stdout.strip())
+    assert [r["agent"] for r in result["results"]] == ["claude"]
+    assert not (tmp_path / ".cursor").exists()
+    assert not (tmp_path / ".agents").exists()
+
+    proc = _run_turbine_home(["-o", "json", "skill", "status"], tmp_path)
+    states = {r["agent"]: r["state"] for r in json.loads(proc.stdout.strip())["results"]}
+    assert states == {"cursor": "not-installed", "claude": "installed", "codex": "not-installed"}
+
+    # Re-install on an unmodified copy is a no-op.
+    proc = _run_turbine_home(["-o", "json", "skill", "install"], tmp_path)
+    assert json.loads(proc.stdout.strip())["results"][0]["action"] == "up-to-date"
+
+    # Modified copy: refuse without --force, overwrite with it.
+    skill_name = result["skill"]
+    installed_md = tmp_path / ".claude" / "skills" / skill_name / "SKILL.md"
+    installed_md.write_text("local edits\n", encoding="utf-8")
+    proc = _run_turbine_home(["-o", "json", "skill", "install"], tmp_path)
+    assert proc.returncode == 2
+    assert "force" in proc.stderr.lower()
+    proc = _run_turbine_home(["-o", "json", "skill", "install", "--force"], tmp_path)
+    assert proc.returncode == 0
+    assert json.loads(proc.stdout.strip())["results"][0]["action"] == "installed"
+    assert installed_md.read_text(encoding="utf-8") != "local edits\n"
+
+    proc = _run_turbine_home(["-o", "json", "skill", "uninstall", "--agent", "claude"], tmp_path)
+    assert proc.returncode == 0
+    assert not installed_md.exists()
+
+
+def test_skill_install_no_agents_detected(tmp_path) -> None:
+    proc = _run_turbine_home(["-o", "json", "skill", "install"], tmp_path)
+    assert proc.returncode == 2
+    payload = json.loads(proc.stderr.strip().splitlines()[-1])
+    assert "--agent" in payload["error"]
+
+
+def test_pyproject_has_no_path_dependency() -> None:
+    """A path dependency would make the CLI unpublishable to PyPI."""
+    pyproject = (CLI_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    deps = pyproject.split("[tool.poetry.dependencies]")[1].split("[")[0]
+    assert "path =" not in deps and "path=" not in deps
+    assert "netrise-turbine-sdk" in deps

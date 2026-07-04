@@ -1,0 +1,137 @@
+{
+  "curated": [
+    {
+      "sdk_method": "iter_activity",
+      "curated_command": "asset activity"
+    },
+    {
+      "sdk_method": "iter_asset_group_members",
+      "curated_command": "group members"
+    },
+    {
+      "sdk_method": "iter_asset_groups",
+      "curated_command": "group list"
+    },
+    {
+      "sdk_method": "iter_assets",
+      "curated_command": "asset list --detail lite"
+    },
+    {
+      "sdk_method": "iter_assets_full",
+      "curated_command": "asset list --detail full"
+    },
+    {
+      "sdk_method": "iter_assets_overview",
+      "curated_command": "asset list --detail overview"
+    },
+    {
+      "sdk_method": "iter_assets_relay",
+      "curated_command": "asset list --detail full"
+    },
+    {
+      "sdk_method": "iter_assets_relay_lite",
+      "curated_command": "asset list --detail lite"
+    },
+    {
+      "sdk_method": "iter_assets_relay_summary",
+      "curated_command": "asset list --detail summary"
+    },
+    {
+      "sdk_method": "iter_assets_summary",
+      "curated_command": "asset list --detail summary"
+    },
+    {
+      "sdk_method": "iter_binary_protections",
+      "curated_command": "protection list"
+    },
+    {
+      "sdk_method": "iter_certificates",
+      "curated_command": "cert list"
+    },
+    {
+      "sdk_method": "iter_credentials",
+      "curated_command": "credential list"
+    },
+    {
+      "sdk_method": "iter_dependencies",
+      "curated_command": "component list --detail full"
+    },
+    {
+      "sdk_method": "iter_dependencies_lite",
+      "curated_command": "component list --detail lite"
+    },
+    {
+      "sdk_method": "iter_detailed_vulnerabilities",
+      "curated_command": "vuln list --detail full"
+    },
+    {
+      "sdk_method": "iter_detailed_vulnerabilities_lite",
+      "curated_command": "vuln list --detail lite"
+    },
+    {
+      "sdk_method": "iter_grouped_dependencies",
+      "curated_command": "component grouped"
+    },
+    {
+      "sdk_method": "iter_hashes",
+      "curated_command": "asset hashes"
+    },
+    {
+      "sdk_method": "iter_license_issues",
+      "curated_command": "license list"
+    },
+    {
+      "sdk_method": "iter_list_asset_crypto_libraries",
+      "curated_command": "component crypto"
+    },
+    {
+      "sdk_method": "iter_misconfigurations",
+      "curated_command": "misconfig list --detail full"
+    },
+    {
+      "sdk_method": "iter_misconfigurations_lite",
+      "curated_command": "misconfig list --detail lite"
+    },
+    {
+      "sdk_method": "iter_private_keys",
+      "curated_command": "key list --type private"
+    },
+    {
+      "sdk_method": "iter_public_keys",
+      "curated_command": "key list --type public"
+    },
+    {
+      "sdk_method": "iter_secrets",
+      "curated_command": "secret list"
+    },
+    {
+      "sdk_method": "iter_users",
+      "curated_command": "user list"
+    },
+    {
+      "sdk_method": "iter_vulnerabilities",
+      "curated_command": "vuln list --detail full"
+    },
+    {
+      "sdk_method": "iter_vulnerabilities_lite",
+      "curated_command": "vuln list --detail lite"
+    },
+    {
+      "sdk_method": "iter_vulnerabilities_overview",
+      "curated_command": "vuln overview"
+    },
+    {
+      "sdk_method": "list_files",
+      "curated_command": "asset files"
+    },
+    {
+      "sdk_method": "upload_asset",
+      "curated_command": "asset upload"
+    },
+    {
+      "sdk_method": "upload_assets",
+      "curated_command": "asset upload-dir"
+    }
+  ],
+  "api_count": 114
+}
