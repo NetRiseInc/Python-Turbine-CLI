@@ -7,7 +7,16 @@ description: Query and mutate the NetRise Turbine platform (assets, vulnerabilit
 
 ## Setup
 
-Install the CLI if missing: `uv tool install netrise-turbine-cli` (or `pipx` / `pip`). This skill ships inside the CLI — `turbine skill install` places it in Cursor, Claude Code, and Codex; `turbine skill status` shows where.
+Install the CLI if missing: `uv tool install netrise-turbine-cli` (or `pipx` / `pip`). This skill ships inside the CLI — `turbine skill install` places it in Cursor, Claude Code, Codex, and opencode; `turbine skill status` shows where.
+
+**Finding the `turbine` command.** If a bare `turbine` isn't on `PATH` (common in sandboxed agents), it's installed in a project virtualenv — invoke it through the env manager instead of assuming a global binary:
+
+- Poetry project: `poetry run turbine …`
+- uv project: `uv run turbine …`
+- Plain venv: activate first (`source .venv/bin/activate`) or call `./.venv/bin/turbine …`
+- Isolated install (`uv tool install` / `pipx`): `turbine` is global; no venv needed.
+
+Confirm with `turbine --version` (or `poetry run turbine --version`).
 
 Requires env (or `.env`): prefer `TURBINE_ENDPOINT`, `TURBINE_AUDIENCE`, `TURBINE_DOMAIN`, `TURBINE_CLIENT_ID`, `TURBINE_CLIENT_SECRET`, `TURBINE_ORGANIZATION_ID`.
 

@@ -50,7 +50,7 @@ def invite_user(
     run_graphql_by_name(
         ctx,
         method_name="mutation_user_invite",
-        input_model_name="UserInviteInput",
+        input_model_name="InviteUserInput",
         input_param="user_invite_args",
         payload={"email": email, "role": role},
         risk="write",
@@ -69,7 +69,7 @@ def delete_user(
     run_graphql_by_name(
         ctx,
         method_name="mutation_user_delete",
-        input_model_name="UserDeleteInput",
+        input_model_name="UserInput",
         input_param="user_delete_args",
         payload={"id": user_id},
         risk="destructive",
@@ -88,7 +88,7 @@ def remove_user(
     run_graphql_by_name(
         ctx,
         method_name="mutation_user_remove",
-        input_model_name="UserRemoveInput",
+        input_model_name="UserInput",
         input_param="user_remove_args",
         payload={"id": user_id},
         risk="destructive",

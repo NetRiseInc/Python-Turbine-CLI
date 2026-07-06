@@ -40,7 +40,10 @@ def parse_json_option(value: str | None, *, name: str) -> Any:
     try:
         return json.loads(value)
     except json.JSONDecodeError:
-        if "=" in value:
+        # Documented shorthand: key=value. Only apply it when the input
+        # doesn't look like attempted JSON, so malformed JSON containing
+        # '=' raises instead of being silently misparsed.
+        if "=" in value and not value.lstrip().startswith(("{", "[", '"')):
             key, raw = value.split("=", 1)
             return {key.strip(): raw.strip()}
         raise typer.BadParameter(f"Invalid JSON for {name}")
@@ -136,11 +139,14 @@ def run_list(
     method = getattr(sdk, method_name)
     field_list = [f.strip() for f in fields.split(",")] if fields else None
     item_limit = None if all_pages else limit
-    runtime.emit_stream(
-        method(**kwargs),
-        fields=field_list,
-        limit=item_limit,
-    )
+    # The iterator is consumed lazily inside emit_stream, so SDK/network
+    # errors surface there — keep the whole stream inside sdk_errors().
+    with runtime.sdk_errors():
+        runtime.emit_stream(
+            method(**kwargs),
+            fields=field_list,
+            limit=item_limit,
+        )
 
 
 def run_graphql_by_name(

@@ -29,9 +29,9 @@ Three tiers — pick how much you want:
 | --- | --- | --- |
 | SDK only | `pip install netrise-turbine-sdk` | Python SDK |
 | SDK + CLI | `uv tool install netrise-turbine-cli` (or `pipx` / `pip`) | `turbine` command, SDK included |
-| Everything | `turbine skill install` | Agent skill in Cursor, Claude Code, and Codex |
+| Everything | `turbine skill install` | Agent skill in Cursor, Claude Code, Codex, and opencode |
 
-`turbine skill install` detects which agent tools you have (`~/.cursor`, `~/.claude`, `~/.agents`/`~/.codex`) and installs the bundled skill to each; use `--agent` / `--scope project` for explicit control and `turbine skill status` to inspect. Developing in this repo? `make turbine-cli-test` sets up the poetry env with the local SDK.
+`turbine skill install` detects which agent tools you have (`~/.cursor`, `~/.claude`, `~/.agents`/`~/.codex`, `~/.config/opencode`) and installs the bundled skill to each; use `--agent` / `--scope project` for explicit control and `turbine skill status` to inspect. Developing in this repo? `make turbine-cli-test` sets up the poetry env with the local SDK.
 
 ## Auth
 
@@ -90,7 +90,7 @@ turbine api assets-relay --schema -o json
 From repo root:
 
 ```bash
-make turbine-python-cli
+make turbine-cli-generate
 ```
 
 Rebuilds API commands, catalog, coverage manifest, reference, SKILL auto-section, and human examples.

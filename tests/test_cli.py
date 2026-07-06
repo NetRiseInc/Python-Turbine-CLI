@@ -211,7 +211,12 @@ def test_packaged_skill_present_and_portable() -> None:
 
 @pytest.mark.parametrize(
     ("agent", "base"),
-    [("cursor", ".cursor"), ("claude", ".claude"), ("codex", ".agents")],
+    [
+        ("cursor", ".cursor"),
+        ("claude", ".claude"),
+        ("codex", ".agents"),
+        ("opencode", ".config/opencode"),
+    ],
 )
 def test_skill_install_per_agent(tmp_path, agent, base) -> None:
     proc = _run_turbine_home(["-o", "json", "skill", "install", "--agent", agent], tmp_path)
@@ -235,7 +240,12 @@ def test_skill_install_all_detects_and_force(tmp_path) -> None:
 
     proc = _run_turbine_home(["-o", "json", "skill", "status"], tmp_path)
     states = {r["agent"]: r["state"] for r in json.loads(proc.stdout.strip())["results"]}
-    assert states == {"cursor": "not-installed", "claude": "installed", "codex": "not-installed"}
+    assert states == {
+        "cursor": "not-installed",
+        "claude": "installed",
+        "codex": "not-installed",
+        "opencode": "not-installed",
+    }
 
     # Re-install on an unmodified copy is a no-op.
     proc = _run_turbine_home(["-o", "json", "skill", "install"], tmp_path)
@@ -271,3 +281,61 @@ def test_pyproject_has_no_path_dependency() -> None:
     deps = pyproject.split("[tool.poetry.dependencies]")[1].split("[")[0]
     assert "path =" not in deps and "path=" not in deps
     assert "netrise-turbine-sdk" in deps
+
+
+def _string_constants_in_commands(suffix: str) -> set[str]:
+    """Collect string literals ending in *suffix* from curated command modules."""
+    import ast
+
+    found: set[str] = set()
+    for path in (SRC / "netrise_turbine_cli" / "commands").glob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                if node.value.endswith(suffix):
+                    found.add(node.value)
+    return found
+
+
+def test_curated_input_model_names_exist() -> None:
+    """Every *Input model name referenced by curated commands must exist in the SDK.
+
+    Guards against typos like UserDeleteInput (real model: UserInput), which
+    would raise AttributeError at runtime.
+    """
+    from netrise_turbine_sdk_graphql import input_types
+
+    names = {n for n in _string_constants_in_commands("Input") if n[0].isupper()}
+    assert names, "expected curated commands to reference input models"
+    missing = sorted(n for n in names if not hasattr(input_types, n))
+    assert not missing, f"input models not found in SDK: {missing}"
+
+
+def test_curated_input_params_match_client_signature() -> None:
+    """Every *_args param name referenced by curated commands must be accepted
+    by some generated Client method."""
+    import inspect
+
+    from netrise_turbine_sdk_graphql.client import Client
+
+    valid_params: set[str] = set()
+    for _, fn in inspect.getmembers(Client, predicate=inspect.isfunction):
+        valid_params.update(inspect.signature(fn).parameters)
+
+    params = _string_constants_in_commands("_args")
+    assert params, "expected curated commands to reference input params"
+    unknown = sorted(p for p in params if p not in valid_params)
+    assert not unknown, f"input params not accepted by any Client method: {unknown}"
+
+
+def test_parse_json_option_rejects_malformed_json() -> None:
+    import typer
+
+    from netrise_turbine_cli.commands._common import parse_json_option
+
+    assert parse_json_option(None, name="--filter") is None
+    assert parse_json_option('{"severity": "CRITICAL"}', name="--filter") == {"severity": "CRITICAL"}
+    assert parse_json_option("severity=CRITICAL", name="--filter") == {"severity": "CRITICAL"}
+    # Malformed JSON containing '=' must raise, not be misparsed as key=value.
+    with pytest.raises(typer.BadParameter):
+        parse_json_option('{"key": "bad value', name="--filter")

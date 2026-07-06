@@ -65,8 +65,9 @@ def get_vuln(
     if not vid:
         raise typer.BadParameter("Missing vulnerability ID. Pass it as an argument or --id.")
     method = "query_vulnerability_lite" if detail == "lite" else "query_vulnerability"
-    model = "VulnerabilityLiteInput" if detail == "lite" else "VulnerabilityInput"
-    param = "vulnerability_lite_args" if detail == "lite" else "vulnerability_args"
+    # Both operations take vulnerability_args: VulnerabilityInput.
+    model = "VulnerabilityInput"
+    param = "vulnerability_args"
     run_graphql_by_name(
         ctx,
         method_name=method,
@@ -118,15 +119,15 @@ def remediate_vuln(
     payload["assetId"] = asset_id
     if all_vulns:
         method = "mutation_remediate_all_asset_vulnerabilities"
-        model = "RemediateAllAssetVulnerabilitiesInput"
+        model = "CreateAllAssetVulnerabilitiesRemediationInput"
         param = "remediate_all_asset_vulnerabilities_args"
     elif bulk:
         method = "mutation_remediate_asset_vulnerabilities"
-        model = "RemediateAssetVulnerabilitiesInput"
+        model = "CreateAssetVulnerabilityRemediationsInput"
         param = "remediate_asset_vulnerabilities_args"
     else:
         method = "mutation_remediate_asset_vulnerability"
-        model = "RemediateAssetVulnerabilityInput"
+        model = "CreateAssetVulnerabilityRemediationInput"
         param = "remediate_asset_vulnerability_args"
     run_graphql_by_name(
         ctx,

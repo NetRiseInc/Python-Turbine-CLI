@@ -25,7 +25,7 @@ def catalog(
     runtime: RuntimeContext = ctx.obj
     catalog_path = Path(__file__).resolve().parent / "_generated" / "catalog.json"
     if not catalog_path.exists():
-        runtime.emit_error(ExitCode.USAGE, "Catalog not generated. Run make turbine-python-cli.")
+        runtime.emit_error(ExitCode.USAGE, "Catalog not generated. Run make turbine-cli-generate.")
     payload = json.loads(catalog_path.read_text(encoding="utf-8"))
     if as_json or runtime.is_agent_mode:
         sys.stdout.write(json.dumps(payload, separators=(",", ":")) + "\n")

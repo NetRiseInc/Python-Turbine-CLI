@@ -4,7 +4,9 @@ Ultra-concise playbook for automation and LLM agents.
 
 ## Setup
 
-CLI missing? `uv tool install netrise-turbine-cli` (or `pipx` / `pip`). `turbine skill install` places this skill in Cursor, Claude Code, and Codex skill directories.
+CLI missing? `uv tool install netrise-turbine-cli` (or `pipx` / `pip`). `turbine skill install` places this skill in Cursor, Claude Code, Codex, and opencode skill directories.
+
+If `turbine` isn't on `PATH` (common in sandboxes), it's in a project venv: use `poetry run turbine`, `uv run turbine`, `source .venv/bin/activate` first, or `./.venv/bin/turbine`. Isolated installs (`uv tool` / `pipx`) put `turbine` on `PATH` globally.
 
 Env vars (or `.env`): prefer `TURBINE_ENDPOINT`, `TURBINE_AUDIENCE`, `TURBINE_DOMAIN`, `TURBINE_CLIENT_ID`, `TURBINE_CLIENT_SECRET`, `TURBINE_ORGANIZATION_ID` (unprefixed names still work).
 
