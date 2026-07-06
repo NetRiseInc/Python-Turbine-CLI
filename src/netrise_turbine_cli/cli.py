@@ -51,7 +51,7 @@ def _attach_output_option(ctx: typer.Context, output: str) -> None:
 
 
 @app.callback()
-def main(
+def _root_callback(
     ctx: typer.Context,
     output: str = typer.Option("auto", "--output", "-o", help="auto|json|table"),
     endpoint: Optional[str] = typer.Option(None, "--endpoint", help="Override GraphQL endpoint."),

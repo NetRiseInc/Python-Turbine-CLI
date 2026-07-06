@@ -1,4 +1,4 @@
-"""Agent skill management: install the bundled SKILL.md for Cursor, Claude Code, or Codex."""
+"""Agent skill management: install the bundled SKILL.md for Cursor, Claude Code, Codex, or opencode."""
 
 from __future__ import annotations
 
@@ -13,9 +13,10 @@ import typer
 from ..runtime import ExitCode, RuntimeContext
 
 APP_NAME = "skill"
-APP_HELP = "Install the Turbine agent skill for Cursor, Claude Code, and Codex."
+APP_HELP = "Install the Turbine agent skill for Cursor, Claude Code, Codex, and opencode."
 
-# Agent name -> (detection dirs in $HOME, user-scope skills dir, project-scope skills dir)
+# Agent name -> (detection dirs in $HOME, user-scope skills dir, project-scope skills dir).
+# `user` is relative to $HOME, `project` is relative to the current directory.
 AGENTS: dict[str, dict[str, object]] = {
     "cursor": {
         "detect": [".cursor"],
@@ -31,6 +32,13 @@ AGENTS: dict[str, dict[str, object]] = {
         "detect": [".agents", ".codex"],
         "user": ".agents/skills",
         "project": ".agents/skills",
+    },
+    # opencode uses its own native dir (~/.config/opencode/skills, .opencode/skills);
+    # it also reads the .claude and .agents locations above.
+    "opencode": {
+        "detect": [".config/opencode", ".opencode"],
+        "user": ".config/opencode/skills",
+        "project": ".opencode/skills",
     },
 }
 
@@ -91,15 +99,15 @@ def _resolve_agents(runtime: RuntimeContext, agent: str, scope: str) -> list[str
         runtime.emit_error(
             ExitCode.USAGE,
             "No agent tools detected in your home directory "
-            "(~/.cursor, ~/.claude, ~/.agents, ~/.codex). "
-            "Use --agent cursor|claude|codex to install explicitly.",
+            "(~/.cursor, ~/.claude, ~/.agents, ~/.codex, ~/.config/opencode). "
+            "Use --agent cursor|claude|codex|opencode to install explicitly.",
         )
     return detected
 
 
 def install(
     ctx: typer.Context,
-    agent: str = typer.Option("all", "--agent", help="cursor, claude, codex, or all (detected)."),
+    agent: str = typer.Option("all", "--agent", help="cursor, claude, codex, opencode, or all (detected)."),
     scope: str = typer.Option("user", "--scope", help="user (home dir) or project (current dir)."),
     force: bool = typer.Option(False, "--force", help="Overwrite a modified existing install."),
 ) -> None:
@@ -135,7 +143,7 @@ def install(
 
 def uninstall(
     ctx: typer.Context,
-    agent: str = typer.Option("all", "--agent", help="cursor, claude, codex, or all (detected)."),
+    agent: str = typer.Option("all", "--agent", help="cursor, claude, codex, opencode, or all (detected)."),
     scope: str = typer.Option("user", "--scope", help="user (home dir) or project (current dir)."),
 ) -> None:
     """Remove the installed agent skill."""
