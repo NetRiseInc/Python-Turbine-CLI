@@ -33,6 +33,25 @@ Full agent playbook: [references/agent.md](references/agent.md)
 
 `--output` / `-o` may appear before or after the subcommand.
 
+## Common workflows
+
+**Upload and analyze (most common).** Analysis takes several minutes; `--wait` blocks and prints heartbeats to stderr:
+
+```bash
+# One command: upload, wait for analysis, get the asset ID
+turbine asset upload fw.bin --yes --wait -o json
+# → {"uploadId":"…","name":"fw.bin","assetId":"…","hasRunningJob":false,…}
+```
+
+Or split (upload now, check later): `asset upload` returns an `uploadId` (`assetId` may be null at first — the asset registers asynchronously), then:
+
+```bash
+turbine asset status --upload-id UPLOAD_ID --wait -o json   # blocks until done
+turbine asset status --upload-id UPLOAD_ID -o json          # single non-blocking check
+```
+
+When done, fetch results: `turbine asset get ASSET_ID`, `turbine vuln list ASSET_ID --detail lite -o json`. Do not poll `asset list` to find the upload — `asset status --upload-id` is the direct path.
+
 ## Token discipline
 
 - Prefer curated list commands with `--detail summary|lite` and `--limit` / `--fields`.

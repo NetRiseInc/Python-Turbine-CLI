@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
+import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Callable, Optional
 
 import typer
 
@@ -77,14 +79,113 @@ def get_asset(
     )
 
 
+def _poll_heartbeat(runtime: RuntimeContext) -> Callable[[dict[str, Any]], None]:
+    """Progress lines on stderr while --wait polls (stdout stays data-only)."""
+
+    def _cb(info: dict[str, Any]) -> None:
+        if info.get("has_running_job") is False:
+            return
+        if runtime.is_agent_mode:
+            payload = {
+                "waiting": info["phase"],
+                "asset_id": info.get("asset_id"),
+                "upload_id": info.get("upload_id"),
+                "elapsed_s": int(info["elapsed"]),
+            }
+            sys.stderr.write(json.dumps(payload, separators=(",", ":")) + "\n")
+        else:
+            phase = "resolving upload" if info["phase"] == "resolve" else "analyzing"
+            typer.echo(f"… {phase} (elapsed {int(info['elapsed'])}s)", err=True)
+
+    return _cb
+
+
+def _wait_and_emit(
+    runtime: RuntimeContext,
+    *,
+    asset_id: str | None = None,
+    upload_id: str | None = None,
+    interval: float,
+    timeout: float,
+    extra: dict[str, Any] | None = None,
+) -> None:
+    """Block until analysis completes, then emit the final status JSON."""
+    with runtime.sdk_errors():
+        status = runtime.get_client().wait_for_asset(
+            asset_id=asset_id,
+            upload_id=upload_id,
+            interval=interval,
+            timeout=timeout,
+            on_poll=_poll_heartbeat(runtime),
+        )
+        result: dict[str, Any] = dict(extra or {})
+        result.update(
+            {
+                "assetId": status.asset_id,
+                "hasRunningJob": status.has_running_job,
+                "lastUpdatedTime": status.last_updated_time,
+            }
+        )
+        runtime.emit_result(result)
+
+
 def asset_status(
     ctx: typer.Context,
     asset_id: Optional[str] = typer.Argument(None, help="Asset ID (or use --asset)."),
     asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
+    upload_id: Optional[str] = typer.Option(
+        None, "--upload-id", help="Upload ID from `asset upload` (resolves to the asset)."
+    ),
+    wait: bool = typer.Option(False, "--wait", help="Poll until analysis completes."),
+    interval: float = typer.Option(10.0, "--interval", help="Seconds between polls (with --wait)."),
+    timeout: float = typer.Option(1800.0, "--timeout", help="Max seconds to wait (with --wait)."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
-    """Check asset processing status."""
-    aid = resolve_asset_id(asset_id, asset=asset)
+    """Check asset processing status (by asset ID or upload ID; --wait to block)."""
+    aid = (asset_id or asset or "").strip() or None
+    if aid and upload_id:
+        raise typer.BadParameter("Pass an asset ID or --upload-id, not both.")
+    if not aid and not upload_id:
+        raise typer.BadParameter("Missing ID. Pass an ASSET_ID argument, --asset, or --upload-id.")
+
+    runtime: RuntimeContext = ctx.obj
+
+    if upload_id or wait:
+        if dry_run:
+            runtime.emit_result(
+                {
+                    "dry_run": True,
+                    "operation": "asset_status",
+                    "asset_id": aid,
+                    "upload_id": upload_id,
+                    "wait": wait,
+                }
+            )
+            return
+        if wait:
+            _wait_and_emit(
+                runtime,
+                asset_id=aid,
+                upload_id=upload_id,
+                interval=interval,
+                timeout=timeout,
+                extra={"uploadId": upload_id} if upload_id else None,
+            )
+            return
+        # --upload-id without --wait: resolve once and report.
+        with runtime.sdk_errors():
+            info = runtime.get_client().resolve_upload(upload_id)
+            resolved_id = getattr(info, "asset_id", None)
+            runtime.emit_result(
+                {
+                    "uploadId": upload_id,
+                    "assetId": resolved_id,
+                    "uploaded": getattr(info, "uploaded", None),
+                    "resolved": bool(resolved_id),
+                }
+            )
+        return
+
     run_graphql_by_name(
         ctx,
         method_name="query_asset_status",
@@ -118,19 +219,58 @@ def upload_asset(
     ctx: typer.Context,
     path: Path = typer.Argument(..., help="Firmware or SBOM file."),
     name: Optional[str] = typer.Option(None, "--name"),
+    wait: bool = typer.Option(False, "--wait", help="Block until analysis completes."),
+    interval: float = typer.Option(10.0, "--interval", help="Seconds between polls (with --wait)."),
+    timeout: float = typer.Option(1800.0, "--timeout", help="Max seconds to wait (with --wait)."),
     dry_run: bool = typer.Option(False, "--dry-run"),
     yes: bool = typer.Option(False, "--yes"),
 ) -> None:
-    """Upload a single file as an asset."""
+    """Upload a single file as an asset (--wait blocks until analysis completes)."""
+    from .. import render
+
     runtime: RuntimeContext = ctx.obj
-    runtime.run_curated_op(
-        op_name="upload_asset",
-        method_name="upload_asset",
-        call=lambda sdk: sdk.upload_asset(path, name=name),
-        risk="write",
-        dry_run=dry_run,
-        yes=yes,
-    )
+    runtime.confirm_or_abort("write", yes=yes, dry_run=dry_run)
+    if dry_run:
+        runtime.emit_result(
+            {"dry_run": True, "operation": "upload_asset", "path": str(path), "wait": wait}
+        )
+        return
+
+    with runtime.sdk_errors():
+        sdk = runtime.get_client()
+        with render.status_spinner("Uploading…", enabled=not runtime.is_agent_mode):
+            resp = sdk.upload_asset(path, name=name)
+        upload_id = resp.asset.submit.upload_id
+        display_name = name or path.name
+
+        if wait:
+            _wait_and_emit(
+                runtime,
+                upload_id=upload_id,
+                interval=interval,
+                timeout=timeout,
+                extra={"uploadId": upload_id, "name": display_name},
+            )
+            return
+
+        # Resolve once so callers get an assetId when it's already available;
+        # a failure here must not mask the successful upload.
+        asset_id: str | None = None
+        uploaded: bool | None = None
+        try:
+            info = sdk.resolve_upload(upload_id)
+            asset_id = getattr(info, "asset_id", None)
+            uploaded = getattr(info, "uploaded", None)
+        except Exception:
+            pass
+        runtime.emit_result(
+            {
+                "assetId": asset_id,
+                "uploadId": upload_id,
+                "name": display_name,
+                "uploaded": uploaded,
+            }
+        )
 
 
 def upload_assets(

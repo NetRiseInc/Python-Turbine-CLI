@@ -157,6 +157,58 @@ def test_asset_get_dry_run_with_flag() -> None:
     assert data["dry_run"] is True
 
 
+def test_asset_status_help_lists_wait_flags() -> None:
+    proc = _run_turbine(["asset", "status", "--help"])
+    assert proc.returncode == 0
+    for flag in ("--upload-id", "--wait", "--interval", "--timeout"):
+        assert flag in proc.stdout
+
+
+def test_asset_status_rejects_both_ids() -> None:
+    proc = _run_turbine(["asset", "status", "asset-1", "--upload-id", "up-1"])
+    assert proc.returncode != 0
+    assert "not both" in proc.stderr
+
+
+def test_asset_status_requires_some_id() -> None:
+    proc = _run_turbine(["asset", "status"])
+    assert proc.returncode != 0
+    assert "Missing ID" in proc.stderr
+
+
+def test_asset_status_upload_id_dry_run() -> None:
+    proc = _run_turbine(["asset", "status", "--upload-id", "up-1", "--dry-run", "-o", "json"])
+    assert proc.returncode == 0
+    data = json.loads(proc.stdout.strip())
+    assert data == {
+        "dry_run": True,
+        "operation": "asset_status",
+        "asset_id": None,
+        "upload_id": "up-1",
+        "wait": False,
+    }
+
+
+def test_asset_status_wait_dry_run() -> None:
+    proc = _run_turbine(["asset", "status", "asset-1", "--wait", "--dry-run", "-o", "json"])
+    assert proc.returncode == 0
+    data = json.loads(proc.stdout.strip())
+    assert data["wait"] is True
+    assert data["asset_id"] == "asset-1"
+
+
+def test_asset_upload_dry_run_reports_wait() -> None:
+    proc = _run_turbine(
+        ["asset", "upload", "fw.bin", "--wait", "--dry-run", "-o", "json"]
+    )
+    assert proc.returncode == 0
+    data = json.loads(proc.stdout.strip())
+    assert data["dry_run"] is True
+    assert data["operation"] == "upload_asset"
+    assert data["path"] == "fw.bin"
+    assert data["wait"] is True
+
+
 def test_load_cli_config_from_dotenv(tmp_path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     (tmp_path / ".env").write_text('endpoint="https://example.test/graphql"\n', encoding="utf-8")
@@ -273,6 +325,21 @@ def test_skill_install_no_agents_detected(tmp_path) -> None:
     assert proc.returncode == 2
     payload = json.loads(proc.stderr.strip().splitlines()[-1])
     assert "--agent" in payload["error"]
+
+
+def test_version_matches_pyproject() -> None:
+    """__version__ derives from package metadata, which mirrors pyproject.toml."""
+    import netrise_turbine_cli
+
+    pyproject = (CLI_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    declared = next(
+        line.split('"')[1] for line in pyproject.splitlines() if line.startswith("version = ")
+    )
+    assert netrise_turbine_cli.__version__ == declared
+
+    proc = _run_turbine(["--version"])
+    assert proc.returncode == 0
+    assert proc.stdout.strip() == declared
 
 
 def test_pyproject_has_no_path_dependency() -> None:

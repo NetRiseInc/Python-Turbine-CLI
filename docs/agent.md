@@ -31,6 +31,16 @@ turbine api assets-relay --input '{"cursor":{"first":10}}' -o json
 
 `--output` / `-o` works before or after the subcommand.
 
+## Upload and analyze
+
+Analysis takes minutes. `--wait` blocks (heartbeats on stderr, data on stdout):
+
+```bash
+turbine asset upload fw.bin --yes --wait -o json   # upload + wait, one command
+```
+
+Split flow: `asset upload` returns `uploadId` (`assetId` is null until the asset registers), then `turbine asset status --upload-id UPLOAD_ID --wait -o json` (drop `--wait` for a single check). Never scan `asset list` to find an upload. Afterwards: `turbine asset get ASSET_ID`, `turbine vuln list ASSET_ID`.
+
 ## Input
 
 **Curated list commands:** `--asset`, `--group`, `--filter`, `--sort`, `--limit`, `--fields` (dot paths).
