@@ -7,7 +7,7 @@ from typing import Optional
 
 import typer
 
-from ._common import resolve_asset_id, run_graphql_by_name, run_list
+from ._common import FILTER_HELP, SORT_HELP, resolve_asset_id, run_graphql_by_name, run_list
 from ._registry import VULN_LIST_METHODS
 
 APP_NAME = "vuln"
@@ -26,13 +26,13 @@ def list_vulns(
     asset_id: Optional[str] = typer.Argument(None, help="Asset ID (or use --asset)."),
     asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
     detail: str = typer.Option("lite", "--detail", help="lite|full|detailed|detailed-lite"),
-    filter_json: Optional[str] = typer.Option(None, "--filter"),
-    sort_json: Optional[str] = typer.Option(None, "--sort"),
+    filter_json: Optional[str] = typer.Option(None, "--filter", help=FILTER_HELP),
+    sort_json: Optional[str] = typer.Option(None, "--sort", help=SORT_HELP),
     limit: int = typer.Option(100, "--limit"),
     all_pages: bool = typer.Option(False, "--all"),
     page_size: int = typer.Option(100, "--page-size"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List vulnerabilities for an asset."""
@@ -81,11 +81,11 @@ def get_vuln(
 
 def vuln_overview(
     ctx: typer.Context,
-    filter_json: Optional[str] = typer.Option(None, "--filter"),
-    sort_json: Optional[str] = typer.Option(None, "--sort"),
+    filter_json: Optional[str] = typer.Option(None, "--filter", help=FILTER_HELP),
+    sort_json: Optional[str] = typer.Option(None, "--sort", help=SORT_HELP),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List vulnerability overview records across the org."""

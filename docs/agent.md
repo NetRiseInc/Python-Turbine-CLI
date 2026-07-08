@@ -22,6 +22,7 @@ turbine api catalog --json -o json
 
 # 2. Prefer curated resource commands
 turbine asset list --limit 20 --fields id,name -o json
+turbine asset list --limit 10 --sort createdAt:desc --fields id,name,createdAt -o json
 turbine vuln list ASSET_ID --detail lite --limit 50 -o json
 
 # 3. Escape hatch — exact input schema for any GraphQL op
@@ -41,13 +42,30 @@ turbine asset upload fw.bin --yes --wait -o json   # upload + wait, one command
 
 Split flow: `asset upload` returns `uploadId` (`assetId` is null until the asset registers), then `turbine asset status --upload-id UPLOAD_ID --wait -o json` (drop `--wait` for a single check). Never scan `asset list` to find an upload. Afterwards: `turbine asset get ASSET_ID`, `turbine vuln list ASSET_ID`.
 
+## Vague "risk" asks
+
+"Risk" spans vulnerabilities, exploit exposure, misconfigurations, secrets/credentials, certificates/keys, and license issues. For broad questions ("what risk does this asset have?"), run the one-call summary instead of fanning out:
+
+```bash
+turbine asset risk ASSET_ID -o json    # score + per-category counts, each with a drillDown command
+turbine asset risk --latest -o json    # most recently created asset
+```
+
+Present the counts, then ask which category to drill into (CVEs, misconfigurations, certificate issues, secrets, licenses) unless the request already names one.
+
 ## Input
 
 **Curated list commands:** `--asset`, `--group`, `--filter`, `--sort`, `--limit`, `--fields` (dot paths).
 
+**Sorting:** `--sort FIELD[:asc|desc]`, e.g. `--sort createdAt:desc`. Field names are case-insensitive (`createdAt` → `CREATEDAT`). There is no `--sort-by`/`--sort-order`. An invalid field errors with the valid field list for that resource.
+
+**Filtering:** `--filter` takes resource-specific JSON. Assets/vulns use the fields shape: `--filter '{"fields":[{"fieldName":"NAME","value":["router"],"operation":"CONTAINS"}]}'` (operations: CONTAINS, EQUAL, NOTEQUAL, STARTSWITH, ENDSWITH, GREATERTHAN, LESSTHAN, REGEX, …). Get the exact schema from `turbine api <operation> --schema -o json`.
+
 **API commands:** `--input '{"key":"value"}'` or `--input-file path.json` (use `-` for stdin); promoted kebab-case flags merge into the payload; `turbine api <cmd> --schema` for exact JSON Schema.
 
 Placeholders: `ASSET_ID`, `GROUP_ID`, `CVE_ID`, `USER_ID` — substitute real IDs.
+
+Asset IDs: inputs named `composedAssetId` accept the plain asset ID — the two are interchangeable. Always pass the bare `ASSET_ID` (never an `id|revision` value); the CLI strips any `|<revision>` suffix from output, so IDs you read back are safe to reuse.
 
 ## Output contract
 
@@ -55,6 +73,8 @@ Placeholders: `ASSET_ID`, `GROUP_ID`, `CVE_ID`, `USER_ID` — substitute real ID
 | --- | --- |
 | stdout | Data only — compact JSON; list commands stream NDJSON (one object per line) |
 | stderr | Logs, spinners, human hints |
+
+Exception: `api catalog --json` emits a single JSON array (not NDJSON).
 
 Exit codes: **0** ok · **2** usage · **3** GraphQL · **4** auth · **5** network
 
@@ -75,7 +95,7 @@ Errors are JSON on stderr in agent mode: `{"error":"…","code":2}` — never tr
 
 ```bash
 turbine api graphql -q 'query { … }' --variables '{}' -o json
-turbine api schema --type QueryAsset -o json
+turbine api schema --type Asset -o json
 ```
 
 ## Curated vs api

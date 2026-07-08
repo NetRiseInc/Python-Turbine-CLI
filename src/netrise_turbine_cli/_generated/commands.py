@@ -32,7 +32,7 @@ def _cmd_mutation_add_asset_groups_to_assets(
     try:
         model = AddAssetGroupsToAssetsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'add_asset_groups_to_assets_args': model}
     runtime.run_graphql_op(
         op_name='mutation_add_asset_groups_to_assets',
@@ -70,7 +70,7 @@ def _cmd_mutation_add_assets_to_asset_group(
     try:
         model = AddAssetsToAssetGroupInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'add_assets_to_asset_group_args': model}
     runtime.run_graphql_op(
         op_name='mutation_add_assets_to_asset_group',
@@ -111,7 +111,7 @@ def _cmd_mutation_asset_add_dependency(
     try:
         model = AddDependencyInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id', 'reason'}))
     kwargs = {'asset_add_dependency_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_add_dependency',
@@ -149,7 +149,7 @@ def _cmd_mutation_asset_modify_dependency(
     try:
         model = ModifyDependencyInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'reason'}))
     kwargs = {'asset_modify_dependency_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_modify_dependency',
@@ -187,7 +187,7 @@ def _cmd_mutation_asset_remove_dependencies(
     try:
         model = IdentificationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id'}))
     kwargs = {'asset_remove_dependencies_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_remove_dependencies',
@@ -267,7 +267,7 @@ def _cmd_mutation_asset_submit(
     try:
         model = SubmitAssetInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'architecture', 'asset-cpe', 'bitness', 'family', 'kernel-version', 'license', 'manufacturer', 'model', 'name', 'os', 'sbom-format', 'sbom-type', 'sbom-version', 'type', 'version'}))
     kwargs = {'asset_submit_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_submit',
@@ -317,7 +317,7 @@ def _cmd_mutation_asset_update(
     try:
         model = UpdateAssetInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id', 'name', 'product', 'vendor', 'version'}))
     kwargs = {'asset_update_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_update',
@@ -358,7 +358,7 @@ def _cmd_mutation_create_asset_comparison_report(
     try:
         model = CreateAssetComparisonReportInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-a', 'asset-b'}))
     kwargs = {'create_asset_comparison_report_args': model}
     runtime.run_graphql_op(
         op_name='mutation_create_asset_comparison_report',
@@ -399,7 +399,7 @@ def _cmd_mutation_create_asset_group(
     try:
         model = CreateAssetGroupInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'description', 'name'}))
     kwargs = {'create_asset_group_args': model}
     runtime.run_graphql_op(
         op_name='mutation_create_asset_group',
@@ -436,7 +436,7 @@ def _cmd_mutation_create_notification_configuration(
     try:
         model = CreateNotificationConfigurationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'create_notification_configuration_args': model}
     runtime.run_graphql_op(
         op_name='mutation_create_notification_configuration',
@@ -474,7 +474,7 @@ def _cmd_mutation_delete_asset_comparison_report(
     try:
         model = DeleteAssetComparisonReportInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'report-id'}))
     kwargs = {'delete_asset_comparison_report_args': model}
     runtime.run_graphql_op(
         op_name='mutation_delete_asset_comparison_report',
@@ -512,7 +512,7 @@ def _cmd_mutation_delete_asset_group(
     try:
         model = DeleteAssetGroupInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'delete_asset_group_args': model}
     runtime.run_graphql_op(
         op_name='mutation_delete_asset_group',
@@ -550,7 +550,7 @@ def _cmd_mutation_delete_notification_configuration(
     try:
         model = DeleteNotificationConfigurationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'delete_notification_configuration_args': model}
     runtime.run_graphql_op(
         op_name='mutation_delete_notification_configuration',
@@ -588,7 +588,7 @@ def _cmd_mutation_notify_notification_configuration(
     try:
         model = NotifyNotificationConfigurationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'notify_notification_configuration_args': model}
     runtime.run_graphql_op(
         op_name='mutation_notify_notification_configuration',
@@ -608,6 +608,7 @@ def _cmd_mutation_remediate_all_asset_vulnerabilities(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
     justification: Optional[str] = typer.Option(None, '--justification', help='Optional[VexJustification] (optional)'),
+    responses: Optional[str] = typer.Option(None, '--responses', help='Optional[list[Optional[RemediationResponses]]] (optional)'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
     status: Optional[str] = typer.Option(None, '--status', help='VexStatus (required) [required]'),
 ) -> None:
@@ -628,6 +629,8 @@ def _cmd_mutation_remediate_all_asset_vulnerabilities(
         payload['asset_id'] = asset_id
     if justification is not None:
         payload['justification'] = justification
+    if responses is not None:
+        payload['responses'] = responses
     if description is not None:
         payload['description'] = description
     if status is not None:
@@ -635,7 +638,7 @@ def _cmd_mutation_remediate_all_asset_vulnerabilities(
     try:
         model = CreateAllAssetVulnerabilitiesRemediationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'description', 'justification', 'responses', 'status'}))
     kwargs = {'remediate_all_asset_vulnerabilities_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remediate_all_asset_vulnerabilities',
@@ -655,6 +658,7 @@ def _cmd_mutation_remediate_asset_vulnerabilities(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
     justification: Optional[str] = typer.Option(None, '--justification', help='Optional[VexJustification] (optional)'),
+    responses: Optional[str] = typer.Option(None, '--responses', help='Optional[list[Optional[RemediationResponses]]] (optional)'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
     status: Optional[str] = typer.Option(None, '--status', help='VexStatus (required) [required]'),
 ) -> None:
@@ -675,6 +679,8 @@ def _cmd_mutation_remediate_asset_vulnerabilities(
         payload['asset_id'] = asset_id
     if justification is not None:
         payload['justification'] = justification
+    if responses is not None:
+        payload['responses'] = responses
     if description is not None:
         payload['description'] = description
     if status is not None:
@@ -682,7 +688,7 @@ def _cmd_mutation_remediate_asset_vulnerabilities(
     try:
         model = CreateAssetVulnerabilityRemediationsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'description', 'justification', 'responses', 'status'}))
     kwargs = {'remediate_asset_vulnerabilities_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remediate_asset_vulnerabilities',
@@ -702,6 +708,7 @@ def _cmd_mutation_remediate_asset_vulnerability(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
     justification: Optional[str] = typer.Option(None, '--justification', help='Optional[VexJustification] (optional)'),
+    responses: Optional[str] = typer.Option(None, '--responses', help='Optional[list[Optional[RemediationResponses]]] (optional)'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
     status: Optional[str] = typer.Option(None, '--status', help='VexStatus (required) [required]'),
 ) -> None:
@@ -722,6 +729,8 @@ def _cmd_mutation_remediate_asset_vulnerability(
         payload['asset_id'] = asset_id
     if justification is not None:
         payload['justification'] = justification
+    if responses is not None:
+        payload['responses'] = responses
     if description is not None:
         payload['description'] = description
     if status is not None:
@@ -729,7 +738,7 @@ def _cmd_mutation_remediate_asset_vulnerability(
     try:
         model = CreateAssetVulnerabilityRemediationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'description', 'justification', 'responses', 'status'}))
     kwargs = {'remediate_asset_vulnerability_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remediate_asset_vulnerability',
@@ -773,7 +782,7 @@ def _cmd_mutation_remediate_certificates(
     try:
         model = RemediateCertificatesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'details', 'status'}))
     kwargs = {'remediate_certificates_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remediate_certificates',
@@ -817,7 +826,7 @@ def _cmd_mutation_remediate_license_issues(
     try:
         model = RemediateLicenseIssuesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'details', 'status'}))
     kwargs = {'remediate_license_issues_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remediate_license_issues',
@@ -861,7 +870,7 @@ def _cmd_mutation_remediate_private_keys(
     try:
         model = RemediatePrivateKeysInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'details', 'status'}))
     kwargs = {'remediate_private_keys_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remediate_private_keys',
@@ -905,7 +914,7 @@ def _cmd_mutation_remediate_public_keys(
     try:
         model = RemediatePublicKeysInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'details', 'status'}))
     kwargs = {'remediate_public_keys_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remediate_public_keys',
@@ -949,7 +958,7 @@ def _cmd_mutation_remediate_secrets(
     try:
         model = CreateSecretsRemediationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'description', 'status'}))
     kwargs = {'remediate_secrets_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remediate_secrets',
@@ -986,7 +995,7 @@ def _cmd_mutation_remove_all_asset_groups_from_assets(
     try:
         model = RemoveAllAssetGroupsFromAssetsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'remove_all_asset_groups_from_assets_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remove_all_asset_groups_from_assets',
@@ -1024,7 +1033,7 @@ def _cmd_mutation_remove_assets_from_asset_group(
     try:
         model = RemoveAssetsFromAssetGroupInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'remove_assets_from_asset_group_args': model}
     runtime.run_graphql_op(
         op_name='mutation_remove_assets_from_asset_group',
@@ -1062,7 +1071,7 @@ def _cmd_mutation_set_asset_groups_to_asset(
     try:
         model = SetAssetGroupsToAssetInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'set_asset_groups_to_asset_args': model}
     runtime.run_graphql_op(
         op_name='mutation_set_asset_groups_to_asset',
@@ -1100,7 +1109,7 @@ def _cmd_mutation_set_assets_to_asset_group(
     try:
         model = SetAssetsToAssetGroupInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'group-id'}))
     kwargs = {'set_assets_to_asset_group_args': model}
     runtime.run_graphql_op(
         op_name='mutation_set_assets_to_asset_group',
@@ -1138,7 +1147,7 @@ def _cmd_mutation_submit_rise_ai_analysis(
     try:
         model = RiseAIAnalysisDataInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'submit_rise_ai_analysis_args': model}
     runtime.run_graphql_op(
         op_name='mutation_submit_rise_ai_analysis',
@@ -1182,7 +1191,7 @@ def _cmd_mutation_update_asset_group(
     try:
         model = UpdateAssetGroupInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'description', 'id', 'name'}))
     kwargs = {'update_asset_group_args': model}
     runtime.run_graphql_op(
         op_name='mutation_update_asset_group',
@@ -1219,7 +1228,7 @@ def _cmd_mutation_update_notification_configuration(
     try:
         model = UpdateNotificationConfigurationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'update_notification_configuration_args': model}
     runtime.run_graphql_op(
         op_name='mutation_update_notification_configuration',
@@ -1296,7 +1305,7 @@ def _cmd_mutation_update_org_level_settings(
     try:
         model = OrgLevelSettingsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'binary-fingerprint-enabled', 'curated-hash-enabled', 'idle-timeout-seconds', 'idle-timout-enabled', 'kernel-module-enabled', 'legacy-hash-enabled', 'library-name-enabled', 'library-version-enabled', 'package-manifest-enabled', 'pe-meta-data-enabled', 'rise-ai-conversational-gpt-enabled', 'rise-ai-insights-report-enabled', 'signature-enabled', 'symbol-index-enabled'}))
     kwargs = {'update_org_level_settings_args': model}
     runtime.run_graphql_op(
         op_name='mutation_update_org_level_settings',
@@ -1337,7 +1346,7 @@ def _cmd_mutation_user_action(
     try:
         model = UserActionInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'type', 'user-id'}))
     kwargs = {'user_action_args': model}
     runtime.run_graphql_op(
         op_name='mutation_user_action',
@@ -1375,7 +1384,7 @@ def _cmd_mutation_user_delete(
     try:
         model = UserInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'user_delete_args': model}
     runtime.run_graphql_op(
         op_name='mutation_user_delete',
@@ -1416,7 +1425,7 @@ def _cmd_mutation_user_invite(
     try:
         model = InviteUserInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'email', 'role'}))
     kwargs = {'user_invite_args': model}
     runtime.run_graphql_op(
         op_name='mutation_user_invite',
@@ -1454,7 +1463,7 @@ def _cmd_mutation_user_remove(
     try:
         model = UserInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'user_remove_args': model}
     runtime.run_graphql_op(
         op_name='mutation_user_remove',
@@ -1492,7 +1501,7 @@ def _cmd_mutation_user_reset_password(
     try:
         model = UserInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'user_reset_password_args': model}
     runtime.run_graphql_op(
         op_name='mutation_user_reset_password',
@@ -1533,7 +1542,7 @@ def _cmd_mutation_user_set_user_role(
     try:
         model = SetUserRoleInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'next-role', 'user-id'}))
     kwargs = {'user_set_user_role_args': model}
     runtime.run_graphql_op(
         op_name='mutation_user_set_user_role',
@@ -1580,7 +1589,7 @@ def _cmd_mutation_user_update_user(
     try:
         model = UpdateUserInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'confirm', 'name', 'password', 'user-id'}))
     kwargs = {'user_update_user_args': model}
     runtime.run_graphql_op(
         op_name='mutation_user_update_user',
@@ -1618,7 +1627,7 @@ def _cmd_query_activity(
     try:
         model = ActivityInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'activity_args': model}
     runtime.run_graphql_op(
         op_name='query_activity',
@@ -1685,7 +1694,7 @@ def _cmd_query_asset(
     try:
         model = AssetInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'asset_args': model}
     runtime.run_graphql_op(
         op_name='query_asset',
@@ -1723,7 +1732,7 @@ def _cmd_query_asset_group_analytics(
     try:
         model = AssetGroupAnalyticsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'group-id'}))
     kwargs = {'asset_group_analytics_args': model}
     runtime.run_graphql_op(
         op_name='query_asset_group_analytics',
@@ -1758,10 +1767,13 @@ def _cmd_query_asset_group_members(
     payload = runtime.load_input_payload(input_json, input_file)
     if group_id is not None:
         payload['group_id'] = group_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = AssetGroupMembersInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'group-id'}))
     kwargs = {'asset_group_members_args': model}
     runtime.run_graphql_op(
         op_name='query_asset_group_members',
@@ -1796,10 +1808,13 @@ def _cmd_query_asset_groups(
     payload = runtime.load_input_payload(input_json, input_file)
     if filter is not None:
         payload['filter'] = filter
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = AssetGroupsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'filter'}))
     kwargs = {'asset_groups_args': model}
     runtime.run_graphql_op(
         op_name='query_asset_groups',
@@ -1837,7 +1852,7 @@ def _cmd_query_asset_status(
     try:
         model = AssetStatusInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'asset_status_args': model}
     runtime.run_graphql_op(
         op_name='query_asset_status',
@@ -1875,7 +1890,7 @@ def _cmd_query_asset_upload(
     try:
         model = AssetUploadInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'upload-id'}))
     kwargs = {'asset_upload_args': model}
     runtime.run_graphql_op(
         op_name='query_asset_upload',
@@ -1919,7 +1934,7 @@ def _cmd_query_asset_vulnerability_remediation(
     try:
         model = AssetVulnerabilityRemediationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'remediation-id', 'vulnerability-id'}))
     kwargs = {'asset_vulnerability_remediation_args': model}
     runtime.run_graphql_op(
         op_name='query_asset_vulnerability_remediation',
@@ -1953,10 +1968,13 @@ def _cmd_query_assets_overview(
 
     payload = runtime.load_input_payload(input_json, input_file)
 
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = AssetOverviewInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'assets_overview_args': model}
     runtime.run_graphql_op(
         op_name='query_assets_overview',
@@ -1990,10 +2008,13 @@ def _cmd_query_assets_relay(
 
     payload = runtime.load_input_payload(input_json, input_file)
 
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = AssetsRelayInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'assets_relay_args': model}
     runtime.run_graphql_op(
         op_name='query_assets_relay',
@@ -2027,10 +2048,13 @@ def _cmd_query_assets_relay_lite(
 
     payload = runtime.load_input_payload(input_json, input_file)
 
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = AssetsRelayInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'assets_relay_args': model}
     runtime.run_graphql_op(
         op_name='query_assets_relay_lite',
@@ -2064,10 +2088,13 @@ def _cmd_query_assets_relay_summary(
 
     payload = runtime.load_input_payload(input_json, input_file)
 
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = AssetsRelayInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'assets_relay_args': model}
     runtime.run_graphql_op(
         op_name='query_assets_relay_summary',
@@ -2102,10 +2129,13 @@ def _cmd_query_binary_protections(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = BinaryProtectionsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'binary_protections_args': model}
     runtime.run_graphql_op(
         op_name='query_binary_protections',
@@ -2143,7 +2173,7 @@ def _cmd_query_binary_protections_summary(
     try:
         model = BinaryProtectionsSummaryInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id'}))
     kwargs = {'binary_protections_summary_args': model}
     runtime.run_graphql_op(
         op_name='query_binary_protections_summary',
@@ -2181,7 +2211,7 @@ def _cmd_query_caas_availability(
     try:
         model = RiseAIAnalysisDataInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'caas_availability_args': model}
     runtime.run_graphql_op(
         op_name='query_caas_availability',
@@ -2219,7 +2249,7 @@ def _cmd_query_certificate_external_filters(
     try:
         model = CertificateExternalFiltersInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'certificate_external_filters_args': model}
     runtime.run_graphql_op(
         op_name='query_certificate_external_filters',
@@ -2254,10 +2284,13 @@ def _cmd_query_certificates(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = CertificatesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'certificates_args': model}
     runtime.run_graphql_op(
         op_name='query_certificates',
@@ -2292,10 +2325,13 @@ def _cmd_query_credentials(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = CredentialsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'credentials_args': model}
     runtime.run_graphql_op(
         op_name='query_credentials',
@@ -2333,7 +2369,7 @@ def _cmd_query_dependencies(
     try:
         model = DependencyInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id'}))
     kwargs = {'dependencies_args': model}
     runtime.run_graphql_op(
         op_name='query_dependencies',
@@ -2371,7 +2407,7 @@ def _cmd_query_dependencies_lite(
     try:
         model = DependencyInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id'}))
     kwargs = {'dependencies_args': model}
     runtime.run_graphql_op(
         op_name='query_dependencies_lite',
@@ -2409,7 +2445,7 @@ def _cmd_query_dependency_known_exploits(
     try:
         model = DependencyKnownExploitsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id'}))
     kwargs = {'dependency_known_exploits_args': model}
     runtime.run_graphql_op(
         op_name='query_dependency_known_exploits',
@@ -2447,7 +2483,7 @@ def _cmd_query_detailed_vulnerabilities(
     try:
         model = PaginatedDetailedVulnerabilitiesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'detailed_vulnerabilities_args': model}
     runtime.run_graphql_op(
         op_name='query_detailed_vulnerabilities',
@@ -2485,7 +2521,7 @@ def _cmd_query_detailed_vulnerabilities_lite(
     try:
         model = PaginatedDetailedVulnerabilitiesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'detailed_vulnerabilities_args': model}
     runtime.run_graphql_op(
         op_name='query_detailed_vulnerabilities_lite',
@@ -2526,7 +2562,7 @@ def _cmd_query_download_extracted_firmware(
     try:
         model = ExtractedFirmwareDownloadInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'filesystem-id'}))
     kwargs = {'download_extracted_firmware_args': model}
     runtime.run_graphql_op(
         op_name='query_download_extracted_firmware',
@@ -2570,7 +2606,7 @@ def _cmd_query_download_file(
     try:
         model = FileDownloadInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'file-id', 'filesystem-id'}))
     kwargs = {'download_file_args': model}
     runtime.run_graphql_op(
         op_name='query_download_file',
@@ -2608,7 +2644,7 @@ def _cmd_query_download_file_list(
     try:
         model = FileListDownloadInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'download_file_list_args': model}
     runtime.run_graphql_op(
         op_name='query_download_file_list',
@@ -2646,7 +2682,7 @@ def _cmd_query_download_firmware(
     try:
         model = FirmwareDownloadInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'download_firmware_args': model}
     runtime.run_graphql_op(
         op_name='query_download_firmware',
@@ -2687,7 +2723,7 @@ def _cmd_query_get_ai_model_data(
     try:
         model = GetAiModelDataInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'component-id', 'composed-asset-id'}))
     kwargs = {'get_ai_model_data_args': model}
     runtime.run_graphql_op(
         op_name='query_get_ai_model_data',
@@ -2725,7 +2761,7 @@ def _cmd_query_get_asset_comparison_report(
     try:
         model = GetAssetComparisonReportInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'report-id'}))
     kwargs = {'get_asset_comparison_report_args': model}
     runtime.run_graphql_op(
         op_name='query_get_asset_comparison_report',
@@ -2769,7 +2805,7 @@ def _cmd_query_get_certificate_reachability(
     try:
         model = GetCertificateReachabilityInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id', 'file-path', 'sha256'}))
     kwargs = {'get_certificate_reachability_args': model}
     runtime.run_graphql_op(
         op_name='query_get_certificate_reachability',
@@ -2810,7 +2846,7 @@ def _cmd_query_get_dependency_reachability(
     try:
         model = GetDependencyReachabilityInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'component-id', 'composed-asset-id'}))
     kwargs = {'get_dependency_reachability_args': model}
     runtime.run_graphql_op(
         op_name='query_get_dependency_reachability',
@@ -2851,7 +2887,7 @@ def _cmd_query_get_secret_reachability(
     try:
         model = GetSecretReachabilityInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id', 'secret-id'}))
     kwargs = {'get_secret_reachability_args': model}
     runtime.run_graphql_op(
         op_name='query_get_secret_reachability',
@@ -2892,7 +2928,7 @@ def _cmd_query_get_vuln_reachability(
     try:
         model = GetVulnReachabilityInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'advisory-id', 'asset-id'}))
     kwargs = {'get_vuln_reachability_args': model}
     runtime.run_graphql_op(
         op_name='query_get_vuln_reachability',
@@ -2933,7 +2969,7 @@ def _cmd_query_grouped_dependencies(
     try:
         model = GroupedDependenciesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id', 'grouped-by'}))
     kwargs = {'grouped_dependencies_args': model}
     runtime.run_graphql_op(
         op_name='query_grouped_dependencies',
@@ -2968,10 +3004,13 @@ def _cmd_query_hashes(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = HashesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'hashes_args': model}
     runtime.run_graphql_op(
         op_name='query_hashes',
@@ -3036,7 +3075,7 @@ def _cmd_query_identified_components_preview(
     try:
         model = IdentifiedComponentsPreviewInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'binary-fingerprint-enabled', 'curated-hash-enabled', 'kernel-module-enabled', 'legacy-hash-enabled', 'library-name-enabled', 'library-version-enabled', 'package-manifest-enabled', 'pe-meta-data-enabled', 'signature-enabled', 'symbol-index-enabled'}))
     kwargs = {'identified_components_preview_args': model}
     runtime.run_graphql_op(
         op_name='query_identified_components_preview',
@@ -3077,7 +3116,7 @@ def _cmd_query_license(
     try:
         model = LicenseInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'spdx-id'}))
     kwargs = {'license_args': model}
     runtime.run_graphql_op(
         op_name='query_license',
@@ -3118,7 +3157,7 @@ def _cmd_query_license_issue(
     try:
         model = LicenseIssueInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'issue-id'}))
     kwargs = {'license_issue_args': model}
     runtime.run_graphql_op(
         op_name='query_license_issue',
@@ -3156,7 +3195,7 @@ def _cmd_query_license_issues(
     try:
         model = LicenseIssuesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'license_issues_args': model}
     runtime.run_graphql_op(
         op_name='query_license_issues',
@@ -3194,7 +3233,7 @@ def _cmd_query_license_issues_external_filters(
     try:
         model = LicenseIssuesExternalFiltersInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'license_issues_external_filters_args': model}
     runtime.run_graphql_op(
         op_name='query_license_issues_external_filters',
@@ -3261,7 +3300,7 @@ def _cmd_query_list_ai_providers(
     try:
         model = ListAiProvidersInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id'}))
     kwargs = {'list_ai_providers_args': model}
     runtime.run_graphql_op(
         op_name='query_list_ai_providers',
@@ -3298,7 +3337,7 @@ def _cmd_query_list_asset_comparison_reports(
     try:
         model = ListAssetComparisonReportsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'list_asset_comparison_reports_args': model}
     runtime.run_graphql_op(
         op_name='query_list_asset_comparison_reports',
@@ -3342,7 +3381,7 @@ def _cmd_query_list_asset_correlations(
     try:
         model = ListAssetCorrelationsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id', 'correlation-type', 'identifier'}))
     kwargs = {'list_asset_correlations_args': model}
     runtime.run_graphql_op(
         op_name='query_list_asset_correlations',
@@ -3380,10 +3419,13 @@ def _cmd_query_list_asset_crypto_libraries(
         payload['asset_id'] = asset_id
     if filter is not None:
         payload['filter'] = filter
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = ListAssetCryptoLibrariesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id', 'filter'}))
     kwargs = {'list_asset_crypto_libraries_args': model}
     runtime.run_graphql_op(
         op_name='query_list_asset_crypto_libraries',
@@ -3420,7 +3462,7 @@ def _cmd_query_list_notification_configurations(
     try:
         model = ListNotificationConfigurationsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'list_notification_configurations_args': model}
     runtime.run_graphql_op(
         op_name='query_list_notification_configurations',
@@ -3457,7 +3499,7 @@ def _cmd_query_list_notification_logs(
     try:
         model = ListNotificationLogsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'list_notification_logs_args': model}
     runtime.run_graphql_op(
         op_name='query_list_notification_logs',
@@ -3495,7 +3537,7 @@ def _cmd_query_match_vulnerabilities(
     try:
         model = MatchVulnerabilitiesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'identifier'}))
     kwargs = {'match_vulnerabilities_args': model}
     runtime.run_graphql_op(
         op_name='query_match_vulnerabilities',
@@ -3559,10 +3601,13 @@ def _cmd_query_misconfigurations(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = MisconfigurationsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'misconfigurations_args': model}
     runtime.run_graphql_op(
         op_name='query_misconfigurations',
@@ -3597,10 +3642,13 @@ def _cmd_query_misconfigurations_lite(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = MisconfigurationsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'misconfigurations_args': model}
     runtime.run_graphql_op(
         op_name='query_misconfigurations_lite',
@@ -3637,7 +3685,7 @@ def _cmd_query_org_level_information(
     try:
         model = OrgLevelInformationInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'org_level_information_args': model}
     runtime.run_graphql_op(
         op_name='query_org_level_information',
@@ -3704,7 +3752,7 @@ def _cmd_query_package_dependencies_by_id(
     try:
         model = packageDependenciesByIdInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'composed-asset-id'}))
     kwargs = {'package_dependencies_by_id_args': model}
     runtime.run_graphql_op(
         op_name='query_package_dependencies_by_id',
@@ -3742,7 +3790,7 @@ def _cmd_query_private_key_external_filters(
     try:
         model = PrivateKeyExternalFiltersInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'private_key_external_filters_args': model}
     runtime.run_graphql_op(
         op_name='query_private_key_external_filters',
@@ -3777,10 +3825,13 @@ def _cmd_query_private_keys(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = PrivateKeysInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'private_keys_args': model}
     runtime.run_graphql_op(
         op_name='query_private_keys',
@@ -3818,7 +3869,7 @@ def _cmd_query_public_key_external_filters(
     try:
         model = PublicKeyExternalFiltersInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'public_key_external_filters_args': model}
     runtime.run_graphql_op(
         op_name='query_public_key_external_filters',
@@ -3853,10 +3904,13 @@ def _cmd_query_public_keys(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = PublicKeysInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'public_keys_args': model}
     runtime.run_graphql_op(
         op_name='query_public_keys',
@@ -3894,7 +3948,7 @@ def _cmd_query_rise_ai_analysis_data(
     try:
         model = RiseAIAnalysisDataInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'rise_ai_analysis_data_args': model}
     runtime.run_graphql_op(
         op_name='query_rise_ai_analysis_data',
@@ -3932,7 +3986,7 @@ def _cmd_query_rise_ai_availability(
     try:
         model = RiseAIAnalysisDataInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'rise_ai_availability_args': model}
     runtime.run_graphql_op(
         op_name='query_rise_ai_availability',
@@ -3973,7 +4027,7 @@ def _cmd_query_search(
     try:
         model = SearchInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'artifacts', 'query'}))
     kwargs = {'search_args': model}
     runtime.run_graphql_op(
         op_name='query_search',
@@ -4014,7 +4068,7 @@ def _cmd_query_secret(
     try:
         model = SecretInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id', 'reveal-secret'}))
     kwargs = {'secret_args': model}
     runtime.run_graphql_op(
         op_name='query_secret',
@@ -4052,7 +4106,7 @@ def _cmd_query_secret_categories_summary(
     try:
         model = SecretCategoriesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'secret_categories_summary_args': model}
     runtime.run_graphql_op(
         op_name='query_secret_categories_summary',
@@ -4090,7 +4144,7 @@ def _cmd_query_secret_status_count(
     try:
         model = SecretStatusCountInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'secret_status_count_args': model}
     runtime.run_graphql_op(
         op_name='query_secret_status_count',
@@ -4128,7 +4182,7 @@ def _cmd_query_secret_types_and_count(
     try:
         model = SecretTypesAndCountInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'secret_types_and_count_args': model}
     runtime.run_graphql_op(
         op_name='query_secret_types_and_count',
@@ -4163,10 +4217,13 @@ def _cmd_query_secrets(
     payload = runtime.load_input_payload(input_json, input_file)
     if asset_id is not None:
         payload['asset_id'] = asset_id
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = SecretsInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'secrets_args': model}
     runtime.run_graphql_op(
         op_name='query_secrets',
@@ -4204,7 +4261,7 @@ def _cmd_query_secrets_summary(
     try:
         model = SecretsSummaryInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'secrets_summary_args': model}
     runtime.run_graphql_op(
         op_name='query_secrets_summary',
@@ -4296,10 +4353,13 @@ def _cmd_query_users(
 
     payload = runtime.load_input_payload(input_json, input_file)
 
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = UsersInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'users_args': model}
     runtime.run_graphql_op(
         op_name='query_users',
@@ -4337,7 +4397,7 @@ def _cmd_query_vulnerabilities(
     try:
         model = PaginatedVulnerabilitiesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'vulnerabilities_args': model}
     runtime.run_graphql_op(
         op_name='query_vulnerabilities',
@@ -4375,7 +4435,7 @@ def _cmd_query_vulnerabilities_lite(
     try:
         model = PaginatedVulnerabilitiesInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'vulnerabilities_args': model}
     runtime.run_graphql_op(
         op_name='query_vulnerabilities_lite',
@@ -4409,10 +4469,13 @@ def _cmd_query_vulnerabilities_overview(
 
     payload = runtime.load_input_payload(input_json, input_file)
 
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
     try:
         model = VulnerabilityOverviewInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
     kwargs = {'vulnerabilities_overview_args': model}
     runtime.run_graphql_op(
         op_name='query_vulnerabilities_overview',
@@ -4450,7 +4513,7 @@ def _cmd_query_vulnerability(
     try:
         model = VulnerabilityInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'vulnerability_args': model}
     runtime.run_graphql_op(
         op_name='query_vulnerability',
@@ -4488,7 +4551,7 @@ def _cmd_query_vulnerability_external_filters(
     try:
         model = VulnerabilityExternalFiltersInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'asset-id'}))
     kwargs = {'vulnerability_external_filters_args': model}
     runtime.run_graphql_op(
         op_name='query_vulnerability_external_filters',
@@ -4526,7 +4589,7 @@ def _cmd_query_vulnerability_lite(
     try:
         model = VulnerabilityInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id'}))
     kwargs = {'vulnerability_args': model}
     runtime.run_graphql_op(
         op_name='query_vulnerability_lite',

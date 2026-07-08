@@ -10,7 +10,7 @@ from typing import Any, Callable, Optional
 import typer
 
 from ..runtime import RuntimeContext
-from ._common import resolve_asset_id, run_graphql_by_name, run_list
+from ._common import FILTER_HELP, SORT_HELP, resolve_asset_id, run_graphql_by_name, run_list
 from ._registry import ASSET_LIST_METHODS
 
 APP_NAME = "asset"
@@ -20,6 +20,7 @@ APP_HELP = "Assets: list, inspect, upload, and manage firmware/SBOMs."
 def register(app: typer.Typer) -> None:
     app.command("list")(list_assets)
     app.command("get")(get_asset)
+    app.command("risk")(asset_risk)
     app.command("status")(asset_status)
     app.command("files")(asset_files)
     app.command("upload")(upload_asset)
@@ -33,14 +34,14 @@ def register(app: typer.Typer) -> None:
 def list_assets(
     ctx: typer.Context,
     detail: str = typer.Option("lite", "--detail", help="summary|lite|full|overview"),
-    filter_json: Optional[str] = typer.Option(None, "--filter"),
-    sort_json: Optional[str] = typer.Option(None, "--sort"),
+    filter_json: Optional[str] = typer.Option(None, "--filter", help=FILTER_HELP),
+    sort_json: Optional[str] = typer.Option(None, "--sort", help=SORT_HELP),
     limit: int = typer.Option(100, "--limit"),
     all_pages: bool = typer.Option(False, "--all"),
     page_size: int = typer.Option(100, "--page-size"),
     max_pages: Optional[int] = typer.Option(None, "--max-pages"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List assets with pagination."""
@@ -77,6 +78,116 @@ def get_asset(
         risk="read",
         dry_run=dry_run,
     )
+
+
+def _analytic_summary(aid: str, asset: Any) -> dict[str, Any]:
+    """Reshape query_asset's analytic block into a one-look risk summary."""
+    analytic = getattr(asset, "analytic", None)
+    risk = getattr(asset, "risk", None)
+
+    def block(obj: Any) -> dict[str, Any]:
+        return obj.model_dump(mode="json", by_alias=True) if obj is not None else {}
+
+    vuln = block(getattr(analytic, "vulnerability", None))
+    vuln_total = sum(v for v in vuln.values() if isinstance(v, int))
+    creds = block(getattr(analytic, "credentials", None))
+    misconfig = block(getattr(analytic, "misconfigurations", None))
+    crypto = block(getattr(analytic, "cryptography", None))
+    exploit = block(getattr(analytic, "exploit", None))
+
+    return {
+        "assetId": aid,
+        "name": getattr(asset, "name", None),
+        "risk": {
+            "category": getattr(risk, "category", None),
+            "score": getattr(risk, "score", None),
+        },
+        "findings": {
+            "vulnerabilities": {
+                **vuln,
+                "total": vuln_total,
+                "drillDown": f"turbine vuln list {aid} --detail lite",
+            },
+            "exploitExposure": {
+                **exploit,
+                "drillDown": f"turbine vuln list {aid} --detail detailed-lite",
+            },
+            "misconfigurations": {
+                **misconfig,
+                "drillDown": f"turbine misconfig list {aid}",
+            },
+            "secretsAndCredentials": {
+                **creds,
+                "drillDown": f"turbine secret list {aid} / turbine credential list {aid}",
+            },
+            "cryptography": {
+                **crypto,
+                "drillDown": f"turbine cert list {aid} / turbine key list {aid}",
+            },
+            "licenseIssues": {
+                "count": getattr(analytic, "license_issues", None),
+                "drillDown": f"turbine license list {aid}",
+            },
+        },
+    }
+
+
+def asset_risk(
+    ctx: typer.Context,
+    asset_id: Optional[str] = typer.Argument(None, help="Asset ID (or use --asset / --latest)."),
+    asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
+    latest: bool = typer.Option(
+        False, "--latest", help="Use the most recently created asset in the org."
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run"),
+) -> None:
+    """One-call risk summary: score plus finding counts across every category.
+
+    Answers broad questions like "what risk does this asset carry?" in a
+    single call; each category includes the drill-down command for details.
+    """
+    runtime: RuntimeContext = ctx.obj
+    if latest and (asset_id or asset):
+        raise typer.BadParameter("Pass an asset ID or --latest, not both.")
+    if not latest:
+        # Validate early so the error names all the ways to supply an ID.
+        aid = (asset_id or asset or "").strip()
+        if not aid:
+            raise typer.BadParameter(
+                "Missing ASSET_ID. Pass it as an argument, --asset, or use --latest."
+            )
+    if dry_run:
+        runtime.emit_result(
+            {
+                "dry_run": True,
+                "operation": "asset_risk",
+                "asset_id": None if latest else aid,
+                "latest": latest,
+            }
+        )
+        return
+
+    from netrise_turbine_sdk_graphql.input_types import AssetInput
+
+    from ..runtime import ExitCode, _strip_composed_suffix
+
+    with runtime.sdk_errors():
+        sdk = runtime.get_client()
+        if latest:
+            newest = list(
+                sdk.iter_assets_relay_lite(
+                    sort={"field": "CREATEDAT", "order": "DESC"},
+                    page_size=1,
+                    max_items=1,
+                )
+            )
+            if not newest:
+                runtime.emit_error(ExitCode.GRAPHQL, "No assets found in the organization.")
+            aid = _strip_composed_suffix(newest[0].id)
+        result = sdk.graphql().query_asset(asset_args=AssetInput(assetId=aid)).asset
+        if result is None:
+            runtime.emit_error(ExitCode.GRAPHQL, f"Asset not found: {aid}")
+        runtime.emit_result(_analytic_summary(aid, result))
 
 
 def _poll_heartbeat(runtime: RuntimeContext) -> Callable[[dict[str, Any]], None]:
@@ -346,7 +457,7 @@ def asset_activity(
     asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List activity log entries for an asset."""
@@ -368,7 +479,7 @@ def asset_hashes(
     asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List file hashes for an asset."""

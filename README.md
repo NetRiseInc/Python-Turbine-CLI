@@ -31,7 +31,7 @@ Three tiers — pick how much you want:
 | SDK + CLI | `uv tool install netrise-turbine-cli` (or `pipx` / `pip`) | `turbine` command, SDK included |
 | Everything | `turbine skill install` | Agent skill in Cursor, Claude Code, Codex, and opencode |
 
-`turbine skill install` detects which agent tools you have (`~/.cursor`, `~/.claude`, `~/.agents`/`~/.codex`, `~/.config/opencode`) and installs the bundled skill to each; use `--agent` / `--scope project` for explicit control and `turbine skill status` to inspect. Developing in this repo? `make turbine-cli-test` sets up the poetry env with the local SDK.
+`turbine skill install` detects which agent tools you have (`~/.cursor`, `~/.claude`, `~/.agents`/`~/.codex`, `~/.config/opencode`) and installs the bundled skill to each; use `--agent` / `--scope project` for explicit control, `turbine skill status` to inspect, and `turbine skill uninstall` to remove. Developing in this repo? `make turbine-cli-dev` sets up the poetry env with the local editable SDK — run it instead of (or after) any bare `poetry install`, which resets the env to the locked PyPI SDK.
 
 ## Auth
 

@@ -6,7 +6,7 @@ from typing import Optional
 
 import typer
 
-from ._common import resolve_asset_id, run_list
+from ._common import FILTER_HELP, SORT_HELP, resolve_asset_id, run_list
 from ._registry import COMPONENT_LIST_METHODS
 
 APP_NAME = "component"
@@ -24,11 +24,11 @@ def list_components(
     asset_id: Optional[str] = typer.Argument(None, help="Asset ID (or use --asset)."),
     asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
     detail: str = typer.Option("lite", "--detail", help="lite|full"),
-    filter_json: Optional[str] = typer.Option(None, "--filter"),
-    sort_json: Optional[str] = typer.Option(None, "--sort"),
+    filter_json: Optional[str] = typer.Option(None, "--filter", help=FILTER_HELP),
+    sort_json: Optional[str] = typer.Option(None, "--sort", help=SORT_HELP),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List dependencies for an asset."""
@@ -51,17 +51,19 @@ def grouped_components(
     ctx: typer.Context,
     asset_id: Optional[str] = typer.Argument(None, help="Asset ID (or use --asset)."),
     asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
-    grouped_by: Optional[str] = typer.Option(None, "--group-by"),
+    grouped_by: str = typer.Option(
+        # The API rejects requests without a group-by, so default it.
+        "VENDOR",
+        "--group-by",
+        help="VENDOR|LICENSE|TYPE|SUBTYPE",
+    ),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List grouped dependency rollups."""
     aid = resolve_asset_id(asset_id, asset=asset)
-    extra: dict[str, str] = {}
-    if grouped_by:
-        extra["grouped_by"] = grouped_by
     run_list(
         ctx,
         method_name="iter_grouped_dependencies",
@@ -70,7 +72,7 @@ def grouped_components(
         after=after,
         fields=fields,
         dry_run=dry_run,
-        extra_kwargs=extra or None,
+        extra_kwargs={"grouped_by": grouped_by.upper()},
     )
 
 
@@ -80,7 +82,7 @@ def crypto_libraries(
     asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List crypto libraries in an asset."""

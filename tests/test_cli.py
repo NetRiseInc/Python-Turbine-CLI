@@ -29,6 +29,54 @@ def test_project_fields_strict_unknown() -> None:
         project_fields({"a": 1}, ["missing"], strict=True)
 
 
+def test_to_jsonable_strips_composed_asset_ids() -> None:
+    from netrise_turbine_cli.runtime import _to_jsonable
+
+    data = {
+        "composedAssetId": "abc123|0",
+        "assetId": "def456|12",
+        "nested": {"composed_asset_id": "ghi|3", "asset_id": "jkl|1"},
+        "items": [{"composedAssetId": "mno|0"}, {"assetId": "pqr"}],
+    }
+    out = _to_jsonable(data)
+    assert out["composedAssetId"] == "abc123"
+    assert out["assetId"] == "def456"
+    assert out["nested"] == {"composed_asset_id": "ghi", "asset_id": "jkl"}
+    assert out["items"] == [{"composedAssetId": "mno"}, {"assetId": "pqr"}]
+
+
+def test_to_jsonable_leaves_other_keys_and_values_alone() -> None:
+    from netrise_turbine_cli.runtime import _to_jsonable
+
+    data = {
+        "name": "fw|0",  # non-ID key: untouched even with a |n suffix
+        "assetId": "a|b",  # ID key but non-digit suffix: untouched
+        "composedAssetId": None,  # non-string: untouched
+        "composed_asset_id": "no-suffix-here",  # no |n suffix: untouched
+        "asset_id": "x|y|2",  # only the trailing |<digits> is stripped
+    }
+    out = _to_jsonable(data)
+    assert out["name"] == "fw|0"
+    assert out["assetId"] == "a|b"
+    assert out["composedAssetId"] is None
+    assert out["composed_asset_id"] == "no-suffix-here"
+    assert out["asset_id"] == "x|y"
+
+
+def test_to_jsonable_strips_composed_ids_from_pydantic_models() -> None:
+    from pydantic import BaseModel, Field
+
+    from netrise_turbine_cli.runtime import _to_jsonable
+
+    class Node(BaseModel):
+        composed_asset_id: str = Field(alias="composedAssetId")
+
+        model_config = {"populate_by_name": True}
+
+    out = _to_jsonable(Node(composed_asset_id="stu|4"))
+    assert out == {"composedAssetId": "stu"}
+
+
 def test_format_validation_error() -> None:
     from pydantic import BaseModel, Field
 
@@ -142,6 +190,62 @@ def test_catalog_json_generated() -> None:
     data = json.loads(catalog.read_text(encoding="utf-8"))
     assert len(data) >= 100
     assert all(row["group"] == "api" for row in data)
+
+
+def test_api_required_cursor_defaults() -> None:
+    """Ops with a required cursor get a default so bare invocations work."""
+    proc = _run_turbine(["api", "assets-overview", "--dry-run", "-o", "json"])
+    assert proc.returncode == 0, proc.stderr
+    data = json.loads(proc.stdout.strip())
+    assert data["dry_run"] is True
+    cursor = data["kwargs"]["assets_overview_args"]["cursor"]
+    assert cursor["first"] == 100
+
+
+def test_api_explicit_cursor_wins_over_default() -> None:
+    proc = _run_turbine(
+        ["api", "assets-overview", "--input", '{"cursor":{"first":5}}', "--dry-run", "-o", "json"]
+    )
+    assert proc.returncode == 0, proc.stderr
+    data = json.loads(proc.stdout.strip())
+    assert data["kwargs"]["assets_overview_args"]["cursor"]["first"] == 5
+
+
+def test_api_validation_error_never_suggests_phantom_flags() -> None:
+    """Missing fields without a real CLI flag must point at --input, not a fake option."""
+    proc = _run_turbine(["api", "asset-modify-dependency", "-o", "json"])
+    assert proc.returncode == 2
+    payload = json.loads(proc.stderr.strip().splitlines()[-1])
+    assert "--identification" not in payload["error"]
+    assert 'input field "identification"' in payload["error"]
+    assert "--input" in payload["error"]
+
+
+def test_api_validation_error_uses_real_flag_when_available() -> None:
+    proc = _run_turbine(["api", "dependencies", "-o", "json"])
+    assert proc.returncode == 2
+    payload = json.loads(proc.stderr.strip().splitlines()[-1])
+    assert "--composed-asset-id: Field required" in payload["error"]
+
+
+def test_format_validation_error_known_flags() -> None:
+    """Unit check: flag rendering is gated on the command's actual options."""
+    import pydantic
+
+    from netrise_turbine_cli.errors import format_validation_error
+
+    class Model(pydantic.BaseModel):
+        composed_asset_id: str
+        cursor: dict
+
+    try:
+        Model.model_validate({})
+    except pydantic.ValidationError as exc:
+        msg = format_validation_error(exc, known_flags={"composed-asset-id"})
+    assert "--composed-asset-id: Field required" in msg
+    assert "--cursor" not in msg
+    assert 'input field "cursor"' in msg
+    assert "--input" in msg
 
 
 def test_asset_get_requires_id() -> None:
@@ -406,3 +510,144 @@ def test_parse_json_option_rejects_malformed_json() -> None:
     # Malformed JSON containing '=' must raise, not be misparsed as key=value.
     with pytest.raises(typer.BadParameter):
         parse_json_option('{"key": "bad value', name="--filter")
+
+
+def test_parse_sort_option_shorthand() -> None:
+    from netrise_turbine_cli.commands._common import parse_sort_option
+
+    assert parse_sort_option(None) is None
+    # Field-only shorthand: any casing/spelling normalizes to the enum form.
+    assert parse_sort_option("createdAt") == {"field": "CREATEDAT"}
+    assert parse_sort_option("created_at") == {"field": "CREATEDAT"}
+    assert parse_sort_option("CREATEDAT") == {"field": "CREATEDAT"}
+    # Field:order shorthand.
+    assert parse_sort_option("createdAt:desc") == {"field": "CREATEDAT", "order": "DESC"}
+    assert parse_sort_option("riskScore:asc") == {"field": "RISKSCORE", "order": "ASC"}
+    assert parse_sort_option("name:DESC") == {"field": "NAME", "order": "DESC"}
+    # Raw JSON still passes through untouched.
+    assert parse_sort_option('{"field":"CREATEDAT","order":"DESC"}') == {
+        "field": "CREATEDAT",
+        "order": "DESC",
+    }
+
+
+def test_parse_sort_option_errors_mention_shorthand() -> None:
+    import typer
+
+    from netrise_turbine_cli.commands._common import parse_sort_option
+
+    with pytest.raises(typer.BadParameter, match="asc or desc"):
+        parse_sort_option("createdAt:down")
+    with pytest.raises(typer.BadParameter, match="createdAt:desc"):
+        parse_sort_option('{"field": bad json')
+
+
+def test_asset_risk_requires_id_or_latest() -> None:
+    result = _run_turbine(["asset", "risk"])
+    assert result.returncode == 2
+    assert "--latest" in result.stdout + result.stderr
+
+
+def test_asset_risk_rejects_id_and_latest() -> None:
+    result = _run_turbine(["asset", "risk", "some-id", "--latest"])
+    assert result.returncode == 2
+
+
+def test_asset_risk_dry_run() -> None:
+    result = _run_turbine(["asset", "risk", "some-id", "--dry-run", "-o", "json"])
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload == {
+        "dry_run": True,
+        "operation": "asset_risk",
+        "asset_id": "some-id",
+        "latest": False,
+    }
+
+
+def test_asset_risk_latest_dry_run() -> None:
+    result = _run_turbine(["asset", "risk", "--latest", "--dry-run", "-o", "json"])
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["latest"] is True
+    assert payload["asset_id"] is None
+
+
+def test_analytic_summary_shapes_counts_and_drilldowns() -> None:
+    from netrise_turbine_sdk_graphql.query_asset import (
+        QueryAssetAsset,
+        QueryAssetAssetAnalytic,
+        QueryAssetAssetRisk,
+    )
+
+    from netrise_turbine_cli.commands.asset import _analytic_summary
+
+    analytic = QueryAssetAssetAnalytic.model_validate(
+        {
+            "aiComponents": 0,
+            "binaries": 3,
+            "components": {
+                "aiModel": 0,
+                "application": 1,
+                "container": 0,
+                "device": 0,
+                "framework": 0,
+                "kernel": 1,
+                "kernelModule": 0,
+                "library": 5,
+                "os": 1,
+                "package": 2,
+            },
+            "credentials": {
+                "crackedCred": 1,
+                "crackedHash": 0,
+                "credential": 2,
+                "hash": 3,
+                "secrets": 4,
+            },
+            "cryptography": {"certificate": 5, "privateKey": 1, "publicKey": 2},
+            "exploit": {
+                "botnet": 0,
+                "exploitCode": 1,
+                "inKnownExploitedVulnerabilities": 2,
+                "inTheWild": 0,
+                "knownAttacks": 0,
+                "ransomware": 0,
+                "threatActor": 0,
+            },
+            "files": 100,
+            "licenseIssues": 7,
+            "misconfigurations": {"failed": 4, "notApplicable": 2, "passed": 10},
+            "vulnerability": {"critical": 3, "high": 10, "medium": 2, "low": 1},
+        }
+    )
+    asset = QueryAssetAsset.model_construct(
+        name="fw.bin",
+        analytic=analytic,
+        risk=QueryAssetAssetRisk.model_construct(category="CRITICAL", raw_score=9.1, score=9.1),
+    )
+
+    summary = _analytic_summary("asset-1", asset)
+    assert summary["assetId"] == "asset-1"
+    assert summary["risk"]["score"] == 9.1
+    vulns = summary["findings"]["vulnerabilities"]
+    assert vulns["total"] == 16
+    assert vulns["drillDown"] == "turbine vuln list asset-1 --detail lite"
+    assert summary["findings"]["misconfigurations"]["failed"] == 4
+    assert summary["findings"]["secretsAndCredentials"]["secrets"] == 4
+    assert summary["findings"]["cryptography"]["certificate"] == 5
+    assert summary["findings"]["licenseIssues"]["count"] == 7
+
+
+def test_analytic_summary_handles_missing_analytic() -> None:
+    from netrise_turbine_cli.commands.asset import _analytic_summary
+
+    summary = _analytic_summary("asset-1", object())
+    assert summary["risk"] == {"category": None, "score": None}
+    assert summary["findings"]["vulnerabilities"]["total"] == 0
+
+
+def test_asset_list_sort_help_documents_shorthand() -> None:
+    result = _run_turbine(["asset", "list", "--help"])
+    assert result.returncode == 0
+    assert "asc|desc" in result.stdout

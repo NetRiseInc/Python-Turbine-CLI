@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Optional
 
 import typer
 
 from ..runtime import RuntimeContext
+
+# Shared help text so every list command documents the same syntax.
+SORT_HELP = 'FIELD[:asc|desc], e.g. createdAt:desc. JSON also accepted: {"field":"CREATEDAT","order":"DESC"}.'
+FILTER_HELP = 'Filter JSON (shape varies by resource; see docs) or key=value shorthand.'
 
 
 def resolve_asset_id(
@@ -49,6 +54,52 @@ def parse_json_option(value: str | None, *, name: str) -> Any:
         raise typer.BadParameter(f"Invalid JSON for {name}")
 
 
+_SORT_ORDERS = {
+    "asc": "ASC",
+    "ascending": "ASC",
+    "desc": "DESC",
+    "descending": "DESC",
+}
+
+
+def parse_sort_option(value: str | None, *, name: str = "--sort") -> Any:
+    """Parse --sort as FIELD[:asc|desc] shorthand or raw sort JSON.
+
+    Field names are normalized to the API's uppercase enum spelling, so
+    `createdAt`, `created_at`, and `CREATEDAT` are all accepted. Server-side
+    sort models share the {"field": ..., "order": ...} shape.
+    """
+    if value is None:
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    if text.startswith(("{", "[")):
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            raise typer.BadParameter(
+                f'Invalid JSON for {name}. Shorthand also works: FIELD or FIELD:desc '
+                f"(e.g. {name} createdAt:desc)."
+            )
+    field, sep, order = text.partition(":")
+    normalized_field = re.sub(r"[^A-Za-z0-9]", "", field).upper()
+    if not normalized_field:
+        raise typer.BadParameter(
+            f"{name} expects FIELD[:asc|desc] (e.g. createdAt:desc) or sort JSON."
+        )
+    result: dict[str, str] = {"field": normalized_field}
+    if sep:
+        normalized_order = _SORT_ORDERS.get(order.strip().lower())
+        if normalized_order is None:
+            raise typer.BadParameter(
+                f"{name}: order must be asc or desc, got {order.strip()!r} "
+                f"(e.g. {name} {field}:desc)."
+            )
+        result["order"] = normalized_order
+    return result
+
+
 def list_options(
     *,
     asset: bool = False,
@@ -58,8 +109,8 @@ def list_options(
     """Standard options for list commands."""
     opts: dict[str, Any] = {
         "detail": typer.Option("lite", "--detail", help="summary|lite|full|overview (resource-specific)."),
-        "filter": typer.Option(None, "--filter", help="Filter JSON or key=value."),
-        "sort": typer.Option(None, "--sort", help="Sort JSON."),
+        "filter": typer.Option(None, "--filter", help=FILTER_HELP),
+        "sort": typer.Option(None, "--sort", help=SORT_HELP),
         "limit": typer.Option(100, "--limit", help="Max items to return."),
         "all_pages": typer.Option(False, "--all", help="Fetch all pages (ignores --limit)."),
         "page_size": typer.Option(100, "--page-size"),
@@ -99,6 +150,10 @@ def run_list(
     extra_kwargs: dict[str, Any] | None = None,
 ) -> None:
     runtime: RuntimeContext = ctx.obj
+    # Parse --filter/--sort before the dry-run exit so syntax errors surface
+    # even in offline dry-run validation.
+    filt = parse_json_option(filter_json, name="--filter")
+    sort_val = parse_sort_option(sort_json, name="--sort")
     if dry_run:
         runtime.emit_result(
             {
@@ -107,6 +162,8 @@ def run_list(
                 "asset_id": asset_id,
                 "composed_asset_id": composed_asset_id,
                 "group_id": group_id,
+                "filter": filt,
+                "sort": sort_val,
                 "after": after,
                 "limit": None if all_pages else limit,
             }
@@ -126,10 +183,8 @@ def run_list(
         kwargs["group_id"] = group_id
     if asset_group_ids is not None:
         kwargs["asset_group_ids"] = asset_group_ids
-    filt = parse_json_option(filter_json, name="--filter")
     if filt is not None:
         kwargs["filter"] = filt
-    sort_val = parse_json_option(sort_json, name="--sort")
     if sort_val is not None:
         kwargs["sort"] = sort_val
     if extra_kwargs:

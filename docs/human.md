@@ -27,12 +27,32 @@ turbine vuln list ASSET_ID --detail lite --limit 50
 
 You can pass the ID positionally (`turbine asset get ASSET_ID`) or as a flag (`turbine asset get --asset ASSET_ID`).
 
+**"What risk does this asset have?"** — one call summarizes every finding category (vulnerabilities, misconfigurations, secrets, certificates/keys, license issues) with drill-down commands:
+
+```bash
+turbine asset risk ASSET_ID
+turbine asset risk --latest    # most recently created asset
+```
+
 **List with pagination and projection:**
 
 ```bash
 turbine asset list --detail lite --limit 20 --fields id,name,status
 turbine vuln list ASSET_ID --detail lite --limit 50
 turbine secret list ASSET_ID --limit 100
+```
+
+**Sort and filter.** `--sort` takes `FIELD[:asc|desc]` — field names are case-insensitive (`createdAt`, `created_at`, and `CREATEDAT` all work):
+
+```bash
+turbine asset list --limit 10 --sort createdAt:desc --fields id,name,createdAt
+turbine asset list --sort riskScore:desc --limit 10
+```
+
+An invalid field name errors with the full list of valid fields for that resource. `--filter` takes resource-specific filter JSON (see `turbine api <operation> --schema` for the exact shape) or a simple `key=value` shorthand:
+
+```bash
+turbine asset list --filter '{"fields":[{"fieldName":"NAME","value":["router"],"operation":"CONTAINS"}]}'
 ```
 
 **Detail levels** replace the old `-lite`/`-summary`/`-relay` command variants:
@@ -99,6 +119,12 @@ turbine asset list --detail overview --limit 20
 Curated: asset list --detail summary
 ```bash
 turbine asset list --detail summary --limit 20
+```
+
+#### asset risk
+Curated: asset risk
+```bash
+turbine asset risk ASSET_ID
 ```
 
 #### asset status
@@ -362,19 +388,19 @@ turbine vuln overview --limit 20
 #### vuln remediate
 Curated: vuln remediate
 ```bash
-turbine vuln remediate --asset ASSET_ID --input '{"vulnerabilityId":"CVE_ID","status":"NOT_AFFECTED","justification":"..."}' --dry-run
+turbine vuln remediate --asset ASSET_ID --input '{"remediationId":{"vulnerabilityId":"CVE_ID"},"status":"NOT_AFFECTED","justification":"CODE_NOT_PRESENT"}' --dry-run
 ```
 
 #### vuln remediate --all
 Curated: vuln remediate --all
 ```bash
-turbine vuln remediate --asset ASSET_ID --all --input '{"status":"NOT_AFFECTED","justification":"..."}' --dry-run
+turbine vuln remediate --asset ASSET_ID --all --input '{"vulnerabilityFilter":{},"status":"NOT_AFFECTED","justification":"CODE_NOT_PRESENT"}' --dry-run
 ```
 
 #### vuln remediate --bulk
 Curated: vuln remediate --bulk
 ```bash
-turbine vuln remediate --asset ASSET_ID --bulk --input '{"vulnerabilityIds":["CVE_ID"],"status":"NOT_AFFECTED","justification":"..."}' --dry-run
+turbine vuln remediate --asset ASSET_ID --bulk --input '{"remediationIds":[{"vulnerabilityId":"CVE_ID"}],"status":"NOT_AFFECTED","justification":"CODE_NOT_PRESENT"}' --dry-run
 ```
 
 ## API operations
@@ -412,7 +438,7 @@ turbine api asset-groups --input '{"cursor":{"first":10}}'
 #### api asset-upload
 Obtain a secure pre-signed URL to upload files for analysis.
 ```bash
-turbine api asset-upload
+turbine api asset-upload --upload-id UPLOAD_ID
 ```
 
 #### api asset-vulnerability-remediation
@@ -574,7 +600,7 @@ turbine api get-vuln-reachability --input '{"asset_id":"ASSET_ID","advisory_id":
 #### api grouped-dependencies
 View dependencies aggregated by vendor, license, or specific component type.
 ```bash
-turbine api grouped-dependencies --composed-asset-id ASSET_ID
+turbine api grouped-dependencies --composed-asset-id ASSET_ID --grouped-by VENDOR
 ```
 
 #### api hashes
@@ -634,7 +660,7 @@ turbine api list-asset-comparison-reports --input '{"cursor":{"first":10}}'
 #### api list-asset-correlations
 Retrieve cross-asset correlation data linking shared components and vulnerabilities.
 ```bash
-turbine api list-asset-correlations --identifier VALUE --correlation-type VALUE
+turbine api list-asset-correlations --identifier VALUE --correlation-type UNSPECIFIED
 ```
 
 #### api list-asset-crypto-libraries
@@ -736,7 +762,7 @@ turbine api rise-ai-availability --asset-id ASSET_ID
 #### api secret
 Retrieve detailed information about a specific discovered secret.
 ```bash
-turbine api secret --id ASSET_ID
+turbine api secret --id SECRET_ID
 ```
 
 #### api secret-categories-summary
@@ -844,7 +870,7 @@ turbine api create-asset-comparison-report --asset-a VALUE --asset-b VALUE
 #### api create-notification-configuration
 Create a notification configuration defining channel, scopes, and triggers for alerts.
 ```bash
-turbine api create-notification-configuration --input '{"configuration":{"type":"NOTIFICATION_TYPE_UNSPECIFIED","channel":"NOTIFICATION_CHANNEL_UNSPECIFIED","activity_scopes":{}}}'
+turbine api create-notification-configuration --input '{"configuration":{"type":"NOTIFICATION_TYPE_UNSPECIFIED","channel":"NOTIFICATION_CHANNEL_UNSPECIFIED","activity_scopes":[{}]}}'
 ```
 
 #### api delete-asset-comparison-report
@@ -868,7 +894,7 @@ turbine api notify-notification-configuration --id CONFIG_ID
 #### api remediate-certificates
 Update remediation status and notes for certificate issues found in assets.
 ```bash
-turbine api remediate-certificates --asset-id ASSET_ID --status VALUE --dry-run
+turbine api remediate-certificates --input '{"asset_id":"ASSET_ID","certificates":[{"file_path":"./path/to/file","sha_256":"VALUE"}],"status":"UNSPECIFIED"}' --dry-run
 ```
 
 #### api remediate-license-issues
@@ -880,13 +906,13 @@ turbine api remediate-license-issues --input '{"asset_id":"ASSET_ID","issue_ids"
 #### api remediate-private-keys
 Apply remediation status to private key exposures discovered in assets.
 ```bash
-turbine api remediate-private-keys --input '{"asset_id":"ASSET_ID","private_keys":{"file_path":"./path/to/file","match_hash":"VALUE"},"status":"UNSPECIFIED"}' --dry-run
+turbine api remediate-private-keys --input '{"asset_id":"ASSET_ID","private_keys":[{"file_path":"./path/to/file","match_hash":"VALUE"}],"status":"UNSPECIFIED"}' --dry-run
 ```
 
 #### api remediate-public-keys
 Update remediation status for public key issues identified in assets.
 ```bash
-turbine api remediate-public-keys --input '{"asset_id":"ASSET_ID","public_keys":{"file_path":"./path/to/file","match_hash":"VALUE"},"status":"UNSPECIFIED"}' --dry-run
+turbine api remediate-public-keys --input '{"asset_id":"ASSET_ID","public_keys":[{"file_path":"./path/to/file","match_hash":"VALUE"}],"status":"UNSPECIFIED"}' --dry-run
 ```
 
 #### api remediate-secrets
@@ -922,19 +948,19 @@ turbine api submit-rise-ai-analysis --asset-id ASSET_ID
 #### api update-notification-configuration
 Update channel, scopes, triggers, or status for an existing notification configuration.
 ```bash
-turbine api update-notification-configuration --input '{"configuration":{"id":"CONFIG_ID","name":"my-example","disabled":true,"silenced":true,"type":"NOTIFICATION_TYPE_UNSPECIFIED","channel":"NOTIFICATION_CHANNEL_UNSPECIFIED","activity_scopes":{},"channel_configuration":{}}}'
+turbine api update-notification-configuration --input '{"configuration":{"id":"CONFIG_ID","name":"my-example","disabled":true,"silenced":true,"type":"NOTIFICATION_TYPE_UNSPECIFIED","channel":"NOTIFICATION_CHANNEL_UNSPECIFIED","activity_scopes":[{}],"channel_configuration":{}}}'
 ```
 
 #### api update-org-level-settings
 Configure global organization settings such as idle session timeout duration.
 ```bash
-turbine api update-org-level-settings --idle-timout-enabled VALUE
+turbine api update-org-level-settings --idle-timout-enabled
 ```
 
 #### api user-action
 Perform administrative actions like enabling or disabling specific user accounts.
 ```bash
-turbine api user-action --type VALUE --user-id USER_ID
+turbine api user-action --type DISABLE --user-id USER_ID
 ```
 
 #### api user-reset-password

@@ -239,6 +239,7 @@
     "promoted_flags": [
       "asset-id",
       "justification",
+      "responses",
       "description",
       "status"
     ],
@@ -257,6 +258,7 @@
     "promoted_flags": [
       "asset-id",
       "justification",
+      "responses",
       "description",
       "status"
     ],
@@ -275,6 +277,7 @@
     "promoted_flags": [
       "asset-id",
       "justification",
+      "responses",
       "description",
       "status"
     ],
@@ -289,7 +292,7 @@
     "risk": "destructive",
     "return_type": "MutationRemediateCertificates",
     "input_model": "RemediateCertificatesInput",
-    "has_nested_input": false,
+    "has_nested_input": true,
     "promoted_flags": [
       "asset-id",
       "status",

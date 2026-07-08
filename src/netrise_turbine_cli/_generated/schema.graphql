@@ -1,0 +1,8584 @@
+directive @featureFlag(name: String!) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+Org-level: which component identification methods are enabled.
+Each field corresponds to one method (e.g. symbol index, hashes, signatures).
+Used when fetching or filtering org component data by verification method.
+"""
+input IdentifiedComponentsPreviewInput {
+  symbolIndexEnabled: Boolean
+  kernelModuleEnabled: Boolean
+  curatedHashEnabled: Boolean
+  legacyHashEnabled: Boolean
+  packageManifestEnabled: Boolean
+  signatureEnabled: Boolean
+  peMetaDataEnabled: Boolean
+  libraryVersionEnabled: Boolean
+  libraryNameEnabled: Boolean
+  binaryFingerprintEnabled: Boolean
+}
+
+"""
+Count and delta for a single component type in the org's identified components preview.
+"""
+type IdentificationMethodCount {
+  """
+  Number of components of this type matching the org's identification method filter.
+  """
+  beforeCount: Int
+
+  """Change in quantity vs. previous state (e.g. after toggling a method)."""
+  afterCount: Int
+}
+
+"""
+Per-component-type counts for the org's identified components preview.
+Each field gives quantity and difference for that component type under the
+org's identification method filter.
+"""
+type IdentifiedComponentsPreview {
+  application: IdentificationMethodCount!
+  framework: IdentificationMethodCount!
+  library: IdentificationMethodCount!
+  container: IdentificationMethodCount!
+  device: IdentificationMethodCount!
+  kernel: IdentificationMethodCount!
+  package: IdentificationMethodCount!
+  kernelModule: IdentificationMethodCount!
+  os: IdentificationMethodCount!
+}
+
+type Query {
+  """
+  Returns asset analytic for the org, filtered by the org's enabled identification
+  methods. Use when advanced-settings is on; refetch when any org-level
+  verification method checkbox changes.
+  """
+  identifiedComponentsPreview(args: IdentifiedComponentsPreviewInput!): IdentifiedComponentsPreview
+
+  """
+  Lists correlated assets for the provided identifier and correlation type,
+  with cursor pagination.
+  
+  Note: this query is the long-term path for correlation data as NetRise
+  decouples pagination from parent result types. `correlationsCount` remains
+  available on parent types where exposed.
+  """
+  listAssetCorrelations(args: ListAssetCorrelationsInput!): AssetCorrelationConnection!
+
+  """
+  Retrieves a summary of certificate counts categorized by algorithm type (e.g., Classical, PQC) for a given asset.
+  """
+  certificateExternalFilters(args: CertificateExternalFiltersInput!): CertificateExternalFilters
+
+  """
+  Retrieves a paginated list of cryptographic libraries detected within an asset.
+  """
+  listAssetCryptoLibraries(args: ListAssetCryptoLibrariesInput!): AssetCryptoLibrariesConnection
+
+  """Retrieves aggregated license issue counters for a specific asset."""
+  licenseIssuesExternalFilters(args: LicenseIssuesExternalFiltersInput!): LicenseIssuesExternalFilters!
+
+  """Retrieves a paginated list of license issues for a specific asset."""
+  licenseIssues(args: LicenseIssuesInput!): LicenseIssuesConnection
+
+  """Retrieves a single license issue for a specific asset."""
+  licenseIssue(args: LicenseIssueInput!): LicenseIssueNode
+
+  """Retrieves a single license by spdxId"""
+  license(args: LicenseInput!): License
+
+  """Retrieves all valid licenses spdxIds"""
+  licensesSpdxIds: [String]
+
+  """
+  Retrieves a paginated list of notification configurations (webhook, email, in-app).
+  """
+  listNotificationConfigurations(args: ListNotificationConfigurationsInput!): NotificationConfigurationsConnection!
+
+  """Retrieves a paginated list of notification delivery logs."""
+  listNotificationLogs(args: ListNotificationLogsInput!): NotificationLogsConnection!
+
+  """Retrieves the organization's general settings configuration."""
+  orgLevelSettings: OrgLevelSettings
+
+  """
+  Retrieves a summary of private key counts categorized by algorithm type (e.g., Classical, PQC) for a given asset.
+  """
+  privateKeyExternalFilters(args: PrivateKeyExternalFiltersInput!): PrivateKeyExternalFilters
+
+  """
+  Retrieves a summary of public key counts categorized by algorithm type (e.g., Classical, PQC) for a given asset.
+  """
+  publicKeyExternalFilters(args: PublicKeyExternalFiltersInput!): PublicKeyExternalFilters
+
+  """Retrieves a specific asset by its unique identifier."""
+  asset(args: AssetInput): Asset
+
+  """
+  Fetches a paginated list of assets, supporting filters and sorting. Uses Relay-style cursor pagination.
+  """
+  assetsRelay(args: AssetsRelayInput!): AssetsConnection
+
+  """
+  Provides a high-level overview of multiple assets, including risk scores and exploit findings, with support for filtering and pagination.
+  """
+  assetsOverview(args: AssetOverviewInput!): AssetOverviewConnection
+
+  """
+  Checks the processing status of a specific asset, indicating if any analysis jobs are currently running.
+  """
+  assetStatus(args: AssetStatusInput!): AssetStatus!
+
+  """
+  Retrieves a paginated list of all asset groups within the organization.
+  """
+  assetGroups(args: AssetGroupsInput!): AssetGroupsConnection!
+
+  """
+  Fetches a paginated list of all assets that are members of a specific asset group.
+  """
+  assetGroupMembers(args: AssetGroupMembersInput!): AssetsConnection!
+
+  """
+  Returns key analytics for a specific asset group, such as exploit counts and total components.
+  """
+  assetGroupAnalytics(args: AssetGroupAnalyticsInput!): AssetGroupAnalytic
+
+  """
+  Retrieves detailed information for a single vulnerability by its identifier (e.g., CVE-2023-1234).
+  """
+  vulnerability(args: VulnerabilityInput!): Vulnerability
+
+  """
+  Fetches a paginated list of vulnerabilities detected within a specific asset, with options for filtering and sorting.
+  """
+  vulnerabilities(args: PaginatedVulnerabilitiesInput!): VulnerabilityConnection
+
+  """
+  Retrieves a paginated list of vulnerabilities with extended details, such as full impact scores and problem types.
+  """
+  detailedVulnerabilities(args: PaginatedDetailedVulnerabilitiesInput!): DetailedVulnerabilitiesConnection
+
+  """
+  Provides a high-level overview of multiple vulnerabilities across assets, summarizing occurrences, severity, and exploit status.
+  """
+  vulnerabilitiesOverview(args: VulnerabilityOverviewInput!): VulnerabilityOverviewConnection
+
+  """
+  Finds and returns a list of all known vulnerabilities that match a given component identifier (PURL or CPE).
+  """
+  matchVulnerabilities(args: MatchVulnerabilitiesInput!): [Vulnerability]
+
+  """
+  Retrieves a summary of vulnerability counts categorized by external threat intelligence data (e.g., in botnets, in ransomware) for a given asset.
+  """
+  vulnerabilityExternalFilters(args: VulnerabilityExternalFiltersInput!): VulnerabilityExternalFilters
+
+  """
+  Retrieves the current remediation status and details for a specific vulnerability on a given asset.
+  """
+  assetVulnerabilityRemediation(args: AssetVulnerabilityRemediationInput!): AssetVulnerabilityRemediation
+
+  """Retrieves reachability evidence when vulnerability is reachable."""
+  getVulnReachability(args: GetVulnReachabilityInput!): [ReachabilityEvidence!]
+
+  """
+  Fetches a paginated list of software dependencies identified within a specific asset.
+  """
+  dependencies(args: DependencyInput!): DependencyConnection
+
+  """
+  Fetches a list of dependencies, grouped by a specified field such as license, vendor, or type.
+  """
+  groupedDependencies(args: GroupedDependenciesInput!): GroupedDependencyConnection
+
+  """
+  Retrieves the full dependency graph (direct and indirect dependencies) for a specific package identified by its ID (PURL).
+  """
+  packageDependenciesById(args: packageDependenciesByIdInput!): PackageDependencies
+
+  """
+  Lists known exploits, ransomware associations, and threat intelligence related to a specific software dependency.
+  """
+  dependencyKnownExploits(args: DependencyKnownExploitsInput!): DependencyKnownExploitsData
+
+  """Lists all known AI providers for dependency filtering."""
+  listAiProviders(args: ListAiProvidersInput): ListAiProvidersResponse
+
+  """
+  Returns detailed AI model metadata for a dependency component (ComponentsService.GetAiModelData).
+  """
+  getAiModelData(args: GetAiModelDataInput!): GetAiModelDataResponse
+
+  """
+  Retrieves a paginated list of digital certificates (e.g., X.509) found within an asset.
+  """
+  certificates(args: CertificatesInput!): CertificateConnection
+
+  """
+  Retrieves a paginated list of public cryptographic keys found within an asset.
+  """
+  publicKeys(args: PublicKeysInput!): PublicKeysConnection
+
+  """
+  Retrieves a paginated list of private cryptographic keys found within an asset.
+  """
+  privateKeys(args: PrivateKeysInput!): PrivateKeysConnection
+
+  """
+  Retrieves a paginated list of detected credentials (e.g., usernames, password hashes) from an asset.
+  """
+  credentials(args: CredentialsInput!): CredentialsConnection
+
+  """
+  Retrieves a paginated list of cryptographic hashes found within an asset.
+  """
+  hashes(args: HashesInput!): HashConnection
+
+  """
+  Retrieves a paginated list of security misconfigurations detected in an asset.
+  """
+  misconfigurations(args: MisconfigurationsInput!): MisconfigurationsConnection
+
+  """
+  Fetches a paginated list of binary files and their memory protection statuses (e.g., NX, PIE, RELRO).
+  """
+  binaryProtections(args: BinaryProtectionsInput!): BinaryProtectionsConnection
+
+  """
+  Provides a summary count of enabled and disabled memory protections (Canary, NX, PIE, RELRO) for a given component.
+  """
+  binaryProtectionsSummary(args: BinaryProtectionsSummaryInput!): BinaryProtectionsSummary
+
+  """
+  Access a wide range of analytics, including vulnerabilities by age, high-profile exploits, and license counts.
+  """
+  analytics: Analytics
+
+  """
+  Provides high-level count-based metrics for the entire organization, such as total assets and vulnerabilities by status.
+  """
+  metrics: Metrics!
+
+  """Retrieves a paginated list of all users within the organization."""
+  users(args: UsersInput!): UserConnection!
+
+  """
+  Retrieves a list of organizations the currently authenticated user belongs to.
+  """
+  userOrgs: [UserOrganization]
+
+  """
+  Initiates the asset submission process. This query typically provides a pre-signed URL for uploading the asset file.
+  """
+  assetUpload(args: AssetUploadInput): AssetUploadResponse
+
+  """
+  Accesses queries to generate secure, time-limited download URLs for various artifacts like SBOMs, firmware, or individual files.
+  """
+  download: DownloadQueries
+
+  """
+  Performs a raw text or keyword search across specified artifacts and assets to find matching file content.
+  """
+  search(args: SearchInput): SearchResponse
+
+  """
+  Accesses similarity search capabilities to find files with similar content based on keywords or semantic meaning.
+  """
+  sift: Sift
+
+  """
+  Retrieves a log of recent activities and events related to a specific asset.
+  """
+  activity(args: ActivityInput!): ActivityConnection!
+
+  """Retrieves information about the organization level."""
+  orgLevelInformation(args: OrgLevelInformationInput!): OrgLevelInformation!
+
+  """Fetches an asset comparison report by its ID."""
+  getAssetComparisonReport(args: GetAssetComparisonReportInput!): AssetComparisonReport
+
+  """Fetches a paginated list of asset comparison reports."""
+  listAssetComparisonReports(args: ListAssetComparisonReportsInput!): AssetComparisonReportConnection!
+
+  """
+  Retrieves RiseAI analysis data for generating PDF reports.
+  Returns findings count and detailed analysis information.
+  """
+  riseAIAnalysisData(args: RiseAIAnalysisDataInput!): RiseAIAnalysisData!
+
+  """Checks if riseAI is available for the given asset."""
+  riseAIAvailability(args: RiseAIAnalysisDataInput!): RiseAIAvailability!
+
+  """
+  **Deprecated.** Use `riseAIAvailability` instead, which returns a structured `RiseAIAvailability`
+  object with `available`, `status`, and `eligible` fields.
+  Removed without prior notice on 2026-01-22.
+  """
+  caasAvailability(args: RiseAIAnalysisDataInput!): Boolean! @deprecated(reason: "Removed without prior notice. Use riseAIAvailability instead, which returns RiseAIAvailability { available status eligible }.")
+
+  """Retrieves a paginated list of secrets for a specific asset."""
+  secrets(args: SecretsInput!): SecretsConnection
+
+  """Retrieves aggregated secret counters for a specific asset."""
+  secretsSummary(args: SecretsSummaryInput!): SecretsSummary!
+
+  """
+  Retrieves a single secret by ID.
+  The secret value can optionally be revealed.
+  """
+  secret(args: SecretInput!): Secret
+
+  """Retrieves a summary of secret categories for a specific asset."""
+  secretCategoriesSummary(args: SecretCategoriesInput!): [SecretCategoriesSummary]
+
+  """Retrieves secret types and their counts for a specific asset."""
+  secretTypesAndCount(args: SecretTypesAndCountInput!): SecretTypesAndCount
+
+  """Retrieves secret statuses and their counts for a specific asset."""
+  secretStatusCount(args: SecretStatusCountInput!): [SecretStatusCount]
+
+  """
+  Execution-path reachability evidence for a certificate on the asset (by unique hash).
+  """
+  getCertificateReachability(args: GetCertificateReachabilityInput!): [ReachabilityEvidence!]
+
+  """
+  Execution-path reachability evidence for a dependency component on the asset.
+  """
+  getDependencyReachability(args: GetDependencyReachabilityInput!): [ReachabilityEvidence!]
+
+  """
+  Execution-path reachability evidence for an exposed secret on the asset.
+  """
+  getSecretReachability(args: GetSecretReachabilityInput!): [ReachabilityEvidence!]
+}
+
+"""
+Org-level settings for a single identification method: whether it is enabled,
+its confidence level (read-only, from Confidence enum), and component count.
+"""
+type MethodSettings {
+  """Whether this identification method is enabled for the org."""
+  enabled: Boolean
+
+  """Confidence level for this method (read-only)."""
+  confidence: Confidence
+
+  """Number of components identified by this method (org-wide)."""
+  componentCount: Int
+}
+
+input OrgLevelSettingsInput {
+  symbolIndexEnabled: Boolean
+  kernelModuleEnabled: Boolean
+  curatedHashEnabled: Boolean
+  legacyHashEnabled: Boolean
+  packageManifestEnabled: Boolean
+  signatureEnabled: Boolean
+  peMetaDataEnabled: Boolean
+  libraryVersionEnabled: Boolean
+  libraryNameEnabled: Boolean
+  binaryFingerprintEnabled: Boolean
+  idleTimoutEnabled: Boolean!
+  idleTimeoutSeconds: Int
+  riseAiConversationalGptEnabled: Boolean
+  riseAiInsightsReportEnabled: Boolean
+}
+
+type OrgLevelSettings {
+  heuristicEnabled: Boolean @deprecated(reason: "Removed without prior notice. No direct replacement; the heuristic method was folded into other identification methods.")
+  cryptographicHashEnabled: Boolean @deprecated(reason: "Removed without prior notice. Use curatedHashEnabled or legacyHashEnabled (both return MethodSettings) instead.")
+  packageManagerEnabled: Boolean @deprecated(reason: "Removed without prior notice. Use packageManifestEnabled (returns MethodSettings) instead.")
+  functionHashingEnabled: Boolean @deprecated(reason: "Removed without prior notice. No direct replacement; contact support for migration guidance.")
+
+  """
+  **Breaking change (no prior deprecation):** this field changed type from `Boolean` to `MethodSettings`
+  on 2026-01-22. Clients previously reading a boolean must now select `symbolIndexEnabled { enabled }`.
+  """
+  symbolIndexEnabled: MethodSettings
+  kernelModuleEnabled: MethodSettings
+  curatedHashEnabled: MethodSettings
+  legacyHashEnabled: MethodSettings
+  packageManifestEnabled: MethodSettings
+  signatureEnabled: MethodSettings
+  peMetaDataEnabled: MethodSettings
+  libraryVersionEnabled: MethodSettings
+  libraryNameEnabled: MethodSettings
+  binaryFingerprintEnabled: MethodSettings
+  userModifiedEnabled: MethodSettings
+
+  """
+  True while background jobs are updating advanced-settings–derived data.
+  """
+  advancedSettingsJobsProcessing: Boolean
+  idleTimoutEnabled: Boolean
+  idleTimeoutSeconds: Int
+  riseAiConversationalGptEnabled: Boolean
+  riseAiInsightsReportEnabled: Boolean
+}
+
+"""Correlation category used for asset correlation lookup."""
+enum AssetCorrelationType {
+  UNSPECIFIED
+  VULNERABILITY
+  COMPONENT
+  CERTIFICATE
+  PUBLIC_KEY
+  PRIVATE_KEY
+  SECRET
+  MISCONFIG
+  BINARY
+  USER
+  HASH
+}
+
+input ListAssetCorrelationsInput {
+  composedAssetId: ID
+  identifier: String!
+  correlationType: AssetCorrelationType!
+
+  """
+  Cursor-based pagination (Relay-style). Uses the same `Cursor` / page request shape as other data queries.
+  """
+  cursor: Cursor
+}
+
+type AssetCorrelationEdge implements Edge {
+  cursor: String
+
+  """The correlated asset payload for this connection edge."""
+  node: AssetCorrelation!
+}
+
+type AssetCorrelationConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [AssetCorrelationEdge]
+}
+
+input BinaryProtectionsInput {
+  assetId: String!
+  cursor: Cursor!
+  filter: BinaryProtectionsFilter
+  sort: BinaryProtectionsSort
+}
+
+type BinaryProtectionsConnection implements Connection {
+  edges: [BinaryProtectionsEdge]
+  pageInfo: PageInfo!
+}
+
+type BinaryProtectionsEdge implements Edge {
+  cursor: String!
+  node: BinaryProtectionsNode
+}
+
+type BinaryProtectionsNode {
+  name: String
+  relro: RelroType
+  stackCanary: Boolean
+  nx: NxType
+  pie: PieType
+  fortifySource: FortifySrcType
+  bindNow: BindNowType
+  sha256: String
+
+  """Embedded correlation rows for this binary protection record."""
+  correlations: [AssetCorrelation] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+  correlationsCount: Int
+  vfsId: String
+  filePath: String
+}
+
+enum RelroType {
+  UNSPECIFIED
+  FALSE
+  PARTIAL
+  FULL
+}
+
+enum NxType {
+  UNSPECIFIED
+  NA
+  TRUE
+  FALSE
+}
+
+enum PieType {
+  UNSPECIFIED
+  NONE
+  DSO
+  REL
+  PIE
+}
+
+enum FortifySrcType {
+  UNSPECIFIED
+  NONE
+  NA
+  PARTIAL
+  FULL
+}
+
+enum BindNowType {
+  UNSPECIFIED
+  NA
+  TRUE
+  FALSE
+}
+
+input BinaryProtectionsFilter {
+  fields: [BinaryProtectionsFilterField]
+}
+
+input BinaryProtectionsFilterField {
+  fieldName: BinaryProtectionsField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+enum BinaryProtectionsField {
+  NAME
+  RELRO
+  STACKCANARY
+  NX
+  PIE
+  FORTIFYSOURCE
+  BINDNOW
+  SHA256
+  CORRELATIONS
+  VFSID
+  FILEPATH
+}
+
+input BinaryProtectionsSort {
+  field: BinaryProtectionsField
+  order: SortOrder
+}
+
+input CertificatesInput {
+  assetId: String!
+  cursor: Cursor!
+  filter: ListCertificatesFilter
+  sort: ListCertificatesSort
+}
+
+type CertificateConnection implements Connection {
+  edges: [CertificateEdge]
+  pageInfo: PageInfo!
+}
+
+type CertificateEdge implements Edge {
+  cursor: String!
+  node: CertificateNode
+}
+
+type CertificateNode {
+  filePath: String
+  sha256: String
+  sha1: String
+  signature: String
+  effectivePermissions: String
+  subjectDN: String
+  issuerDN: String
+  serial: String
+  startDate: String
+  expireDate: String
+  bitSize: String
+  publicKeyAlgorithm: String
+  signatureAlgorithm: String
+  e: String
+  curve: String
+  selfSigned: Boolean
+  isCa: Boolean
+  expired: Boolean
+  invalidities: [String]!
+  invaliditiesCount: Int!
+  correlations: [AssetCorrelation]! @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+  correlationsCount: Int
+  algorithmType: CryptoAlgorithmType
+  uniqueHash: String
+  fileOffset: BigInt
+  invalid: Boolean
+  passwordProtected: Boolean
+  version: Int
+  privKeyCompromised: Boolean
+  revoked: [String]!
+  issuerCountry: String
+  issuerOrganization: String
+  issuerCommonName: String
+  issuerLocality: String
+  issuerOrgUnit: String
+  issuerPostalCode: String
+  issuerProvince: String
+  issuerStreetAddress: String
+  issuerSerialNumber: String
+  issuerRdn: String
+  subjectCountry: String
+  subjectOrganization: String
+  subjectCommonName: String
+  subjectLocality: String
+  subjectOrgUnit: String
+  subjectPostalCode: String
+  subjectProvince: String
+  subjectStreetAddress: String
+  subjectSerialNumber: String
+  subjectRdn: String
+  altDnsNames: [String]!
+  altEmailAddresses: [String]!
+  altIps: [String]!
+  altUris: [String]!
+  keyUsage: [String]!
+  signatureValid: Boolean
+  issuingCertUrl: String
+  ocspServer: String
+  crlDistributionPoints: [String]!
+  basicConstraintsValid: Boolean
+  encapsulationKey: String
+  decapsulationKey: String
+  publicDsaKey: String
+  privateDsaKey: String
+  seed: String
+  publicKeyMatchHash: String
+
+  """The most recent certificate remediation for a given assetId"""
+  currentRemediation: AssetCertificateRemediation
+  isReachable: Boolean
+}
+
+input ListCertificatesFilter {
+  fields: [ListCertificatesFilterField]
+  algorithmType: StringFilter
+
+  """When true, only certificates marked as reachable (reachability v2)."""
+  isReachable: Boolean
+}
+
+input ListCertificatesFilterField {
+  fieldName: CertificatesField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+enum CertificatesField {
+  ALGORITHMTYPE
+  ALGORITHM
+  UNIQUEHASH
+  CRYPTOTYPE
+  EXPIRED
+  EXPIREDATE
+  SELFSIGNED
+  ISCA
+  INVALID
+  REMEDIATIONSTATUS
+  SHA256
+  FILEPATH
+  INVALIDITIESCOUNT
+  EFFECTIVEPERMISSIONS
+  CORRELATIONS
+}
+
+input ListCertificatesSort {
+  field: CertificatesField
+  order: SortOrder
+}
+
+enum CryptoAlgorithmType {
+  UNSPECIFIED
+  CLASSICAL
+  PQC
+}
+
+enum CryptoRemediationStatus {
+  UNSPECIFIED
+  IN_PROGRESS
+  REMEDIATED
+  RISK_ACCEPTED
+  NOT_AFFECTED
+}
+
+type CertificateIdentifier {
+  filePath: String!
+  sha256: String!
+}
+
+type AssetCertificateRemediation {
+  certificate: CertificateIdentifier!
+  status: CryptoRemediationStatus!
+  description: String
+  author: String
+  createdAt: String
+
+  """
+  Error message when remediation failed (e.g. success: false from backend).
+  """
+  errorMessage: String
+}
+
+input CertificateExternalFiltersInput {
+  assetId: ID!
+}
+
+type CertificateExternalFilters {
+  totalClassical: Int
+  totalPqc: Int
+}
+
+input CertificateIdentifierInput {
+  filePath: String!
+  sha256: String!
+}
+
+input RemediateCertificatesInput {
+  assetId: ID!
+  certificates: [CertificateIdentifierInput]!
+  status: CryptoRemediationStatus!
+  details: String
+}
+
+type Mutation {
+  """
+  Applies a remediation status to a single or multiple certificate/s on a specific asset in a single operation.
+  """
+  remediateCertificates(args: RemediateCertificatesInput!): [AssetCertificateRemediation]!
+
+  """
+  Access mutations related to user management, such as inviting, updating, or deleting users.
+  """
+  user: UserMutations
+
+  """
+  Access mutations related to asset management, such as submitting or updating an asset.
+  """
+  asset: AssetMutations
+
+  """
+  Creates a new asset group. A name is required, with an optional description and an initial list of asset IDs.
+  """
+  createAssetGroup(args: CreateAssetGroupInput!): AssetGroupMutationResponse!
+
+  """
+  Updates an existing asset group. This operation functions as a complete replacement (PUT); you must provide all fields (id, name, and description) for the update to succeed.
+  """
+  updateAssetGroup(args: UpdateAssetGroupInput!): AssetGroupMutationResponse!
+
+  """Deletes an asset group by its unique ID."""
+  deleteAssetGroup(args: DeleteAssetGroupInput!): Boolean!
+
+  """Adds one or more assets to a specified asset group."""
+  addAssetsToAssetGroup(args: AddAssetsToAssetGroupInput!): Boolean!
+
+  """Removes one or more assets from a specified asset group."""
+  removeAssetsFromAssetGroup(args: RemoveAssetsFromAssetGroupInput!): Boolean!
+
+  """
+  Replaces all assets in an asset group with a new list. Providing an empty list will remove all assets from the group.
+  """
+  setAssetsToAssetGroup(args: SetAssetsToAssetGroupInput!): Boolean!
+
+  """Associates one or more asset groups with one or more assets."""
+  addAssetGroupsToAssets(args: AddAssetGroupsToAssetsInput!): Boolean!
+
+  """
+  Replaces all asset groups for a specific asset with a new set of groups. Providing an empty list will remove all group associations from the asset.
+  """
+  setAssetGroupsToAsset(args: SetAssetGroupsToAssetInput!): Boolean!
+
+  """Disassociates all asset groups from one or more specified assets."""
+  removeAllAssetGroupsFromAssets(args: RemoveAllAssetGroupsFromAssetsInput!): Boolean!
+
+  """
+  Applies a remediation status to a single vulnerability on a specific asset.
+  """
+  remediateAssetVulnerability(args: CreateAssetVulnerabilityRemediationInput!): DetectedVulnerability!
+
+  """
+  Applies a remediation status to multiple vulnerabilities on a specific asset in a single operation.
+  """
+  remediateAssetVulnerabilities(args: CreateAssetVulnerabilityRemediationsInput!): [DetectedVulnerability!]!
+
+  """
+  Applies a remediation status to all vulnerabilities on an asset that match a specified filter.
+  """
+  remediateAllAssetVulnerabilities(args: CreateAllAssetVulnerabilitiesRemediationInput!): ErrResponse!
+
+  """Configures the organization's general settings."""
+  updateOrgLevelSettings(args: OrgLevelSettingsInput!): ErrResponse
+
+  """
+  Applies a remediation status to a single or multiple license issue/s on a specific asset in a single operation.
+  """
+  remediateLicenseIssues(args: RemediateLicenseIssuesInput!): ErrResponse
+
+  """Creates a new asset comparison report between two assets."""
+  createAssetComparisonReport(args: CreateAssetComparisonReportInput!): CreateAssetComparisonReportResponse!
+
+  """Deletes an asset comparison report by its ID."""
+  deleteAssetComparisonReport(args: DeleteAssetComparisonReportInput!): Boolean!
+
+  """Creates a new notification configuration."""
+  createNotificationConfiguration(args: CreateNotificationConfigurationInput!): NotificationConfiguration
+
+  """Updates an existing notification configuration."""
+  updateNotificationConfiguration(args: UpdateNotificationConfigurationInput!): NotificationConfiguration
+
+  """Deletes a notification configuration by its ID."""
+  deleteNotificationConfiguration(args: DeleteNotificationConfigurationInput!): Boolean!
+
+  """
+  Triggers delivery for a notification configuration via the notifications service (test / manual send).
+  """
+  notifyNotificationConfiguration(args: NotifyNotificationConfigurationInput!): Boolean!
+
+  """
+  Applies a remediation status to a single or multiple private key/s on a specific asset in a single operation.
+  """
+  remediatePrivateKeys(args: RemediatePrivateKeysInput!): [AssetPrivateKeyRemediation]!
+
+  """
+  Applies a remediation status to a single or multiple public key/s on a specific asset in a single operation.
+  """
+  remediatePublicKeys(args: RemediatePublicKeysInput!): [AssetPublicKeyRemediation]!
+
+  """
+  Submits a RiseAI analysis for the given asset.
+  Returns the current availability status.
+  """
+  submitRiseAIAnalysis(args: RiseAIAnalysisDataInput!): RiseAISubmit!
+
+  """
+  Applies a remediation status to multiple secrets on a specific asset in a single operation.
+  """
+  remediateSecrets(args: CreateSecretsRemediationInput!): [SecretRemediation]
+}
+
+"""
+Correlation payload returned by `listAssetCorrelations` and (during migration)
+embedded `correlations` fields on other types.
+
+Embedded `correlations` fields are deprecated in favor of `listAssetCorrelations`;
+`correlationsCount` remains on parent types where exposed. Fields on this type are
+not deprecated.
+"""
+type AssetCorrelation {
+  assetId: String
+  assetName: String
+  artifact: String
+  location: String
+  updatedAt: String
+  risk: RiskScore
+}
+
+input HashesInput {
+  assetId: ID!
+  filter: HashesFilter
+  sort: HashesSort
+  cursor: Cursor!
+}
+
+type HashConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [HashEdge]
+}
+
+input HashesFilter {
+  fields: [HashesFieldFilter]
+}
+
+input HashesFieldFilter {
+  fieldName: HashesField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+type HashEdge implements Edge {
+  cursor: String
+  node: DetectedHash
+}
+
+input HashesSort {
+  field: HashesField
+  order: SortOrder
+}
+
+enum HashesField {
+  HASH
+  HASHTYPE
+  CRACKED
+  NUMROUNDS
+  FILEPATH
+  HASHCATNUMBER
+  CORRELATIONS
+}
+
+type DetectedHash {
+  hash: String
+  hashType: String
+  type: String
+  cracked: Boolean
+  numRounds: Int
+  filePath: String
+  hashcatNumber: Int
+  correlations: [AssetCorrelation] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+  correlationsCount: Int
+}
+
+type CredentialsConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [CredentialsEdge]
+}
+
+input CredentialsInput {
+  assetId: ID!
+  filter: CredentialsFilter
+  sort: CredentialsSort
+  cursor: Cursor!
+}
+
+input CredentialsFilter {
+  fields: [CredentialsFieldFilter]
+}
+
+input CredentialsFieldFilter {
+  fieldName: CredentialsField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+enum CredentialsField {
+  USERNAME
+  PASSWORDHASH
+  HASHTYPE
+  CRACKED
+  FILEPATH
+  SHELL
+  USERINFO
+  HOMEDIR
+  CORRELATIONS
+}
+
+input CredentialsSort {
+  field: CredentialsField
+  order: SortOrder
+}
+
+type CredentialsEdge implements Edge {
+  cursor: String
+  node: DetectedCredential
+}
+
+"""Credential type for various operating system authentication data"""
+type DetectedCredential {
+  """User Name"""
+  userName: String
+
+  """Hash"""
+  passwordHash: String
+
+  """Hash type"""
+  hashType: String
+
+  """Is credential cracked?"""
+  cracked: Boolean
+
+  """User Id"""
+  userInfo: String
+
+  """Home Dir"""
+  homeDir: String
+
+  """Shell"""
+  shell: String
+
+  """Location of the Credential artifact in the component"""
+  filePath: String
+  correlations: [AssetCorrelation] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+  correlationsCount: Int
+}
+
+input ListAssetCryptoLibrariesInput {
+  assetId: String!
+  cursor: Cursor!
+  filter: String
+  sort: ListCryptoLibrariesSort
+}
+
+input ListCryptoLibrariesSort {
+  field: CryptoLibrariesSortField
+  order: SortOrder
+}
+
+enum CryptoLibrariesSortField {
+  NAME
+  VENDOR
+  VERSION
+  PURL
+  PQC_READY
+  FIPS
+}
+
+type AssetCryptoLibrariesConnection implements Connection {
+  edges: [AssetCryptoLibraryEdge]
+  pageInfo: PageInfo!
+}
+
+type AssetCryptoLibraryEdge implements Edge {
+  cursor: String!
+  node: AssetCryptoLibraryNode
+}
+
+type AssetCryptoLibraryNode {
+  name: String
+  vendor: String
+  version: String
+  purl: String
+  pqcReady: Boolean
+  fips: String
+}
+
+enum DependencyField {
+  """Name of the dependency"""
+  NAME
+  VENDOR
+  TYPE
+  SUBTYPE
+  LICENSE
+  VERSION
+  VERIFICATION
+  CORRELATIONS
+  ONDISK
+  ISPREDICTED
+  SCOPE
+  AIMODEL
+  AIARCHITECTURE
+  ISAI
+  AIPROVIDERS
+  IDENTIFIEDVIA
+  CONFIDENCE
+}
+
+enum DependencySortField {
+  """Name of the dependency field to sort on"""
+  NAME
+  VENDOR
+  TYPE
+  SUBTYPE
+  VERSION
+  VULNERABILITY
+  EXPLOIT
+  VERIFICATION
+  CORRELATIONS
+  SBOM_DEPENDENCIES_COUNT
+  ONDISK
+  ISPREDICTED
+  SCOPE
+  ISAI
+  AIARCHITECTURE
+  IDENTIFIEDVIA
+  CONFIDENCE
+}
+
+"""
+Component is a generic type for all asset.
+
+It captures the "what" and "where" of a component. From these fields,
+we should be able to translate to an other identifier schema either partially or fully.
+"""
+type Component {
+  """Confidence of the component"""
+  confidence: Confidence
+
+  """
+   Human readable string identifier based on values present in this type,
+  could be fuzzy or exact.
+  """
+  id: ID!
+
+  """List of identification ids"""
+  identificationIds: [String]
+
+  """List of cpes"""
+  cpes: [String]
+
+  """List of purls"""
+  purls: [String]
+
+  """Name of the component"""
+  name: String!
+
+  """Component type"""
+  type: ComponentType!
+
+  """Component subtype"""
+  subtype: ComponentSubType
+
+  """Architecture of component"""
+  architecture: Architecture
+
+  """Operating system associated with the component"""
+  operatingSystem: String
+
+  """Kernel version of OS associated with the component"""
+  operatingSystemKernelVersion: String
+
+  """Language of component"""
+  language: [Language!]
+
+  """Package registry (e.g github.com, bitbucket.org)"""
+  namespace: String
+
+  """Package registry path, (e..g /myorg/reponame)"""
+  path: String
+
+  """Entity that sells, manufacturers, or maintains the component"""
+  vendor: String
+
+  """Product name associated with the component"""
+  product: String
+
+  """License(s) of component"""
+  license: [String]
+
+  """Version identified as primary"""
+  version: StringVersion
+
+  """
+  Mappings or derived translations to other identifier model URI/URL either exact or partial matches.
+  """
+  identifiers: [Identifier!]
+
+  """Hash digests for the component."""
+  digest: Digest
+
+  """
+  Package related information available when this component is of `PACKAGE` component type.
+  """
+  package: Package
+
+  """
+  File related information available when this component is of `FILE` component type.
+  """
+  file: File
+
+  """Sbom dependencies count"""
+  sbomDependenciesCount: Int
+
+  """Component related information available."""
+  description: String
+
+  """Information about found on disk ."""
+  onDisk: Boolean
+
+  """Information about predicted component."""
+  isPredicted: Boolean
+  scope: [Scope]
+}
+
+"""Dependency Component"""
+type Dependency {
+  identifiedVia: [IdentifiedViaCategory]
+
+  """Globally unique identifier for the root component and analysis data."""
+  id: ID!
+
+  """Submitted datetime of the root component."""
+  submitDatetime: DateTime
+
+  """Dependent component identified in the root component."""
+  dependency: Component!
+
+  """Analytics summarizing findings about this dependency component."""
+  analytic: AssetAnalytic!
+
+  """Associated files identified with this dependency component."""
+  associatedFiles: [ComponentNeighbor!]
+
+  """
+  Components within the root component that this dependency component depends on.
+  """
+  dependencies: Dependencies!
+
+  """Methods of verification used for identification of this dependency."""
+  verification: Verification!
+
+  """Data related to user modification of this dependency."""
+  latestRemediation: IdentificationRemediation
+  correlations: [AssetCorrelation] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+  correlationsCount: Int
+
+  """The scope of the dependency."""
+  scope: [Scope]
+
+  """Whether the dependency is AI-related."""
+  isAi: Boolean
+
+  """Provider of the AI model (for example: OpenAI, Anthropic, etc)."""
+  aiProviders: [String]
+
+  """Architecture type of the AI model (for example: LLM, Diffusion, etc)."""
+  aiArchitecture: String
+  isReachable: Boolean
+}
+
+type Email {
+  """
+  A title for the email, e.g. "Joe Smith" in "Joe Smith <jsmith@domain.com>"
+  """
+  title: String
+
+  """Email address"""
+  address: String!
+}
+
+enum FilterFieldOperation {
+  CONTAINS
+  NOTCONTAINS
+  STARTSWITH
+  ENDSWITH
+  EQUAL
+  NOTEQUAL
+  GREATERTHAN
+  GREATERTHANOREQUAL
+  LESSTHAN
+  LESSTHANOREQUAL
+  ENUM
+}
+
+input StringFilter {
+  eq: String
+  any: [String!]
+  arr: [String!]
+}
+
+input BooleanFilter {
+  eq: Boolean!
+}
+
+input DateTimeFilter {
+  """Less Than"""
+  lt: DateTime
+
+  """Less Than or Equal To"""
+  lte: DateTime
+
+  """Greater Than"""
+  gt: DateTime
+
+  """Greater Than or Equal To"""
+  gte: DateTime
+}
+
+input LicenseIssuesExternalFiltersInput {
+  assetId: ID!
+}
+
+type LicenseIssuesExternalFilters {
+  resolved: Int!
+  inReview: Int!
+  unreviewed: Int!
+  blocker: Int!
+  major: Int!
+  minor: Int!
+  types: [LicenseIssueTypeCount]
+}
+
+type LicenseIssueTypeCount {
+  type: String
+  count: Int
+}
+
+"""Severity for license issues."""
+enum LicenseIssueSeverity {
+  BLOCKER
+  MAJOR
+  MINOR
+}
+
+"""
+Status for license issues.
+Display values are: Resolved, In Review, Unreviewed.
+"""
+enum LicenseIssueStatus {
+  RESOLVED
+  IN_REVIEW
+  UNREVIEWED
+}
+
+"""Fields available for free-text filtering."""
+enum LicenseIssuesField {
+  ISSUENAME
+  LICENSE
+  COMPONENTNAME
+}
+
+"""Field-level filter for license issues free-text search."""
+input LicenseIssuesFieldFilter {
+  fieldName: LicenseIssuesField!
+  value: String
+  operation: FilterFieldOperation
+}
+
+"""
+Filter for license issues.
+Note: lastModified is a dedicated date filter.
+"""
+input LicenseIssuesFilter {
+  fields: [LicenseIssuesFieldFilter!]
+  severity: StringFilter
+  status: StringFilter
+}
+
+"""Sorting for license issues."""
+enum LicenseIssuesSortField {
+  SEVERITY
+  STATUS
+  LASTMODIFIED
+  ISSUENAME
+  LICENSE
+  COMPONENTNAME
+}
+
+input LicenseIssuesSort {
+  field: LicenseIssuesSortField!
+  order: SortOrder!
+}
+
+"""License issues query input."""
+input LicenseIssuesInput {
+  assetId: ID!
+  filter: LicenseIssuesFilter
+  cursor: Cursor
+  sort: LicenseIssuesSort
+}
+
+input LicenseIssueInput {
+  assetId: ID!
+  issueId: ID!
+}
+
+"""License issue node."""
+type LicenseIssueNode {
+  issueId: ID!
+  issueName: String!
+  issueDescription: String
+  potentialSolution: String
+  severity: LicenseIssueSeverity
+  license: License
+  componentName: String
+  componentVersion: String
+  componentId: String
+  lastModified: DateTime
+  status: LicenseIssueStatus!
+  remediation: LicenseIssueRemediation
+  evidence: LicenseIssueEvidence
+}
+
+type LicenseIssueEvidence {
+  name: String
+  version: String
+  packageType: String
+  vendor: String
+  licenseName: String
+  spdxId: String
+  componentId: String
+
+  """
+  in fact, children is an array of LicenseIssueEvidence, but it is defined as JSON for querying it
+  """
+  children: JSON
+}
+
+"""Edge for license issues connection."""
+type LicenseIssuesEdge implements Edge {
+  cursor: String
+  node: LicenseIssueNode!
+}
+
+"""Connection for license issues."""
+type LicenseIssuesConnection implements Connection {
+  edges: [LicenseIssuesEdge!]!
+  pageInfo: PageInfo!
+}
+
+input RemediateLicenseIssuesInput {
+  assetId: ID!
+  issueIds: [ID!]!
+  status: LicenseIssueStatus!
+  details: String
+}
+
+type License {
+  licenseName: String
+  licenseUrl: String
+  licenseType: String
+  spdxId: String
+  url: String
+  additionalInfoUrlsList: [String]
+  licenseNotes: String
+  additionalCounts: LicenseAdditionalCounts
+}
+
+type LicenseAdditionalCounts {
+  issues: Int
+  associatedComponents: Int
+}
+
+type LicenseIssueRemediation {
+  detail: String
+  user: String
+  createdTime: DateTime
+}
+
+"""
+**Breaking change (no prior deprecation):** `assetId` was added as a required field (`ID!`) on
+2026-01-22. Clients that previously called `license(args: { spdxId: "..." })` must now also
+supply `assetId`. Existing calls without `assetId` will fail validation.
+"""
+input LicenseInput {
+  spdxId: String!
+  assetId: ID!
+}
+
+type Analytics {
+  """Get a summary of all vulnerabilities found for an org."""
+  assetsByRiskCategory(args: AnalyticsOrgInput): AssetsByRiskCategory
+
+  """Get vulnerabilities summary count for a specific asset"""
+  vulnerabilitiesSummaryCount(args: AnalyticsAssetInput!): VulnSummaryCount
+
+  """
+  Get Vulnerabilities highlighted products, a.k.a VULNERABILITY_HIGHLIGHTED_PRODUCTS
+  """
+  vulnerabilityHighlightedProducts(args: AnalyticsAssetHighlightedProductsInput!): [VulnerabilityHighlightedProduct]
+
+  """Get cryptography counts"""
+  cryptographyCount(args: AnalyticsAssetInput!): CryptographyCount
+
+  """Get Known exploits"""
+  knownExploits(args: AnalyticsAssetInput!): KnownExploitsCounts
+
+  """Get misconfigurations by category"""
+  misconfigurationByCategory(args: AnalyticsAssetInput!): [MisconfigurationsByCategory]
+
+  """Get misconfigurations check data"""
+  misconfigurationCheck(args: AnalyticsAssetInput!): MisconfigurationCheck
+
+  """Get licenses"""
+  licenses(args: AnalyticsAssetInput!): [LicenseCount]
+
+  """get vulnerabilities of interest data for chart"""
+  vulnerabilitiesOfInterest(args: AnalyticsOrgInput): [CategoryOfInterest!]!
+
+  """get vulnerabilities by priority score data for chart"""
+  vulnerabilitiesByPriorityScore(args: AnalyticsOrgInput): [VulnerabilityByPriorityScore!]!
+
+  """get vulnerabilities by age data for chart"""
+  vulnerabilitiesByAge(args: AnalyticsOrgInput): [VulnerabilityByAge!]!
+
+  """
+  Get threat actors and known named attacks count CVEs involved and report's count involved
+  """
+  highProfileVulnerabilities(args: AnalyticsOrgInput): HighProfileVulnerabilitiesResponse!
+
+  """CISA Known Exploited Vulnerabilities"""
+  knownExploitedVulnerabilities(args: AnalyticsOrgInput): KnownExploitedVulnerabilitiesResponse!
+
+  """Inner details for High profile vulnerabilities click through"""
+  highProfileExploits(args: HighProfileExploitInput!): HighProfileExploitConnection!
+
+  """Data for the funnel chart"""
+  vulnerabilitiesFunnelChart(args: VulnerabilitiesFunnelChartInput): [VulnerabilitiesFunnelChart]
+}
+
+input NotificationsInput {
+  """
+  Cursor for pagination. Use `first` to limit the number of notifications returned.
+  """
+  cursor: Cursor
+
+  """Optional filter for notifications."""
+  filter: NotificationsFilter
+
+  """Optional sort configuration."""
+  sort: NotificationsSort
+}
+
+type NotificationsConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [NotificationsEdge]
+}
+
+type NotificationsEdge implements Edge {
+  cursor: String
+  node: Notification
+}
+
+type Notification {
+  """Unique identifier for the notification."""
+  id: String!
+
+  """Title of the notification."""
+  title: String!
+
+  """Description of the notification."""
+  description: String!
+
+  """Type of the notification."""
+  type: NotificationType!
+
+  """Parser that generated this notification."""
+  parser: NotificationParser!
+
+  """Unique identifier of the asset related to this notification."""
+  assetId: String!
+
+  """Name of the asset related to this notification."""
+  assetName: String!
+
+  """Entry data specific to the notification type."""
+  entry: NotificationEntry
+
+  """Timestamp when the notification was created."""
+  createdAt: String!
+
+  """User associated with this notification."""
+  user: String
+
+  """Indicates whether the notification is unread."""
+  isUnread: Boolean!
+}
+
+enum NotificationType {
+  VULNERABILITY
+  ASSET
+  IDENTIFICATION
+  MISCONFIGURATION
+  CERTIFICATE
+  VULNERABILITY_REMEDIATED
+  CREDENTIAL_USER
+  ASSET_GROUP_ADDED
+  ASSET_GROUP_REMOVED
+  PRIVATE_KEY
+  CREDENTIAL_HASH
+}
+
+enum NotificationParser {
+  CVE
+  ASSET
+  COMPONENT
+  BINARY_PROTECTIONS
+  CERTIFICATE
+  LINUXAUTH
+  PRIVATEKEY
+  HASH
+}
+
+union NotificationEntry = CveNotificationEntry | ComponentNotificationEntry | BinaryProtectionsNotificationEntry | CertificateNotificationEntry | CredentialUserNotificationEntry | CredentialHashNotificationEntry | PrivateKeyNotificationEntry | EmptyNotificationEntry
+
+type CveNotificationEntry {
+  """CVE identifier (e.g., CVE-2025-46394)."""
+  cveId: String!
+}
+
+type ComponentNotificationEntry {
+  """Name of the component."""
+  componentName: String!
+
+  """Version of the component."""
+  componentVersion: String!
+
+  """Vendor of the component."""
+  vendor: String
+}
+
+type BinaryProtectionsNotificationEntry {
+  """File path of the binary."""
+  filePath: String!
+}
+
+type CertificateNotificationEntry {
+  """File path of the certificate."""
+  filePath: String!
+
+  """SHA-256 thumbprint of the certificate."""
+  sha256Thumbprint: String!
+}
+
+type CredentialUserNotificationEntry {
+  """File path where the credential was found."""
+  filePath: String!
+
+  """Username of the user account."""
+  username: String!
+}
+
+type CredentialHashNotificationEntry {
+  """File path where the hash was found."""
+  filePath: String!
+
+  """Hash value."""
+  hash: String!
+}
+
+type PrivateKeyNotificationEntry {
+  """File path where the private key was found."""
+  filePath: String!
+
+  """Match hash for the private key."""
+  matchHash: String!
+}
+
+type EmptyNotificationEntry {
+  """Empty entry for notifications that don't have specific entry data."""
+  _empty: Boolean
+}
+
+"""Summary information for notifications analytics."""
+type NotificationsSummary {
+  created: NotificationsCreatedSummary!
+  status: NotificationsStatusSummary!
+  types: NotificationsTypeSummary!
+}
+
+type NotificationsCreatedSummary {
+  pastDay: Int!
+  past3Days: Int!
+  pastWeek: Int!
+  pastMonth: Int!
+}
+
+type NotificationsStatusSummary {
+  all: Int!
+  unread: Int!
+}
+
+type NotificationsTypeSummary {
+  asset: Int!
+  sbom: Int!
+  vulnerability: Int!
+  setting: Int!
+}
+
+input NotificationsFilter {
+  fields: [NotificationsFieldFilter]
+
+  """Filter by notification type."""
+  type: NotificationTypeFilter
+
+  """Filter by parser type."""
+  parser: NotificationParserFilter
+
+  """Filter by asset ID."""
+  assetId: StringFilter
+
+  """Filter by creation date."""
+  createdAt: DateTimeFilter
+
+  """Filter by unread status."""
+  isUnread: BooleanFilter
+}
+
+input NotificationsFieldFilter {
+  fieldName: NotificationField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+input NotificationTypeFilter {
+  eq: NotificationType
+  any: [NotificationType!]
+}
+
+input NotificationParserFilter {
+  eq: NotificationParser
+  any: [NotificationParser!]
+}
+
+enum NotificationField {
+  ID
+  TITLE
+  DESCRIPTION
+  TYPE
+  PARSER
+  ASSETID
+  ASSETNAME
+  CREATEDAT
+  ISUNREAD
+}
+
+input NotificationsSort {
+  field: NotificationSortField
+  order: SortOrder
+}
+
+enum NotificationSortField {
+  CREATEDAT
+  TITLE
+  TYPE
+  PARSER
+}
+
+"""Channel through which a notification can be delivered."""
+enum NotificationChannel {
+  UNSPECIFIED
+  IN_APP
+  EMAIL
+  WEBHOOK
+}
+
+"""
+High level area the notification relates to. Mirrors the groupings shown in
+the notifications settings UI.
+"""
+enum NotificationCategory {
+  UNSPECIFIED
+  ASSET_ANALYSIS
+  SECURITY_FINDINGS
+  SETTINGS_AND_ADMINISTRATION
+  VULNERABILITY
+}
+
+"""
+Concrete notification triggers surfaced across email, in-app, and webhook
+channels.
+"""
+enum NotificationSettingsType {
+  UNSPECIFIED
+  ASSET_ANALYSIS_EVENT
+  NEW_SBOM_FINDINGS
+  ASSET_RISK_SCORE_CHANGED
+  CERTIFICATE_VALIDITY_THRESHOLD
+  CERTIFICATES_EXPIRED
+  WEAK_CREDENTIALS_DISCOVERED
+  NEW_MISCONFIGURATION_FAILURE
+  NEW_CVE_DETECTED
+  CVE_SEVERITY_CHANGED
+  ORGANIZATION_SETTING_CHANGED
+  HIGH_VALUE_KEY_EXPOSURE
+  USER_MANAGEMENT_EVENTS
+  CVE_MATURITY_CHANGE
+  CVE_STATUS_CHANGE
+  CISA_KEV_DETECTED
+}
+
+enum NotificationTimeframe {
+  UNSPECIFIED
+  THREE_HOURS
+  DAILY
+  WEEKLY
+}
+
+enum VulnerabilitiesExploitsSelection {
+  UNSPECIFIED
+  WEAPONIZED
+  EXPLOITABLE
+  IN_TRIAGE
+}
+
+enum VulnerabilitiesSeveritiesSelection {
+  UNSPECIFIED
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum UserManagementEventSelection {
+  UNSPECIFIED
+  NEW_ROLE
+  DISABLED
+  DELETED
+}
+
+enum CertificateValidityPeriod {
+  UNSPECIFIED
+  NONE
+  DAYS_10
+  DAYS_30
+  DAYS_60
+  DAYS_90
+  DAYS_1000
+  DAYS_2000
+  DAYS_4000
+  NO_MAX
+}
+
+enum AssetAnalysisEventSelection {
+  UNSPECIFIED
+  COMPLETED
+  FAILED
+  IN_PROGRESS
+}
+
+enum NewSBOMFindingsSelection {
+  UNSPECIFIED
+  COMPONENTS
+  LICENSES
+}
+
+"""Notification settings configuration for the organization."""
+type NotificationSettings {
+  allowUserOverrides: Boolean!
+  emailNotificationsEnabled: Boolean!
+  notificationTimeframe: NotificationTimeframe!
+  preferences: [NotificationPreference!]!
+}
+
+"""
+One cell in the UI matrix: a type-channel pair with an optional threshold.
+"""
+type NotificationPreference {
+  name: String!
+  type: NotificationSettingsType!
+  category: NotificationCategory!
+  console: String!
+  consoleEnabled: Boolean!
+  email: String!
+  emailEnabled: Boolean!
+  webhook: String!
+  webhookEnabled: Boolean!
+  controls: [NotificationControl!]!
+}
+
+union NotificationControl = VulnerabilityControl | CertificateControl | AssetAnalysisControl | SbomFindingsControl | UserManagementControl
+
+type VulnerabilityControl {
+  severities: [VulnerabilitiesSeveritiesSelection!]!
+  exploits: [VulnerabilitiesExploitsSelection!]!
+}
+
+type CertificateControl {
+  minValidity: CertificateValidityPeriod!
+  maxValidity: CertificateValidityPeriod!
+}
+
+type AssetAnalysisControl {
+  events: [AssetAnalysisEventSelection!]!
+}
+
+type SbomFindingsControl {
+  findings: [NewSBOMFindingsSelection!]!
+}
+
+type UserManagementControl {
+  events: [UserManagementEventSelection!]!
+}
+
+input UpdateNotificationSettingsInput {
+  settings: NotificationSettingsInput!
+  updateMask: [String!]
+}
+
+input NotificationSettingsInput {
+  allowUserOverrides: Boolean
+  emailNotificationsEnabled: Boolean
+  notificationTimeframe: NotificationTimeframe
+  preferences: [NotificationPreferenceInput!]
+}
+
+input NotificationPreferenceInput {
+  name: String
+  type: NotificationSettingsType
+  console: String
+  consoleEnabled: Boolean
+  email: String
+  emailEnabled: Boolean
+  webhook: String
+  webhookEnabled: Boolean
+  controls: [NotificationControlInput]
+}
+
+input NotificationControlInput {
+  vulnerability: VulnerabilityControlInput
+  certificateValidity: CertificateControlInput
+  assetAnalysis: AssetAnalysisControlInput
+  sbomFindings: SbomFindingsControlInput
+  userManagement: UserManagementControlInput
+}
+
+input VulnerabilityControlInput {
+  severities: [VulnerabilitiesSeveritiesSelection!]
+  exploits: [VulnerabilitiesExploitsSelection!]
+}
+
+input CertificateControlInput {
+  minValidity: CertificateValidityPeriod
+  maxValidity: CertificateValidityPeriod
+}
+
+input AssetAnalysisControlInput {
+  events: [AssetAnalysisEventSelection!]
+}
+
+input SbomFindingsControlInput {
+  findings: [NewSBOMFindingsSelection!]
+}
+
+input UserManagementControlInput {
+  events: [UserManagementEventSelection!]
+}
+
+input ListNotificationConfigurationsInput {
+  """
+  Cursor for pagination. Use `first` to limit the number of configurations returned.
+  """
+  cursor: Cursor
+  filter: NotificationConfigurationsFilter
+  sort: NotificationConfigurationsSort
+}
+
+"""Input for listing notification logs."""
+input ListNotificationLogsInput {
+  """Cursor for pagination."""
+  cursor: Cursor
+  filter: NotificationLogsFilter
+  sort: NotificationLogsSort
+}
+
+input NotificationConfigurationsFilter {
+  fields: [NotificationConfigurationsFilterField]
+}
+
+input NotificationConfigurationsFilterField {
+  fieldName: NotificationConfigurationsField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+enum NotificationConfigurationsField {
+  ID
+  NAME
+  DISABLED
+  SILENCED
+  TYPE
+  CHANNEL
+  CREATEDAT
+  UPDATEDAT
+  ACTIVITYSCOPES
+}
+
+input NotificationConfigurationsSort {
+  field: NotificationConfigurationsField
+  order: SortOrder
+}
+
+input NotificationLogsFilter {
+  fields: [NotificationLogsFilterField]
+}
+
+input NotificationLogsFilterField {
+  fieldName: NotificationLogsField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+enum NotificationLogsField {
+  ID
+  STATUS
+  TIMESTAMP
+  EVENTCOUNT
+}
+
+input NotificationLogsSort {
+  field: NotificationLogsField
+  order: SortOrder
+}
+
+type NotificationConfigurationsConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [NotificationConfigurationEdge]
+}
+
+type NotificationConfigurationEdge implements Edge {
+  cursor: String
+  node: NotificationConfiguration
+}
+
+type NotificationLogsConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [NotificationLogEdge]
+}
+
+type NotificationLogEdge implements Edge {
+  cursor: String
+  node: NotificationLog
+}
+
+type NotificationConfiguration {
+  id: String
+  disabled: Boolean
+  silenced: Boolean
+  name: String
+  type: NotificationConfigurationType
+  channel: NotificationConfigurationChannel
+
+  """
+  At least one inventory scope must be present for notifications to be delivered.
+  """
+  inventoryScopes: [NotificationInventoryScope!]!
+
+  """
+  At least one activity scope must be present for notifications to be delivered.
+  """
+  activityScopes: [NotificationActivityScope!]!
+  createdAt: String
+  updatedAt: String
+  updatedBy: String
+
+  """
+  Channel-specific settings (webhook, email, or application), consistent with `channel`.
+  """
+  channelConfiguration: NotificationChannelConfiguration
+}
+
+"""Represents a single notification delivery attempt."""
+type NotificationLog {
+  notificationConfigurationId: String
+  status: NotificationLogStatus
+  timestamp: String
+  eventCount: Int
+  messages: [String!]
+}
+
+"""
+Union of channel-specific configs. Exactly one is set based on channel.
+"""
+union NotificationChannelConfiguration = NotificationConfigurationWebhook | NotificationConfigurationEmail | NotificationConfigurationApplication
+
+type NotificationConfigurationWebhook {
+  url: String!
+}
+
+type NotificationConfigurationEmail {
+  address: String!
+}
+
+type NotificationConfigurationApplication {
+  """Application channel has no extra fields."""
+  _empty: Boolean
+}
+
+type NotificationInventoryScope {
+  organization: Boolean
+  groupId: String
+  assetId: String
+}
+
+type NotificationActivityScope {
+  activityType: NotificationActivityKind
+  entityType: ActivityEntityType
+  threshold: NotificationActivityThreshold
+}
+
+type NotificationActivityThreshold {
+  key: NotificationActivityThresholdField!
+  value: String!
+  operator: NotificationActivityThresholdOperator!
+}
+
+enum NotificationConfigurationType {
+  NOTIFICATION_TYPE_UNSPECIFIED
+  NOTIFICATION_TYPE_ORGANIZATION
+  NOTIFICATION_TYPE_USER
+}
+
+enum NotificationConfigurationChannel {
+  NOTIFICATION_CHANNEL_UNSPECIFIED
+  NOTIFICATION_CHANNEL_WEBHOOK
+  NOTIFICATION_CHANNEL_EMAIL
+  NOTIFICATION_CHANNEL_APPLICATION
+}
+
+enum NotificationActivityKind {
+  NOTIFICATION_ACTIVITY_UNSPECIFIED
+  NOTIFICATION_ACTIVITY_ASSET_ANALYSIS_COMPLETED
+  NOTIFICATION_ACTIVITY_ADVISORY_ADDED
+  NOTIFICATION_ACTIVITY_ADVISORY_REMEDIATED
+  NOTIFICATION_ACTIVITY_ADVISORY_REMOVED
+  NOTIFICATION_ACTIVITY_ADVISORY_UPDATED
+  NOTIFICATION_ACTIVITY_ASSET_CREATED
+  NOTIFICATION_ACTIVITY_ASSET_GROUP_ADDED
+  NOTIFICATION_ACTIVITY_ASSET_GROUP_REMOVED
+  NOTIFICATION_ACTIVITY_ASSET_RISK_CHANGED
+  NOTIFICATION_ACTIVITY_ASSET_UPDATED
+  NOTIFICATION_ACTIVITY_GROUP_CREATED
+  NOTIFICATION_ACTIVITY_GROUP_DELETED
+  NOTIFICATION_ACTIVITY_GROUP_MEMBERSHIP_CHANGED
+  NOTIFICATION_ACTIVITY_GROUP_UPDATED
+  NOTIFICATION_ACTIVITY_IDENTIFICATION_ADDED
+  NOTIFICATION_ACTIVITY_IDENTIFICATION_REMOVED
+  NOTIFICATION_ACTIVITY_LICENSE_ISSUE_REMEDIATED
+  NOTIFICATION_ACTIVITY_MISCONFIG_CHANGED
+  NOTIFICATION_ACTIVITY_ORG_SETTINGS_UPDATED
+  NOTIFICATION_ACTIVITY_SECRET_REMEDIATED
+  NOTIFICATION_ACTIVITY_RBAC_ACR_CREATED
+  NOTIFICATION_ACTIVITY_RBAC_ACR_DELETED
+  NOTIFICATION_ACTIVITY_RBAC_ACR_REPLACED
+  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_CREATED
+  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_UPDATED
+  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_DELETED
+  NOTIFICATION_ACTIVITY_RBAC_MEMBER_ADDED
+  NOTIFICATION_ACTIVITY_RBAC_MEMBER_REMOVED
+  NOTIFICATION_ACTIVITY_RBAC_ROLE_CREATED
+  NOTIFICATION_ACTIVITY_RBAC_ROLE_UPDATED
+  NOTIFICATION_ACTIVITY_RBAC_ROLE_DELETED
+  NOTIFICATION_ACTIVITY_RBAC_USER_INVITED
+  NOTIFICATION_ACTIVITY_RBAC_USER_REMOVED
+  NOTIFICATION_ACTIVITY_RBAC_USER_STATUS_CHANGED
+}
+
+enum NotificationActivityThresholdField {
+  FIELD_UNSPECIFIED
+  FIELD_VULNERABILITY_SEVERITY
+  FIELD_VULNERABILITY_CVSS_SCORE
+  FIELD_VULNERABILITY_EPSS_SCORE
+  FIELD_VULNERABILITY_CISA_KEV_PREVALENCE
+  FIELD_VULNERABILITY_EXPLOIT_MATURITY
+}
+
+enum NotificationActivityThresholdOperator {
+  OPERATOR_UNSPECIFIED
+  OPERATOR_LESS
+  OPERATOR_LESS_OR_EQUAL
+  OPERATOR_EQUAL
+  OPERATOR_GREATER
+  OPERATOR_GREATER_OR_EQUAL
+  OPERATOR_CHANGE_PERCENTAGE
+  OPERATOR_CHANGE_MAGNITUDE
+}
+
+enum NotificationLogStatus {
+  NOTIFICATION_LOG_STATUS_UNSPECIFIED
+  NOTIFICATION_LOG_STATUS_SUCCESS
+  NOTIFICATION_LOG_STATUS_FAILURE
+  NOTIFICATION_LOG_STATUS_WARNING
+  NOTIFICATION_LOG_STATUS_SILENCED
+  NOTIFICATION_LOG_STATUS_EMPTY
+}
+
+"""Payload for creating a notification configuration."""
+input CreateNotificationConfigurationInput {
+  configuration: NotificationConfigurationCreateInput!
+}
+
+"""
+Payload for updating a notification configuration. Id is required; other fields are optional (only sent fields are updated).
+"""
+input UpdateNotificationConfigurationInput {
+  configuration: NotificationConfigurationUpdateInput!
+}
+
+"""Payload for deleting a notification configuration."""
+input DeleteNotificationConfigurationInput {
+  id: String!
+}
+
+"""Input for triggering notification delivery for a configuration."""
+input NotifyNotificationConfigurationInput {
+  id: String!
+}
+
+"""
+Input for creating a notification configuration. Id is not set by the client.
+"""
+input NotificationConfigurationCreateInput {
+  name: String
+  disabled: Boolean
+  silenced: Boolean
+  type: NotificationConfigurationType!
+  channel: NotificationConfigurationChannel!
+  inventoryScopes: [NotificationInventoryScopeInput!]
+  activityScopes: [NotificationActivityScopeInput!]!
+
+  """
+  Channel-specific settings. Exactly one of webhook, email, or application must be set, consistent with `channel`.
+  """
+  channelConfiguration: NotificationChannelConfigurationInput
+}
+
+"""
+Input for updating a notification configuration. Id is required; other fields are optional.
+"""
+input NotificationConfigurationUpdateInput {
+  id: String!
+  name: String!
+  disabled: Boolean!
+  silenced: Boolean!
+  type: NotificationConfigurationType!
+  channel: NotificationConfigurationChannel!
+  inventoryScopes: [NotificationInventoryScopeInput!]
+  activityScopes: [NotificationActivityScopeInput!]!
+
+  """
+  Channel-specific settings. Exactly one of webhook, email, or application must be set, consistent with `channel`.
+  """
+  channelConfiguration: NotificationChannelConfigurationInput!
+}
+
+"""Exactly one of webhook, email, or application must be set."""
+input NotificationChannelConfigurationInput {
+  webhook: NotificationConfigurationWebhookInput
+  email: NotificationConfigurationEmailInput
+  application: NotificationConfigurationApplicationInput
+}
+
+input NotificationInventoryScopeInput {
+  organization: Boolean
+  groupId: String
+  assetId: String
+}
+
+input NotificationActivityScopeInput {
+  activityType: NotificationActivityKind
+  entityType: ActivityEntityType
+  threshold: NotificationActivityThresholdInput
+}
+
+input NotificationActivityThresholdInput {
+  key: NotificationActivityThresholdField!
+  value: String!
+  operator: NotificationActivityThresholdOperator!
+}
+
+input NotificationConfigurationWebhookInput {
+  url: String!
+}
+
+input NotificationConfigurationEmailInput {
+  address: String!
+}
+
+"""
+Application channel has no extra fields, but we keep an explicit input for future extensibility.
+"""
+input NotificationConfigurationApplicationInput {
+  _empty: Boolean
+}
+
+"""Sort order for connections"""
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input OrgLevelInformationInput {
+  assetGroupIds: [ID!]
+}
+
+type OrgLevelInformation {
+  lastUpdatedAt: DateTime
+}
+
+type PageInfoV3 {
+  nextPageToken: String
+  prevPageToken: String
+  totalSize: Int
+}
+
+type PageInfo {
+  """
+  Total number of rows for this connection. If `totalCount`, `hasNextPage`, and `hasPreviousPage`
+  are all omitted from the selection, the server skips the extra count work and can respond faster.
+  If any one of these three fields is selected, behavior remains the usual behavior.
+  """
+  totalCount: Int
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+interface PaginatedResponse {
+  pageInfo: PageInfoV3
+}
+
+input CursorV3 {
+  first: Int!
+  after: String
+  before: String
+}
+
+input Cursor {
+  first: Int
+  after: String
+  last: Int
+  before: String
+}
+
+interface Connection {
+  edges: [Edge]
+  pageInfo: PageInfo!
+}
+
+interface Edge {
+  cursor: String
+}
+
+input PrivateKeysInput {
+  assetId: String!
+  cursor: Cursor!
+  filter: ListPrivateKeysFilter
+  sort: ListPrivateKeysSort
+}
+
+type PrivateKeysConnection implements Connection {
+  edges: [PrivateKeyEdge]
+  pageInfo: PageInfo!
+}
+
+type PrivateKeyEdge implements Edge {
+  cursor: String!
+  node: PrivateKeyNode
+}
+
+type PrivateKeyNode {
+  filePath: String
+  algorithm: String
+  bitSize: String
+  e: String
+  id: String
+  foundPublicKey: Boolean
+  matchHash: String
+  effectivePermissions: String
+  correlations: [AssetCorrelation]! @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+  correlationsCount: Int
+  foundPublicKeyCount: Int
+  uniqueHash: String
+  fileOffset: BigInt
+  algorithmType: CryptoAlgorithmType
+  encapsulationKey: String
+  decapsulationKey: String
+  publicDsaKey: String
+  privateDsaKey: String
+  seed: String
+
+  """The most recent private key remediation for a given assetId"""
+  currentRemediation: AssetPrivateKeyRemediation
+}
+
+input ListPrivateKeysFilter {
+  fields: [ListPrivateKeysFilterField]
+  algorithmType: StringFilter
+}
+
+input ListPrivateKeysFilterField {
+  fieldName: PrivateKeysField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+enum PrivateKeysField {
+  UNIQUEHASH
+  FILEOFFSET
+  ALGORITHMTYPE
+  REMEDIATIONSTATUS
+  FILEPATH
+  ALGORITHM
+  FOUNDPUBLICKEY
+  MATCHHASH
+  EFFECTIVEPERMISSIONS
+  CORRELATIONS
+}
+
+input ListPrivateKeysSort {
+  field: PrivateKeysField
+  order: SortOrder
+}
+
+type AssetPrivateKeyRemediation {
+  privateKey: PrivateKeyIdentifier!
+  status: CryptoRemediationStatus!
+  description: String
+  author: String
+  createdAt: String
+
+  """
+  Error message when remediation failed (e.g. success: false from backend).
+  """
+  errorMessage: String
+}
+
+input PrivateKeyExternalFiltersInput {
+  assetId: ID!
+}
+
+type PrivateKeyIdentifier {
+  filePath: String!
+  matchHash: String!
+}
+
+input PrivateKeyIdentifierInput {
+  filePath: String!
+  matchHash: String!
+}
+
+type PrivateKeyExternalFilters {
+  totalClassical: Int
+  totalPqc: Int
+}
+
+input RemediatePrivateKeysInput {
+  assetId: ID!
+  privateKeys: [PrivateKeyIdentifierInput!]!
+  status: CryptoRemediationStatus!
+  details: String
+}
+
+input PublicKeysInput {
+  assetId: String!
+  cursor: Cursor!
+  filter: ListPublicKeysFilter
+  sort: ListPublicKeysSort
+}
+
+type PublicKeysConnection implements Connection {
+  edges: [PublicKeyEdge]
+  pageInfo: PageInfo!
+}
+
+type PublicKeyEdge implements Edge {
+  cursor: String!
+  node: PublicKeyNode
+}
+
+type PublicKeyNode {
+  filePath: String
+  algorithm: String
+  bitSize: String
+  e: String
+  foundPrivateKey: Boolean
+  matchHash: String
+  effectivePermissions: String
+  correlations: [AssetCorrelation]! @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+  correlationsCount: Int
+  foundPrivateKeyCount: Int
+  uniqueHash: String
+  fileOffset: BigInt
+  algorithmType: CryptoAlgorithmType
+
+  """The most recent public key remediation for a given assetId"""
+  currentRemediation: AssetPublicKeyRemediation
+}
+
+input ListPublicKeysFilter {
+  fields: [ListPublicKeysFilterField]
+  algorithmType: StringFilter
+}
+
+input ListPublicKeysFilterField {
+  fieldName: PublicKeysField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+enum PublicKeysField {
+  UNIQUEHASH
+  FILEOFFSET
+  ALGORITHMTYPE
+  REMEDIATIONSTATUS
+  FILEPATH
+  ALGORITHM
+  FOUNDPRIVATEKEY
+  MATCHHASH
+  EFFECTIVEPERMISSIONS
+  CORRELATIONS
+}
+
+input ListPublicKeysSort {
+  field: PublicKeysField
+  order: SortOrder
+}
+
+type AssetPublicKeyRemediation {
+  assetId: ID
+  publicKeyId: ID!
+  status: CryptoRemediationStatus!
+  description: String
+  author: String!
+  createdAt: String!
+  publicKey: PublicKeyIdentifier!
+}
+
+input PublicKeyExternalFiltersInput {
+  assetId: ID!
+}
+
+type PublicKeyExternalFilters {
+  totalClassical: Int
+  totalPqc: Int
+}
+
+type PublicKeyIdentifier {
+  filePath: String!
+  matchHash: String!
+}
+
+input PublicKeyIdentifierInput {
+  filePath: String!
+  matchHash: String!
+}
+
+input RemediatePublicKeysInput {
+  assetId: ID!
+  publicKeys: [PublicKeyIdentifierInput!]!
+  status: CryptoRemediationStatus!
+  details: String
+}
+
+type AssetComparisonReport {
+  reportId: ID!
+  comparisonReportSummary: AssetComparisonReportSummary
+  vulnerabilityDiff: AssetVulnerabilityDiff
+  componentDiff: AssetComponentDiff
+  assetAInfo: AssetComparisonReportAssetInfo
+  assetBInfo: AssetComparisonReportAssetInfo
+  createdBy: String
+  createdAt: String
+  completedAt: String
+  riverJobId: String
+}
+
+type AssetComparisonReportAssetInfo {
+  assetId: String
+  analysisId: String
+  name: String
+  assetType: String
+  version: String
+  uploadedBy: String
+  assetCreatedAt: String
+  analysisCreatedAt: String
+  vendor: String
+  product: String
+  orgId: String
+}
+
+type AssetComparisonReportSummary {
+  assetAVulnerabilitySummary: AssetVulnerabilitySummary
+  assetBVulnerabilitySummary: AssetVulnerabilitySummary
+  assetAMisconfigurationsSummary: AssetMisconfigurationsSummary
+  assetBMisconfigurationsSummary: AssetMisconfigurationsSummary
+  assetACryptographySummary: AssetCryptographySummary
+  assetBCryptographySummary: AssetCryptographySummary
+  assetALicenseIssueSummary: AssetLicenseIssueSummary
+  assetBLicenseIssueSummary: AssetLicenseIssueSummary
+  assetACredentialsSummary: AssetCredentialsSummary
+  assetBCredentialsSummary: AssetCredentialsSummary
+  inventoryComparisonSummary: AssetInventoryComparisonSummary
+}
+
+type AssetVulnerabilitySummary {
+  totalCritical: Int
+  totalHigh: Int
+  totalMedium: Int
+  totalLow: Int
+  totalReachable: Int
+  totalKev: Int
+  totalWeaponized: Int
+  totalPoc: Int
+}
+
+type AssetMisconfigurationsSummary {
+  totalFailed: Int
+  totalPassed: Int
+}
+
+type AssetCryptographySummary {
+  totalFailed: Int
+  totalPassed: Int
+  totalNotApplicable: Int
+}
+
+type AssetLicenseIssueSummary {
+  totalCopyleft: Int
+  totalRelationalConflict: Int
+  totalLicenses: Int
+}
+
+type AssetCredentialsSummary {
+  totalCrackedAccounts: Int
+  totalCrackedHashes: Int
+  totalExposedSecrets: Int
+}
+
+type AssetInventoryComparisonSummary {
+  componentsInANotInB: Int
+  componentsInBNotInA: Int
+  totalOverlappingComponents: Int
+  licensesInANotInB: Int
+  licensesInBNotInA: Int
+  totalOverlappingLicenses: Int
+  binariesInANotInB: Int
+  binariesInBNotInA: Int
+  totalOverlappingBinaries: Int
+  filesInANotInB: Int
+  filesInBNotInA: Int
+  totalOverlappingFiles: Int
+}
+
+type AssetVulnerabilityRemediationDiff {
+  vulnerabilitiesResolvedInA: [VulnerabilityDiffEntry]
+  vulnerabilitiesResolvedInAPresentInB: [VulnerabilityDiffEntry]
+  vulnerabilitiesResolvedInB: [VulnerabilityDiffEntry]
+  vulnerabilitiesResolvedInBPresentInA: [VulnerabilityDiffEntry]
+  totalTrackedA: Int
+  totalResolvedA: Int
+  totalTrackedB: Int
+  totalResolvedB: Int
+  totalResolvedInAPresentInB: Int
+  totalResolvedInBPresentInA: Int
+  vulnerabilitiesMarkedResolvedInA: [VulnerabilityDiffEntry]
+  vulnerabilitiesMarkedResolvedInB: [VulnerabilityDiffEntry]
+  totalResolvedANotPresentInB: Int
+  totalResolvedBNotPresentInA: Int
+}
+
+type AssetVulnerabilityDiff {
+  inBNotInA: [VulnerabilityDiffEntry]
+  inANotInB: [VulnerabilityDiffEntry]
+  overlap: [VulnerabilityDiffEntry]
+  inBNotInAReachableCount: Int
+  inBNotInAKevCount: Int
+  inANotInBReachableCount: Int
+  inANotInBKevCount: Int
+  overlapReachableCount: Int
+  overlapKevCount: Int
+  assetVulnerabilityRemediationDiff: AssetVulnerabilityRemediationDiff
+}
+
+type VulnerabilityDiffEntry {
+  cveId: String
+  componentName: String
+  componentVersion: String
+  severity: String
+  cvssScore: Float
+  exploitMaturity: String
+  reachable: Boolean
+  cisaKev: Boolean
+}
+
+type AssetComponentDiff {
+  inBNotInA: [ComponentDiffEntry]
+  inANotInB: [ComponentDiffEntry]
+  overlap: [ComponentDiffEntry]
+  inBNotInAReachableCount: Int
+  inANotInBReachableCount: Int
+  overlapReachableCount: Int
+  assetATypeCounts: AssetCountByTypeAnalytic
+  assetBTypeCounts: AssetCountByTypeAnalytic
+}
+
+type ComponentDiffEntry {
+  name: String
+  version: String
+  type: String
+  packageType: String
+  licenses: [String]
+  lowSevs: Int
+  mediumSevs: Int
+  highSevs: Int
+  criticalSevs: Int
+  totalVulns: Int
+  reachable: Boolean
+}
+
+type ComponentTypeCount {
+  type: String
+  count: Int
+}
+
+type AssetComparisonReportConnection implements Connection {
+  totalCount: Int!
+  edges: [AssetComparisonReportEdge!]!
+  pageInfo: PageInfo!
+}
+
+type AssetComparisonReportEdge implements Edge {
+  node: AssetComparisonReport!
+  cursor: String!
+}
+
+input CreateAssetComparisonReportInput {
+  assetA: ID!
+  assetB: ID!
+}
+
+input GetAssetComparisonReportInput {
+  reportId: ID!
+}
+
+input ListAssetComparisonReportsInput {
+  cursor: Cursor
+  filter: ListAssetComparisonReportsFilterInput
+  sort: ListAssetComparisonReportsSortInput
+}
+
+input ListAssetComparisonReportsFilterInput {
+  search: String
+  type: String
+}
+
+input ListAssetComparisonReportsSortInput {
+  field: String
+  order: SortOrder
+}
+
+input DeleteAssetComparisonReportInput {
+  reportId: ID!
+}
+
+type CreateAssetComparisonReportResponse {
+  jobId: ID!
+}
+
+type RiseAISubmit {
+  status: RiseAIStatus
+}
+
+type RiseAIAvailability {
+  available: Boolean
+  status: RiseAIStatus
+  eligible: Boolean
+}
+
+enum RiseAIStatus {
+  UNSPECIFIED
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  NOT_ELIGIBLE
+  ELIGIBLE
+}
+
+input RiseAIAnalysisDataInput {
+  assetId: String!
+}
+
+type RiseAIAnalysisData {
+  findingsCount: Int!
+  synopsis: String
+  fileInfo: FileInfo
+  totals: AnalysisTotals
+  components: [RiseAIComponent!]
+  entropyData: [EntropyData!]
+  architectures: [Architecture!]
+  securityInsights: SecurityInsights
+}
+
+type FileInfo {
+  filename: String!
+  size: Int
+  sizeFormatted: String
+  magic: String
+  sha256: String
+}
+
+type AnalysisTotals {
+  components: Int
+  entropySections: Int
+  architecturesCount: Int
+  highEntropyPct: Float
+  mediumEntropyPct: Float
+  lowEntropyPct: Float
+}
+
+type RiseAIComponent {
+  name: String!
+  versions: [String!]!
+  cpes: [String!]!
+}
+
+type EntropyData {
+  level: String!
+  percentage: Float!
+  description: String!
+}
+
+"""CPU Architecture"""
+enum Architecture {
+  ALL
+  ARM
+  ARM64
+  AMD64
+  CPM_HS
+  FREESCALE_P1021MDS
+  X86
+  X86_64
+  MIPS
+  MIPS64
+  MIPS_MIPS32
+  MIPS_24KC
+  MIPSEL_24KC
+  MODEL_MTK_MT762X
+  MTCAP
+  POWERPC
+  POWERPC64
+  PPCE500V2
+  R9000
+  SPARC
+  SPARC64
+  I386_PENTIUM4
+  IPQ806X
+  AR71XX
+  ARMHF
+  ARM_CORTEX_A7_NEON_VFPV4
+  ARM_CORTEX_A9_VFPV3_D16
+  ARM_CORTEX_A15_NEON_VFPV4
+  ARM_MPCORE
+  ARM_XSCALE
+  ARM926EJSTE
+  XR700
+  ARMV7AHF_NEON
+  AARCH64_ARMV8_A
+  AM335X_RMD
+  RAMIPS_24KEC
+  RISCV64
+
+  """
+  PowerPC, Performance Optimization With Enhanced RISC – Performance Computing
+  """
+  PPC
+
+  """An architecture not fully defined in the platform at this time."""
+  OTHER
+
+  """Unknown architecture that requires identification."""
+  UNKNOWN
+}
+
+type SecurityInsights {
+  oldComponents: [OldComponent!]!
+}
+
+type OldComponent {
+  name: String!
+  version: String!
+  concern: String!
+}
+
+"""SBOM identifies a SBOM specification, such as CycloneDX."""
+enum SBOM {
+  """CycloneDX format, v1.4"""
+  CYCLONEDX_V1_4
+
+  """SPDX v2.2"""
+  SPDX_V2_2
+
+  """SPDX v2.3"""
+  SPDX_V2_3
+}
+
+enum SbomVersion {
+  """Default version"""
+  VERSION_UNSPECIFIED
+
+  """CycloneDX format, v1.1 a v1.6"""
+  VERSION_V1_1
+  VERSION_V1_2
+  VERSION_V1_3
+  VERSION_V1_4
+  VERSION_V1_5
+  VERSION_V1_6
+
+  """SPDX v2.1 a v2.3"""
+  VERSION_V2_1
+  VERSION_V2_2
+  VERSION_V2_3
+}
+
+"""
+Export format identifies a file (or export) format for a specific SBOM spec.
+"""
+enum SbomFormat {
+  FORMAT_UNSPECIFIED
+  FORMAT_JSON
+  FORMAT_TAG
+  FORMAT_XML
+  FORMAT_YAML
+}
+
+scalar BigInt
+
+scalar JSON
+
+scalar DateTime
+
+type SearchFindingConnection implements Connection {
+  edges: [SearchFindingEdge!]!
+  pageInfo: PageInfo!
+}
+
+type SearchFindingEdge implements Edge {
+  cursor: String
+  node: SearchFindingNode!
+}
+
+type SearchFindingNode {
+  assetId: String!
+  assetRevision: Int!
+  assetName: String!
+  filePath: String!
+  parser: String!
+  sha256: String
+  sha1: String
+  updatedAt: String
+  data: JSON!
+  assetGroupIds: [ID!]
+}
+
+input SearchInput {
+  query: String!
+  artifacts: [ArtifactName!]!
+  assetIds: [String!]
+  groupIds: [String!]
+  cursor: Cursor
+}
+
+type SearchResponse {
+  query: String!
+  findings: SearchFindingConnection!
+}
+
+enum ArtifactName {
+  PUBLICKEY
+  ALL_COMPONENT_CVES
+  CERTIFICATE
+  SHEBANG
+  BINARY_PROTECTIONS
+  SONAME
+  PRIVATEKEY
+  KMODINFO
+  LINUXAUTH
+  PASSWD
+  GROUP
+  HASH
+  SHADOW
+  INITTAB
+  SYSCTLCONF
+  PUBLICPRIVATEKEYPAIRS
+  ENCRYPTEDPEM
+  SYSCONFIG
+  SSHPUBKEY
+  SERVICES
+  KERNELCONFIG
+  AUTHORIZEDKEY
+  MALWARE
+  BUSYBOXCONF
+  CVE
+  COMPONENT
+  ANY
+}
+
+"""Fields that can be used in free-text field filters for secrets."""
+enum SecretsField {
+  ID
+  NAME
+  TYPE
+  FILE_PATH
+  DESCRIPTION
+  SEVERITY
+  CORRELATIONS
+  STATUS
+}
+
+enum SecretCategory {
+  UNSPECIFIED
+  CLOUD_AND_INFRASTRUCTURE
+  DATABASE_AND_DATA_STORES
+  MESSAGING_AND_COMMUNICATION
+  PAYMENTS_AND_FINANCIAL
+  DEVOPS_AND_SCM
+  BUSINESS_AND_PRODUCTIVITY
+  IDENTITY_AND_AUTHENTICATION
+  GENERAL_SAAS_AND_API_TOKENS
+  GENERIC_AND_LOW_CONFIDENCE
+  PRIVATE_KEYS_AND_CRYPTOGRAPHY
+  UNKNOWN
+}
+
+enum SecretSeverity {
+  UNSPECIFIED
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum SecretRemediationStatus {
+  UNSPECIFIED
+  UNREVIEWED
+  EXPOSED
+  REMOVED
+  FALSE_POSITIVE
+  COMPENSATING_CONTROLS
+}
+
+enum SecretType {
+  UNSPECIFIED
+  UNKNOWN
+  AIRBRAKE
+  AIRTABLE
+  ANYPOINT
+  ASANA
+  AUTH0
+  AWS
+  AZURE
+  BOX
+  CLOUDFLARE
+  DIGITALOCEAN
+  DISCORD
+  GOOGLE_CLOUD_PLATFORM
+  GENERIC
+  GITHUB
+  GRAFANA
+  HUBSPOT
+  LARK_SUITE
+  LINE
+  MAILJET
+  PAYMO
+  PLANETSCALE
+  PORTAINER
+  RESTPACK
+  SALESFORCE
+  SATISMETER
+  SENDBIRD
+  SENTRY
+  SHUTTERSTOCK
+  SLACK
+  SOURCEGRAPH
+  SQUARE
+  STORYBLOK
+  STRIPE
+  TWILIO
+  TWITCH
+  TWITTER
+  WEBEX
+}
+
+enum SecretSubType {
+  UNSPECIFIED
+  UNKNOWN
+  ABSTRACT
+  ABUSEIPDB
+  ABYSSALE
+  ACCUWEATHER
+  ADAFRUIT
+  ADAFRUIT_IO
+  ADOBE
+  ADOBE_IO
+  ADZUNA
+  AERISWEATHER
+  AEROWORKFLOW
+  AFTERSHIP
+  AGORA
+  AHA
+  AIRBRAKE
+  AIRBRAKE_PROJECT_KEY
+  AIRBRAKE_USER_KEY
+  AIRSHIP
+  AIRTABLE
+  AIRTABLE_API_KEY
+  AIRTABLE_METADATA_API_KEY
+  AIRTABLE_OAUTH
+  AIRTABLE_PERSONAL_ACCESS_TOKEN
+  AIRVISUAL
+  AIVEN
+  AKAMAI_TOKEN
+  ALCHEMY
+  ALCONOST
+  ALEGRA
+  ALETHEIA
+  ALETHEIA_API
+  ALGOLIA
+  ALGOLIA_ADMIN_KEY
+  ALIBABA
+  ALIENVAULT
+  ALLSPORTS
+  ALPHAVANTAGE
+  AMADEUS
+  AMAZON_MWS
+  AMBEE
+  AMPLITUDE
+  AMPLITUDE_API_KEY
+  AMQP
+  ANTHROPIC
+  ANYPOINT
+  ANYPOINT_OAUTH2
+  APACTA
+  API2CART
+  API2_CONVERT
+  APIDECK
+  APIFLASH
+  APIFONICA
+  APIFY
+  APILAYER
+  APIMATIC
+  APIMETRICS
+  APITEMPLATE
+  API_SCIENCE
+  APOLLO
+  APPCUES
+  APPFOLLOW
+  APPOINTEDD
+  APPOPTICS
+  APPSYNERGY
+  APPTIVO
+  ARTIFACTORY_ACCESS_TOKEN
+  ARTSY
+  ASANA
+  ASANA_OAUTH
+  ASANA_PERSONAL_ACCESS_TOKEN
+  ASSEMBLYAI
+  ATERA
+  ATLASSIAN
+  AUDD
+  AUTH0
+  AUTH0OAUTH
+  AUTH0_MANAGEMENT_API_TOKEN
+  AUTHORIZE
+  AUTODESK
+  AUTOKLOSE
+  AUTOPILOT
+  AVALARA
+  AVAZA
+  AVAZA_PERSONAL_ACCESS_TOKEN
+  AVIATIONSTACK
+  AWS
+  AWS_SESSION_KEY
+  AXONAUT
+  AYLIEN
+  AYRSHARE
+  AZURE
+  AZURE_ACTIVE_DIRECTORY_APPLICATION_SECRET
+  AZURE_API_MANAGEMENT_REPOSITORY_KEY
+  AZURE_API_MANAGEMENT_SUBSCRIPTION_KEY
+  AZURE_APP_CONFIG_CONNECTION_STRING
+  AZURE_BATCH
+  AZURE_CACHE_FOR_REDIS_ACCESS_KEY
+  AZURE_CONTAINER_REGISTRY
+  AZURE_COSMOS_DB_KEY_IDENTIFIABLE
+  AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN
+  AZURE_DIRECT_MANAGEMENT_KEY
+  AZURE_FUNCTION_KEY
+  AZURE_MANAGEMENT_CERTIFICATE
+  AZURE_ML_WEB_SERVICE_CLASSIC_IDENTIFIABLE_KEY
+  AZURE_OPEN_AI
+  AZURE_REFRESH_TOKEN
+  AZURE_SAS_TOKEN
+  AZURE_SEARCH_ADMIN_KEY
+  AZURE_SEARCH_QUERY_KEY
+  AZURE_SQL
+  AZURE_STORAGE
+  BANNERBEAR
+  BAREMETRICS
+  BASE_API_IO
+  BASIS_THEORY
+  BEAMER
+  BEEBOLE
+  BESNAPPY
+  BESTTIME
+  BETTER_STACK
+  BILLOMAT
+  BING
+  BING_SUBSCRIPTION_KEY
+  BITBAR
+  BITBUCKET
+  BITBUCKET_APP_PASSWORD
+  BITCOIN_AVERAGE
+  BITFINEX
+  BITLY
+  BITMEX
+  BIT_GO
+  BIT_LY_ACCESS_TOKEN
+  BLABLABUS
+  BLAZEMETER
+  BLITAPP
+  BLOCKNATIVE
+  BLOGGER
+  BOMBBOMB
+  BOOST_NOTE
+  BORED
+  BORGBASE
+  BOX
+  BOX_OAUTH
+  BRAINTREE
+  BRAINTREE_PAYMENTS
+  BRANDFETCH
+  BREVO
+  BRIGHTLOCAL
+  BROWSERSTACK
+  BROWSHOT
+  BSCSCAN
+  BUBBLE
+  BUDDYNS
+  BUDIBASE
+  BUGHERD
+  BUGSNAG
+  BUILDKITE
+  BUILTWITH
+  BULBUL
+  BULKSMS
+  BUTTERCMS
+  CAFLOU
+  CALENDARIFIC
+  CALENDLY
+  CALENDLY_API_KEY
+  CALORIE_NINJA
+  CAMPAYN
+  CANNY
+  CANNY_IO
+  CAPSULE_CRM
+  CAPTAIN_DATA
+  CARBON_INTERFACE
+  CASHBOARD
+  CASPIO
+  CENSYS
+  CENTRAL_STATION_CRM
+  CEX_IO
+  CHARTMOGUL
+  CHATBOT
+  CHATFULE
+  CHEC
+  CHECKLY
+  CHECKLY_HQ
+  CHECKMARKET
+  CHECKOUT
+  CHECKVIST
+  CHEC_IO
+  CICERO
+  CIRCLE
+  CIRCLE_CI
+  CLARIFAI
+  CLEARBIT
+  CLICKHELP
+  CLICKSEND
+  CLICKUP
+  CLICKUP_PERSONAL_TOKEN
+  CLICK_SENDSMS
+  CLIENGO
+  CLIENTARY
+  CLINCHPAD
+  CLOCKIFY
+  CLOCKWORK_SMS
+  CLOSE
+  CLOUDANT
+  CLOUDCONVERT
+  CLOUDFLARE
+  CLOUDFLARE_API_TOKEN
+  CLOUDFLARE_CA_KEY
+  CLOUDFLARE_GLOBAL_API_KEY
+  CLOUDIMAGE
+  CLOUDMERSIVE
+  CLOUDPLAN
+  CLOUDSIGHT_KEY
+  CLOUDSMITH
+  CLOUDWAYS
+  CLOUD_ELEMENTS
+  CLOVERLY
+  CLOZE
+  CLUSTDOC
+  CODA
+  CODACY
+  CODEMAGIC
+  CODEQUIRY
+  CODE_CLIMATE
+  COINAPI
+  COINBASE
+  COINBASE_WAA_S
+  COINLAYER
+  COINLIB
+  COIN_GECKO
+  COIN_MARKET_CAP
+  COLLECT2
+  COLUMN
+  COMETCHAT
+  COMMERCE_JS
+  COMMODITIES
+  COMPANYHUB
+  CONFLUENT
+  CONTENTFUL
+  CONTENTFUL_DELIVERY
+  CONTENTFUL_PERSONAL_ACCESS_TOKEN
+  CONTENT_STACK
+  CONVERSION_TOOLS
+  CONVERT
+  CONVERTAPI
+  CONVERTKIT
+  CONVIER
+  COPPER
+  COPYSCAPE
+  COUCHBASE
+  COUNTRY_LAYER
+  COURIER
+  COVERALLS
+  CRAFTMYPDF
+  CREATESEND
+  CRICKET
+  CROSS_BROWSER_TESTING
+  CROWDIN
+  CRYPTOCOMPARE
+  CURRENCY_CLOUD
+  CURRENCY_FREAKS
+  CURRENCY_LAYER
+  CURRENCY_SCOOP
+  CURRENTS_API
+  CUSTOMER_GURU
+  CUSTOMER_IO
+  CUSTOM_REGEX
+  D7_NETWORK
+  DAILY_CO
+  DANDELION
+  DAREBOOST
+  DATABOX
+  DATABRICKS
+  DATABRICKS_TOKEN
+  DATADOG
+  DATADOG_TOKEN
+  DATA_FIRE
+  DATA_GOV
+  DEBOUNCE
+  DEEPAI
+  DEEPGRAM
+  DEEPSEEK
+  DELIGHTED
+  DEMIO
+  DENO_DEPLOY
+  DEPUTY
+  DETECTIFY
+  DETECT_LANGUAGE
+  DFUSE
+  DIFFBOT
+  DIGGERNAUT
+  DIGITAL_OCEAN_SPACES
+  DIGITAL_OCEAN_TOKEN
+  DIGITAL_OCEAN_V2
+  DISCORD_BOT_TOKEN
+  DISCORD_WEBHOOK
+  DISQUS
+  DISTRIBUSION
+  DITTO
+  DNSCHECK
+  DOCKER
+  DOCKERHUB
+  DOCPARSER
+  DOCUMO
+  DOCUSIGN
+  DOPPLER
+  DOTDIGITAL
+  DOVICO
+  DRONA_HQ
+  DRONE_CI
+  DROPBOX
+  DUDA
+  DUFFEL
+  DUPLY
+  DWOLLA
+  DYNADOT
+  DYNALIST
+  DYNATRACE
+  DYSPATCH
+  EAGLE_EYE_NETWORKS
+  EASY_INSIGHT
+  ECO_STRUXURE_IT
+  EDAMAM
+  EDEN_AI
+  EDUSIGN
+  EIGHTX_EIGHT
+  ELASTIC_EMAIL
+  ELASTIC_PATH
+  ELEVEN_LABS
+  EMAILOCTOPUS
+  ENABLEX
+  ENDOR_LABS
+  ENIGMA
+  ENVOY_API_KEY
+  EQUINIX_OAUTH
+  ERASER
+  ETHERSCAN
+  ETHPLORER
+  ETSY_API_KEY
+  EVENTBRITE
+  EVERHOUR
+  EVERSIGN
+  EXCHANGE_RATES_API
+  EXCHANGE_RATE_API
+  EXPORT_SDK
+  EXTRACTOR_API
+  FACEBOOK_OAUTH
+  FACE_PLUS_PLUS
+  FAKE_JSON
+  FASTLY_PERSONAL_TOKEN
+  FASTSPRING
+  FAST_FOREX
+  FEEDIER
+  FEEDLY
+  FETCHRSS
+  FIBERY
+  FIGMA_PERSONAL_ACCESS_TOKEN
+  FILESTACK
+  FILE_IO
+  FINAGE
+  FINANCIAL_MODELING_PREP
+  FINDL
+  FINNHUB
+  FIREBASE
+  FIREBASE_CLOUD_MESSAGING
+  FIXER_IO
+  FLAGSMITH_ENVIRONMENT_KEY
+  FLAGSMITH_TOKEN
+  FLAT_IO
+  FLEETBASE
+  FLEXPORT
+  FLICKR
+  FLIGHTSTATS
+  FLIGHT_API
+  FLIGHT_LABS
+  FLOAT
+  FLOWDASH
+  FLOWDOCK
+  FLOW_FLU
+  FLUTTERWAVE
+  FLY_IO
+  FMFW
+  FORMCRAFT
+  FORMSITE
+  FORMSTACK
+  FORM_BUCKET
+  FORM_IO
+  FOUNTAIN
+  FOUR_SQUARE
+  FRAME_IO
+  FRESHBOOKS
+  FRESHDESK
+  FRESHWORKS
+  FRONT
+  FTP
+  FULCRUM
+  FULLSTORY
+  FULL_CONTACT
+  FUSEBILL
+  FX_MARKET
+  GCP
+  GCP_APPLICATION_DEFAULT_CREDENTIALS
+  GECKOBOARD
+  GEMINI
+  GENERIC
+  GENGO
+  GEOAPIFY
+  GEOCODE
+  GEOCODIFY
+  GEOCODIO
+  GEO_IPIFI
+  GETGIST
+  GETRESPONSE
+  GET_EMAIL
+  GET_EMAILS
+  GET_GEO_API
+  GET_SANDBOX
+  GITHUB
+  GITLAB
+  GITTER
+  GIT_HUB_APP
+  GIT_HUB_OAUTH2
+  GIT_HUB_OLD
+  GLASSNODE
+  GLITTERLY_API
+  GOOD_DAY
+  GOOGLE_API_KEY
+  GOOGLE_OAUTH2
+  GOSHIPPO
+  GOSQUARED
+  GO_CANVAS
+  GO_CARDLESS
+  GO_DADDY
+  GRAFANA
+  GRAFANA_SERVICE_ACCOUNT
+  GRAPHHOPPER
+  GRAPH_CMS
+  GROOVEHQ
+  GROQ
+  GT_METRIX
+  GUARDIANAPI
+  GUMROAD
+  GURU
+  GYAZO
+  HAPPI
+  HAPPYSCRIBE
+  HARNESS
+  HARVEST
+  HASHI_CORP_VAULT_AUTH
+  HASURA
+  HEATMAPAPI
+  HELLO_SIGN
+  HELPSCOUT
+  HELP_CRUNCH
+  HERE_API
+  HEROKU
+  HIVE
+  HIVEAGE
+  HOLIDAY_API
+  HOLISTIC
+  HONEY
+  HONEYCOMB
+  HOST
+  HOTWIRE
+  HTML2_PDF
+  HUB_SPOT
+  HUB_SPOT_API_KEY
+  HUB_SPOT_OAUTH
+  HUGGING_FACE
+  HUMANITY
+  HUNTER
+  HYBISCUS
+  HYPERTRACK
+  HYPE_AUDITOR
+  IBM_CLOUD_USER_KEY
+  ICON_FINDER
+  IEXAPIS
+  IEXCLOUD
+  IMAGE4
+  IMAGEKIT
+  IMAGE_TO_TEXT
+  IMAGGA
+  IMGIX
+  IMGUR
+  IMPALA
+  INFOBIP
+  INFURA
+  INSIGHTLY
+  INSTABOT
+  INSTAMOJO
+  INTEGROMAT
+  INTERCOM
+  INTERSELLER
+  INTRA42
+  INTRINIO
+  INVOICE_OCEAN
+  IP2LOCATION
+  IPIFY
+  IPINFO
+  IPINFODB
+  IPQUALITY
+  IPSTACK
+  IP_API
+  IP_GEOLOCATION
+  JDBC
+  JFROG
+  JIRA
+  JIRA_TOKEN
+  JOTFORM
+  JSO_NBIN
+  JUMPCLOUD
+  JUMPSELLER
+  JUPITERONE
+  JURO
+  JWT
+  KAIROS
+  KAKAO_TALK
+  KALEYRA
+  KALTURA_APP_TOKEN
+  KALTURA_SESSION
+  KANBAN
+  KANBAN_TOOL
+  KARMA_CRM
+  KEEN_IO
+  KEYGEN
+  KICKBOX
+  KITE_CONNECT
+  KLAVIYO
+  KLIPFOLIO
+  KNAPSACK_PRO
+  KONTENT
+  KRAKEN
+  KUBE_CONFIG
+  KUCOIN
+  KYLAS
+  LANGFUSE
+  LANGSMITH
+  LANGUAGE_LAYER
+  LARK_SUITE
+  LARK_SUITE_API_KEY
+  LASTFM
+  LAUNCHDARKLY
+  LDAP
+  LEADFEEDER
+  LEMLIST
+  LEMON_SQUEEZY
+  LENDFLOW
+  LESS_ANNOYING_CRM
+  LEXIGRAM
+  LINE
+  LINEAR
+  LINEAR_API
+  LINE_MESSAGING
+  LINE_NOTIFY
+  LINKED_IN
+  LINK_PREVIEW
+  LINODE
+  LIVEAGENT
+  LIVESTORM
+  LOADMILL
+  LOB
+  LOCATIONIQ
+  LOGGLY
+  LOGINRADIUS
+  LOGZ_IO
+  LOKALISE
+  LOKALISE_TOKEN
+  LOYVERSE
+  LUNCH_MONEY
+  LUNO
+  M3O
+  MACADDRESS
+  MADKUDU
+  MAGICBELL
+  MAGNETIC
+  MAILBOXLAYER
+  MAILCHIMP
+  MAILERLITE
+  MAILGUN
+  MAILJET
+  MAILMODO
+  MAILSAC
+  MAIL_JET_BASIC_AUTH
+  MAIL_JET_SMS
+  MANDRILL
+  MANIFEST
+  MAPBOX
+  MAPQUEST
+  MARKETSTACK
+  MATTERMOST
+  MATTERMOST_PERSONAL_TOKEN
+  MAVENLINK
+  MAXMIND
+  MAX_MIND_LICENSE
+  MEANINGCLOUD
+  MEDIASTACK
+  MEISTERTASK
+  MERAKI
+  MESIBO
+  MESSAGEBIRD
+  MESSARI
+  METAAPI
+  METABASE
+  METRILO
+  MICROSOFT_TEAMS
+  MICROSOFT_TEAMS_WEBHOOK
+  MIDISE
+  MINDMEISTER
+  MIRO
+  MITE
+  MIXCLOUD
+  MIXMAX
+  MIXPANEL
+  MOCKAROO
+  MODERATION
+  MOJOHELPDESK
+  MOLLIE_ACCESS_TOKEN
+  MOLLIE_API_KEY
+  MONDAY
+  MONDAY_COM
+  MONGODB
+  MONKEYLEARN
+  MOONCLERK
+  MOOSEND
+  MORALIS
+  MRTICKTOCK
+  MUX
+  MYEXPERIMENT
+  MYFRESHWORKS
+  MYINTERVALS
+  NASDAQ_DATA_LINK
+  NETHUNT
+  NETLIFY
+  NETSUITE
+  NET_CORE
+  NEUTRINO_API
+  NEWSCATCHER
+  NEWS_API
+  NEW_RELIC
+  NEW_RELIC_PERSONAL_API_KEY
+  NEXMO_API_KEY
+  NFTPORT
+  NGC
+  NGROK
+  NICEREPLY
+  NICE_HASH
+  NIGHTFALL
+  NIMBLE
+  NITRO
+  NORDIGEN
+  NOTICEABLE
+  NOTION
+  NOZBE_TEAMS
+  NPM
+  NPM_TOKEN
+  NUBELA
+  NUGET
+  NUMVERIFY
+  NUTRITIONIX
+  NU_GET_API_KEY
+  NVAPI
+  NVIDIA
+  NYLAS
+  NYTIMES
+  OANDA
+  OCR_SPACE
+  OKTA
+  OMNISEND
+  ONBUKA
+  ONEDESK
+  ONELOGIN
+  ONEPAGECRM
+  ONESIGNAL
+  ONFLEET
+  ON_WATER_IO
+  OOPSPAM
+  OPENAI
+  OPENCAGE_DATA
+  OPENDATASOFT
+  OPENGRAPHR
+  OPENUV
+  OPENVPN
+  OPENWEATHERMAP
+  OPEN_WEATHER
+  OPSGENIE
+  OPTIDASH
+  OPTIMIZELY
+  OVERLOOP
+  OWLBOT
+  PACKAGECLOUD
+  PADDLE
+  PAGARME
+  PAGE2_IMAGES
+  PAGERDUTY
+  PAGER_DUTY_API_KEY
+  PANDADOC
+  PANDASCORE
+  PAPERFORM
+  PAPYRS
+  PARALLELDOTS
+  PARSEHUB
+  PARSERS
+  PARSEUR
+  PARTNERSTACK
+  PASSBASE
+  PASTEBIN
+  PAYDIRT
+  PAYDIRTAPP
+  PAYMO
+  PAYMOAPP
+  PAYMONGO
+  PAYPAL
+  PAYPAL_OAUTH
+  PAYSTACK
+  PDFSHIFT
+  PDF_LAYER
+  PD_FMY_URL
+  PENDO_INTEGRATION_KEY
+  PEOPLE_DATA_LABS
+  PEPIPOST
+  PERCY
+  PHOTOROOM
+  PHRASE
+  PHRASE_ACCESS_TOKEN
+  PINATA
+  PIPEDREAM
+  PIPEDRIVE
+  PIVOTAL_TRACKER
+  PIXABAY
+  PLAID
+  PLAID_KEY
+  PLAID_TOKEN
+  PLANETSCALE
+  PLANET_SCALE_DB
+  PLANVIEW_LEANKIT
+  PLANYO
+  PLIVO
+  PODIO
+  POLLS_API
+  POLONIEX
+  POLYGON
+  PORTAINER
+  PORTAINER_TOKEN
+  POSITIONSTACK
+  POSTAGEAPP
+  POSTBACKS
+  POSTGRES
+  POSTGRESQL
+  POSTHOG
+  POSTHOG_APP
+  POSTMAN
+  POSTMARK
+  POWRBOT
+  PREFECT
+  PRINTFECTION
+  PRIVACY
+  PRIVATE_KEY
+  PROCESSST
+  PRODPAD
+  PROSPECT_CRM
+  PROSPECT_IO
+  PROTOCOLS_IO
+  PROXYCRAWL
+  PUBNUB
+  PUB_NUB_PUBLISH_KEY
+  PUB_NUB_SUBSCRIPTION_KEY
+  PULUMI
+  PURESTAKE
+  PUSHBULLET
+  PUSHER
+  PUSHER_CHANNEL_KEY
+  PUSH_BULLET_API_KEY
+  PYPI
+  QASE
+  QUALAROO
+  QUBOLE
+  QUICKBASE
+  QUICK_METRICS
+  RABBITMQ
+  RAILWAY
+  RAILWAY_APP
+  RAMP
+  RAPIDAPI
+  RAVEN
+  RAWG
+  RAZORPAY
+  REACHMAIL
+  README
+  REALLY_SIMPLE_SYSTEMS
+  REBRANDLY
+  RECHARGE
+  RECHARGE_PAYMENTS
+  REDBOOTH
+  REDIS
+  REFINER
+  RENTMAN
+  REPAIRSHOPR
+  REPLICATE
+  REPLY_IO
+  REQUEST_FINANCE
+  RESTPACK
+  RESTPACK_HTML_TO_PDF_API
+  RESTPACK_SCREENSHOT_API
+  REV
+  REVAMP_CRM
+  RE_CAPTCHA
+  RINGCENTRAL
+  RIOTGAMES
+  RITEKIT
+  ROARING
+  ROBINHOOD
+  ROBINHOOD_CRYPTO
+  ROCKETREACH
+  ROCKSET
+  ROOTLY
+  ROSETTE
+  ROUTE4ME
+  ROWND
+  RUBYGEMS
+  RUNRUNIT
+  SALAD
+  SALAD_CLOUD_API_KEY
+  SALESBLINK
+  SALESCOOKIE
+  SALESFLARE
+  SALESFORCE
+  SALESFORCE_OAUTH2
+  SALESFORCE_REFRESH_TOKEN
+  SALESMATE
+  SAMSARA
+  SANITY
+  SATISMETER
+  SATISMETER_PROJECTKEY
+  SATISMETER_WRITEKEY
+  SAUCE_LABS
+  SCALEWAY
+  SCALEWAY_KEY
+  SCALR
+  SCRAPEOWL
+  SCRAPERAPI
+  SCRAPERBOX
+  SCRAPER_SITE
+  SCRAPESTACK
+  SCRAPFLY
+  SCRAPINGANT
+  SCRAPING_BEE
+  SCRAPING_DOG
+  SCREENSHOT_API
+  SCREENSHOT_LAYER
+  SCRUTINIZER_CI
+  SECURITYTRAILS
+  SEGMENT
+  SEGMENT_API_KEY
+  SELECTPDF
+  SELLFY
+  SEMAPHORE
+  SENDBIRD
+  SENDBIRD_ORGANIZATION_API
+  SENDGRID
+  SENDIN_BLUE_V2
+  SENDOSO
+  SENTIMENT
+  SENTRY
+  SENTRY_ORG_TOKEN
+  SENTRY_TOKEN
+  SERPHOUSE
+  SERPSTACK
+  SHEETY
+  SHERPADESK
+  SHIPDAY
+  SHODAN
+  SHODAN_KEY
+  SHOPEE_OPEN_PLATFORM
+  SHOPIFY
+  SHORTCUT
+  SHOTSTACK
+  SHUTTERSTOCK
+  SHUTTERSTOCK_OAUTH
+  SIGNABLE
+  SIGNALWIRE
+  SIGNATURIT
+  SIGNUPGENIUS
+  SIGOPT
+  SIMFIN
+  SIMPLESAT
+  SIMPLYBOOK
+  SIMPLY_NOTED
+  SIMVOLY
+  SINCH
+  SINCH_MESSAGE
+  SIRV
+  SITELEAF
+  SKRAPP_IO
+  SKY_BIOMETRY
+  SLACK
+  SLACK_WEBHOOK
+  SMARTSHEET
+  SMARTSHEETS
+  SMARTYSTREETS
+  SMOOCH
+  SMS_API
+  SNIPCART
+  SNOWFLAKE
+  SNYK
+  SNYK_KEY
+  SONARCLOUD
+  SOURCEGRAPH
+  SOURCEGRAPH_CODY
+  SPARKPOST
+  SPEECHTEXT_AI
+  SPLUNK
+  SPLUNK_OBERSERVABILITY_TOKEN
+  SPOONACULAR
+  SPORTSMONK
+  SPORT_RADAR
+  SPOTIFY
+  SPOTIFY_KEY
+  SQL_SERVER
+  SQUARE
+  SQUARESPACE
+  SQUAREUP
+  SQUARE_APP
+  SSL_MATE
+  STATUSCAKE
+  STATUSPAGE
+  STATUSPAL
+  STITCH
+  STITCHDATA
+  STOCK_DATA
+  STORECOVE
+  STORMBOARD
+  STORMGLASS
+  STORYBLOK
+  STORYBLOK_ACCESS_TOKEN
+  STORYBLOK_PERSONAL_ACCESS_TOKEN
+  STORYCHIEF
+  STRAVA
+  STREAK
+  STREAM_CHAT_MESSAGING
+  STRIPE
+  STRIPE_PAYMENT_INTENT
+  STRIPO
+  STYTCH
+  SUGESTER
+  SUMO_LOGIC
+  SUMO_LOGIC_KEY
+  SUPABASE
+  SUPABASE_TOKEN
+  SUPER_NOTES_API
+  SUPPORTBEE
+  SURGE
+  SURVEYSPARROW
+  SURVEY_ANYPLACE
+  SURVEY_BOT
+  SURVICATE
+  SWELL
+  SWIFTYPE
+  TABLEAU
+  TABLEAU_PERSONAL_ACCESS_TOKEN
+  TAILSCALE
+  TALLYFY
+  TATUM
+  TATUM_IO
+  TAXJAR
+  TEAMGATE
+  TEAMUP
+  TEAMWORK_CRM
+  TEAMWORK_DESK
+  TEAMWORK_SPACES
+  TEAM_VIEWER
+  TECHNICAL_ANALYSIS_API
+  TEFTER
+  TELEGRAM
+  TELEGRAM_BOT_TOKEN
+  TELESIGN
+  TELETYPE
+  TELNYX
+  TENCENT_CLOUD_KEY
+  TERRAFORM_CLOUD
+  TERRAFORM_CLOUD_PERSONAL_TOKEN
+  TEST
+  TESTINGBOT
+  TEXT2_DATA
+  TEXTMAGIC
+  THE_ODDS_API
+  THINKIFIC
+  THOUSANDEYES
+  TICKETMASTER
+  TICKET_TAILOR
+  TIINGO
+  TIMECAMP
+  TIMEKIT
+  TIMEZONE_API
+  TINES
+  TINES_WEBHOOK
+  TLY
+  TMETRIC
+  TODOIST
+  TOGGL_TRACK
+  TOKEET
+  TOMORROW_IO
+  TOMTOM
+  TRADIER
+  TRANSFERWISE
+  TRAVELPAYOUTS
+  TRAVIS_CI
+  TRELLO
+  TRELLO_API_KEY
+  TRIMBLE
+  TRU
+  TRUFFLEHOG_ENTERPRISE
+  TWELVE_DATA
+  TWILIO
+  TWILIO_API_KEY
+  TWIST
+  TWITCH
+  TWITCH_ACCESS_TOKEN
+  TWITTER
+  TWITTER_API_SECRET
+  TWITTER_CONSUMERKEY
+  TYNTEC
+  TYPEFORM
+  TYPETALK
+  UBER_SERVER_TOKEN
+  UBIDOTS
+  UCLASSIFY
+  UNIFYID
+  UNPLUGG
+  UNSPLASH
+  UPC_DATABASE
+  UPLEAD
+  UPLOADCARE
+  UPROC
+  UPTIMEROBOT
+  UPWAVE
+  URI
+  URLSCAN
+  USER
+  USERFLOW
+  USERSTACK
+  VAGRANT_CLOUD
+  VAGRANT_CLOUD_PERSONAL_TOKEN
+  VAT_LAYER
+  VBOUT
+  VEEVAVAULT
+  VERCEL
+  VERIFIER
+  VERIMAIL
+  VERIPHONE
+  VERSIONEYE
+  VIEWNEO
+  VIRUSTOTAL
+  VISUAL_CROSSING
+  VOICEFLOW
+  VOICEGAIN
+  VONAGE
+  VOODOO_SMS
+  VOUCHERY
+  VPN_API
+  VULTR
+  VULTR_API_KEY
+  VYTE
+  WAKATIME
+  WALK_SCORE
+  WEATHERBIT
+  WEATHERSTACK
+  WEB3_STORAGE
+  WEBENGAGE
+  WEBEX
+  WEBEX_BOT
+  WEBFLOW
+  WEBSITE_PULSE
+  WEB_SCRAPER
+  WEB_SCRAPING
+  WEIGHTS_AND_BIASES
+  WEPAY
+  WE_CHAT_APP_KEY
+  WHOXY
+  WISE
+  WISTIA
+  WIT
+  WIT_AI
+  WIZ
+  WOOPRA
+  WORDS_API
+  WORKDAY
+  WORKSNAPS
+  WORKSTACK
+  WORLD_COIN_INDEX
+  WORLD_WEATHER
+  WP_ENGINE
+  WRIKE
+  XAI
+  YANDEX
+  YELP
+  YEXT
+  YNAB
+  YOUSIGN
+  YOUTUBE
+  YOUTUBE_API_KEY
+  YOU_NEED_A_BUDGET
+  ZAPIER
+  ZAPIER_WEBHOOK
+  ZENDESK
+  ZENDESK_API
+  ZENKIT
+  ZENKIT_API
+  ZENROWS
+  ZENSCRAPE
+  ZENSERP
+  ZEPLIN
+  ZEROBOUNCE
+  ZEROTIER
+  ZIPBOOKS
+  ZIPCODEBASE
+  ZIPCODE_API
+  ZIP_API
+  ZOHO_CRM
+  ZONKA_FEEDBACK
+  ZULIP
+  ZULIP_CHAT
+}
+
+"""Detailed representation of a secret."""
+type Secret {
+  """Unique identifier of the secret."""
+  id: ID!
+
+  """
+  Provider or detector type of the secret (e.g. 'github', 'aws_access_key').
+  """
+  type: SecretType
+  subtype: String
+
+  """Human-readable description of the secret."""
+  description: String
+
+  """File Path where the secret was found (e.g. file path, resource path)."""
+  filePath: String
+
+  """High-level classification of the secret."""
+  category: SecretCategory!
+
+  """Human-readable label for the category (UI-friendly)."""
+  categoryLabel: String
+
+  """Severity associated with this secret."""
+  severity: SecretSeverity!
+
+  """Sanitized / redacted representation of the secret value."""
+  sanitizedSecret: String
+
+  """Raw secret value. Only available when revealSecret is true."""
+  rawSecret: String
+
+  """Correlations to other assets or components that reference this secret."""
+  correlations: [AssetCorrelation!] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+
+  """Total number of correlations."""
+  correlationsCount: Int!
+
+  """Status of remediation for this secret."""
+  remediationStatus: SecretRemediationStatus
+
+  """The most recent vulnerability remediation for a given assetId"""
+  currentRemediation: SecretRemediation
+  isReachable: Boolean
+}
+
+type SecretRemediation {
+  secretId: ID
+  status: SecretRemediationStatus
+  description: String
+  author: String
+  createdAt: String
+}
+
+"""Aggregate counters of secrets, e.g. by severity."""
+type SecretsSummary {
+  """Total number of secrets."""
+  total: Int!
+
+  """Number of secrets with HIGH severity."""
+  high: Int!
+
+  """Number of secrets with MEDIUM severity."""
+  medium: Int!
+
+  """Number of secrets with LOW severity."""
+  low: Int!
+
+  """Number of invalid secrets (e.g. false positives)."""
+  invalid: Int!
+}
+
+"""Filter for secrets."""
+input SecretsFilter {
+  type: [SecretType]
+  severity: [SecretSeverity]
+  category: SecretCategory
+  search: String
+  status: [SecretRemediationStatus]
+
+  """
+  When true, only secrets marked as reachable (reachability v2).
+  Pushed to gRPC for list queries; categories-summary rebuilds from filtered list.
+  """
+  isReachable: Boolean
+}
+
+"""Input for querying a single secret."""
+input SecretInput {
+  """Unique secret identifier."""
+  id: ID!
+
+  """If true, attempts to return the raw secret value."""
+  revealSecret: Boolean = false
+}
+
+"""Input for listing secrets on an asset."""
+input SecretsInput {
+  """
+  Asset identifier whose secrets are being listed.
+  Maps to ListAssetSecretsRequest.asset_id.
+  """
+  assetId: ID!
+
+  """Pagination configuration."""
+  cursor: Cursor!
+
+  """Optional structured filter for secrets."""
+  filter: SecretsFilter
+
+  """Optional order by expression."""
+  sort: SecretsSort
+}
+
+input SecretsSort {
+  field: SecretsField
+  order: SortOrder
+}
+
+"""Input for listing secret categories on an asset."""
+input SecretCategoriesInput {
+  """
+  Asset identifier whose secrets are being listed.
+  Maps to ListAssetSecretsRequest.asset_id.
+  """
+  assetId: ID!
+
+  """Optional structured filter for secrets."""
+  filter: SecretsFilter
+}
+
+input SecretsSummaryInput {
+  assetId: ID!
+}
+
+input SecretTypesAndCountInput {
+  assetId: ID!
+}
+
+input SecretStatusCountInput {
+  assetId: ID!
+}
+
+"""Paginated list of secrets for an asset."""
+type SecretsConnection implements Connection {
+  """Page of secrets for the current request."""
+  edges: [SecretEdge!]
+
+  """Pagination information."""
+  pageInfo: PageInfo!
+}
+
+type SecretEdge implements Edge {
+  cursor: String
+  node: Secret
+}
+
+type SecretCategoriesSummary {
+  category: SecretCategory
+
+  """Human-readable label for the category (UI-friendly)."""
+  categoryLabel: String
+  remediationStatusCounts: [SecretRemediationStatusCount]
+  severityCounts: [SecretSeverityCount]
+}
+
+type SecretRemediationStatusCount {
+  status: SecretRemediationStatus
+  count: Int
+}
+
+type SecretSeverityCount {
+  severity: SecretSeverity
+  count: Int
+}
+
+type SecretTypesAndCount {
+  totalTypes: Int
+  typeCounts: [SecretTypeCount]
+}
+
+type SecretStatusCount {
+  name: SecretRemediationStatus
+  count: Int
+}
+
+type SecretTypeCount {
+  type: SecretType
+  count: Int
+}
+
+input CreateSecretsRemediationInput {
+  assetId: ID!
+  secretIds: [ID!]!
+  status: SecretRemediationStatus!
+  description: String
+}
+
+type Sift {
+  count: SiftCount
+  files(args: SiftInput!): SiftFilesResponse
+}
+
+input SiftInput {
+  assetIds: [String!]
+  searchType: SiftSearchType!
+  text: String!
+  threshold: Float!
+}
+
+type SiftFilesResponse {
+  files: [SiftFile]
+  hasMore: Boolean
+}
+
+type SiftCount {
+  assetCount: Int!
+  fileCount: Int!
+  pythonFileCount: Int!
+  scriptFileCount: Int!
+  textFileCount: Int!
+}
+
+type SiftFile {
+  sha256: String
+  path: String
+  matches: [SiftSimilarity]
+  assets: [SiftAsset]
+}
+
+type SiftSimilarity {
+  file: String
+  ordinal: Int
+  similarity: Float
+  text: String
+}
+
+type SiftAsset {
+  componentId: ID!
+  type: String
+  name: String
+  vendor: String
+  product: String
+  version: String
+  createdAt: String
+  updatedAt: String
+  packages: [String]
+}
+
+enum SiftSearchType {
+  KEYWORD
+  SEMANTIC
+}
+
+enum BackgroundTaskType {
+  BACKGROUND_TASK_SBOM_GET
+}
+
+type BackgroundTask {
+  taskId: String!
+  done: Boolean!
+  type: BackgroundTaskType!
+  response: String
+}
+
+input VulnerabilitiesFunnelChartInput {
+  assetId: ID
+  groupIds: [String]
+  isReachable: Boolean
+}
+
+type VulnerabilitiesFunnelChart {
+  category: FunnelChartCategory
+  critical: Int
+  high: Int
+  medium: Int
+  low: Int
+  total: Int
+}
+
+enum FunnelChartCategory {
+  UNSPECIFIED
+  TOTAL
+  EPSS_GT_80
+  EPSS_GT_50
+  IS_WEAPONIZED
+  IS_CISA_KEV
+  HAS_FIXED_VERSION
+  IMPACT
+}
+
+type VulnerabilityByAge {
+  ageGroupId: Int!
+  from: String
+  to: String
+  age: String
+  severity: String
+  count: Int
+  uniqueCount: Int
+}
+
+enum PriorityScore {
+  PRIORITY_5
+  PRIORITY_4
+  PRIORITY_3
+  PRIORITY_2
+  PRIORITY_1
+}
+
+type VulnerabilityByPriorityScore {
+  priorityScore: PriorityScore!
+  priorityScoreFilter: String!
+  occurrences: Int!
+  uniques: Int!
+}
+
+enum CategoryOfInterestName {
+  BOTNETS
+  THREAT_ACTORS
+  RANSOMWARE
+  IN_THE_WILD
+}
+
+type CategoryOfInterest {
+  name: CategoryOfInterestName!
+  occurrences: Int!
+  uniques: Int!
+}
+
+type LicenseCount {
+  license: String!
+  count: Int!
+}
+
+type MisconfigurationCheck {
+  passed: Int!
+  failed: Int!
+  notApplicable: Int!
+}
+
+type MisconfigurationsByCategory {
+  category: String
+  passed: Int!
+  failed: Int!
+  notApplicable: Int!
+}
+
+type KnownExploitsCounts {
+  totalPoc: Int!
+  totalWeaponized: Int!
+  totalReachable: Int!
+  inKnownExploitedVulnerabilities: Int!
+  totalActors: Int!
+  totalAttacks: Int!
+  totalBotnets: Int!
+  totalRansomware: Int!
+  exploitCode: Int!
+  pocTotalActors: Int!
+  pocTotalAttacks: Int!
+  pocTotalBotnets: Int!
+  pocTotalRansomware: Int!
+  pocTotalExploitCode: Int!
+  weaponizedTotalActors: Int!
+  weaponizedTotalAttacks: Int!
+  weaponizedTotalBotnets: Int!
+  weaponizedTotalRansomware: Int!
+  weaponizedTotalExploitCode: Int!
+}
+
+type CryptographyCount {
+  certificates: Int!
+  invalidCertificates: Int!
+  publicKeys: Int!
+  privateFoundInPublic: Int!
+  privateKeys: Int!
+  publicFoundInPrivate: Int!
+}
+
+type VulnerabilityHighlightedProduct {
+  product: String!
+  vulnerabilities: VulnSummaryCount
+}
+
+input AnalyticsOrgInput {
+  assetGroupIds: [ID!]
+}
+
+input AnalyticsAssetHighlightedProductsInput {
+  composedAssetId: ID!
+  isReachable: Boolean
+}
+
+input AnalyticsAssetInput {
+  composedAssetId: ID!
+}
+
+type AssetsByRiskCategory {
+  fields: [AnalyticType]
+}
+
+type AnalyticType {
+  name: AssetOverviewRiskCategory
+  value: Int
+}
+
+type VulnSummaryCount {
+  critical: Int
+  high: Int
+  medium: Int
+  low: Int
+}
+
+type HighProfileVulnerabilitiesResponse {
+  uniqueExploits: Int
+  associatedCves: Int
+  affectedAssets: Int
+}
+
+type KnownExploitedVulnerabilitiesResponse {
+  uniqueKevs: Int
+  pastDue: Int
+  affectedAssets: Int
+}
+
+type HighProfileExploitConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [HighProfileExploitEdge]
+}
+
+type HighProfileExploitEdge implements Edge {
+  cursor: String
+  node: HighProfileExploit
+}
+
+type HighProfileExploit {
+  category: String
+  name: String
+  associatedCvesCount: Int
+  associatedAssetsCount: Int
+}
+
+input HighProfileExploitInput {
+  cursor: Cursor!
+  filter: HighProfileExploitFilter
+  sort: HighProfileExploitSort
+  assetGroupIds: [ID!]
+}
+
+input HighProfileExploitFilter {
+  fields: [HighProfileExploitFieldFilter]
+}
+
+input HighProfileExploitFieldFilter {
+  fieldName: HighProfileExploitFilterField!
+  value: [String!]!
+  operation: FieldFilterOperation!
+}
+
+enum HighProfileExploitFilterField {
+  ASSOCIATEDCVESCOUNT
+  ASSOCIATEDASSETSCOUNT
+  NAME
+  CATEGORY
+}
+
+input HighProfileExploitSort {
+  field: HighProfileExploitSortField
+  order: SortOrder
+}
+
+enum HighProfileExploitSortField {
+  ASSOCIATEDCVESCOUNT
+  ASSOCIATEDASSETSCOUNT
+  NAME
+  CATEGORY
+}
+
+type ActivityConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [ActivityEdge]
+}
+
+type ActivityEdge implements Edge {
+  cursor: String
+  node: Activity
+}
+
+type Activity {
+  """Unique identifier for the activity."""
+  id: String!
+
+  """Unique identifier for the correlation."""
+  correlationId: String!
+
+  """Timestamp of when the activity occurred."""
+  createdAt: String!
+
+  """The type of the entity (e.g., COMPONENT, VULNERABILITY)."""
+  entityType: ActivityEntityType!
+
+  """The type of activity performed (e.g., created, updated, deleted)."""
+  activityType: ActivityType!
+
+  """The user that created the activity."""
+  user: String!
+
+  """Description of the activity."""
+  description: String
+
+  """
+  The entity that the activity is related to (e.g., Component, Vulnerability).
+  """
+  entity: ActivityEntity!
+}
+
+enum ActivityType {
+  UNSPECIFIED
+  ASSET_ANALYSIS_COMPLETED
+  ASSET_CREATED
+  ASSET_CHANGED @deprecated(reason: "Use ASSET_UPDATED instead. ASSET_CHANGED was removed without prior notice; this value is retained for backwards compatibility.")
+  ASSET_UPDATED
+  ASSET_RISK_CHANGED
+  IDENTIFICATION_ADDED
+  IDENTIFICATION_REMOVED
+  VULNERABILITY_ADDED
+  VULNERABILITY_REMEDIATED
+  VULNERABILITY_UPDATED
+  VULNERABILITY_REMOVED
+  MISCONFIG_CHANGED
+  ASSET_GROUP_ADDED
+  ASSET_GROUP_REMOVED
+  SECRET_REMEDIATED
+  LICENSE_ISSUE_REMEDIATED
+  GROUP_CREATED
+  GROUP_UPDATED
+  GROUP_DELETED
+  GROUP_MEMBERSHIP_CHANGED
+  ORG_SETTINGS_UPDATED
+  RBAC_ACR_CREATED
+  RBAC_ACR_DELETED
+  RBAC_ACR_REPLACED
+  RBAC_SECURITY_GROUP_CREATED
+  RBAC_SECURITY_GROUP_UPDATED
+  RBAC_SECURITY_GROUP_DELETED
+  RBAC_MEMBER_ADDED
+  RBAC_MEMBER_REMOVED
+  RBAC_ROLE_CREATED
+  RBAC_ROLE_UPDATED
+  RBAC_ROLE_DELETED
+  RBAC_USER_INVITED
+  RBAC_USER_REMOVED
+  RBAC_USER_STATUS_CHANGED
+}
+
+enum ActivityEntityType {
+  UNSPECIFIED
+  ASSET
+  IDENTIFICATION
+  VULNERABILITY
+  MISCONFIGURATION
+  ASSET_GROUP
+  SECRET
+  LICENSE_ISSUE
+  ORGANIZATION
+  RBAC_ACR
+  RBAC_SECURITY_GROUP
+  RBAC_ROLE
+  RBAC_USER
+}
+
+input ActivityInput {
+  assetId: ID!
+  cursor: Cursor
+}
+
+type AssetCreatedPayload {
+  assetType: AssetType
+  name: String
+  vendor: String
+  version: String
+}
+
+"""
+Emitted when asset analysis (ingestion pipeline) completes for a revision.
+"""
+type AssetAnalysisCompletedPayload {
+  assetId: String
+  revision: Int
+  failure: Boolean
+}
+
+type AssetChangedPayload {
+  assetType: AssetType
+  name: String
+  vendor: String
+  version: String
+}
+
+type AssetRiskChangedPayload {
+  assetType: AssetType
+  name: String
+  vendor: String
+  version: String
+  oldRisk: RiskScore
+  newRisk: RiskScore
+}
+
+type IdentificationAddedPayload {
+  identificationId: String
+  name: String
+  vendor: String
+  version: String
+}
+
+type IdentificationRemovedPayload {
+  identificationId: String
+  name: String
+  vendor: String
+  version: String
+}
+
+type VulnerabilityAddedPayload {
+  cve: String
+  identificationId: String
+  vulnerabilityId: String
+  severity: String
+  componentName: String
+  componentVersion: String
+  componentVendor: String
+}
+
+type VulnerabilityRemediatedPayload {
+  vulnerabilityId: String
+  cve: String
+  severity: String
+  componentName: String
+  componentVersion: String
+  componentVendor: String
+  vexJustification: VexJustification
+  description: String
+}
+
+type VulnerabilityUpdatedPayload {
+  identificationId: String
+  cve: String
+}
+
+type VulnerabilityRemovedPayload {
+  identificationId: String
+  cve: String
+}
+
+type MisconfigChangedPayload {
+  checkId: String
+  checkName: String
+  oldStatus: String
+  newStatus: String
+}
+
+type AssetGroupAddedPayload {
+  groupId: String
+  name: String
+}
+
+type AssetGroupRemovedPayload {
+  groupId: String
+  name: String
+}
+
+type SecretRemediatedPayload {
+  secretId: String
+  subtype: String
+  type: SecretType
+  category: SecretCategory
+  filePath: String
+  oldStatus: String
+  newStatus: String
+  detail: String
+  user: String
+}
+
+"""
+Represents an entity field update for LicenseIssueRemediated, field name with previous and current values.
+"""
+type LicenseIssueRemediatedEntityPayload {
+  """Field name, or dot-delimited field path."""
+  field: String
+
+  """The value prior to update."""
+  previous: LicenseIssueStatus
+
+  """The value after update."""
+  current: LicenseIssueStatus
+}
+
+"""Payload emitted when a license issue is remediated."""
+type LicenseIssueRemediatedPayload {
+  issueName: String
+  componentId: String
+  componentVersion: String
+  componentName: String
+  entityUpdates: [LicenseIssueRemediatedEntityPayload!]
+}
+
+type UnspecifiedPayload {
+  """
+  Fallback payload type for handling backend entities that haven't been added to the schema yet.
+  Contains the raw payload data as JSON.
+  """
+  rawData: JSON
+  payloadType: String
+}
+
+union ActivityEntity = AssetCreatedPayload | AssetAnalysisCompletedPayload | AssetChangedPayload | AssetRiskChangedPayload | IdentificationAddedPayload | IdentificationRemovedPayload | VulnerabilityAddedPayload | VulnerabilityRemediatedPayload | VulnerabilityUpdatedPayload | VulnerabilityRemovedPayload | MisconfigChangedPayload | AssetGroupAddedPayload | AssetGroupRemovedPayload | SecretRemediatedPayload | LicenseIssueRemediatedPayload | UnspecifiedPayload
+
+"""Count of vulnerabilities by severity in an asset"""
+type VulnerabilityCountBySeverityAnalytic {
+  critical: Int!
+  high: Int!
+  medium: Int!
+  low: Int!
+}
+
+"""Count of exploits in an asset"""
+type ExploitCountAnalytic {
+  threatActor: Int!
+  ransomware: Int!
+  botnet: Int!
+  inTheWild: Int!
+  knownAttacks: Int!
+  inKnownExploitedVulnerabilities: Int
+  exploitCode: Int
+}
+
+"""Full summary analytic"""
+type AssetAnalytic {
+  vulnerability: VulnerabilityCountBySeverityAnalytic!
+  exploit: ExploitCountAnalytic!
+  components: AssetCountByTypeAnalytic!
+  misconfigurations: MisconfigurationCountByStatusAnalytic!
+  binaries: Int!
+  cryptography: CryptographyCountByTypeAnalytic!
+  credentials: CredentialCountByTypeAnalytic!
+  files: Int!
+  licenseIssues: Int!
+  aiComponents: Int!
+}
+
+"""Count of asset by component type"""
+type AssetCountByTypeAnalytic {
+  application: Int!
+  framework: Int!
+  library: Int!
+  container: Int!
+  device: Int!
+  kernel: Int!
+  package: Int!
+  kernelModule: Int!
+  os: Int!
+  aiModel: Int!
+}
+
+"""Count of misconfigurations by status"""
+type MisconfigurationCountByStatusAnalytic {
+  passed: Int!
+  failed: Int!
+  notApplicable: Int!
+}
+
+"""Count of cryptography entries by type"""
+type CryptographyCountByTypeAnalytic {
+  publicKey: Int!
+  privateKey: Int!
+  certificate: Int!
+}
+
+"""Count of credential entries by type"""
+type CredentialCountByTypeAnalytic {
+  """Count of credentials"""
+  credential: Int!
+
+  """Count of hashes"""
+  hash: Int!
+
+  """Count of cracked credentials"""
+  crackedCred: Int
+
+  """Count of cracked hashes"""
+  crackedHash: Int
+
+  """Count of secrets"""
+  secrets: Int
+}
+
+type Asset {
+  orgId: String
+  id: String
+  type: AssetType
+  name: String
+  vendor: String
+  product: String
+  version: String
+  assetCpe: String
+  status: ProcessingStatus
+  createdAt: String
+  updatedAt: String
+  firstAnalysisTime: String
+  risk: RiskScore
+  fileName: String
+  filesystems(args: FilesystemsInput): [Filesystem!]
+  sha256: String
+  hasRemediation: Boolean
+  analytic: AssetAnalytic
+  assetGroupCount: Int
+  assetGroupIds: [ID!]
+  uploadedBy: String
+  sizeBytes: BigInt
+
+  """Indicates whether the asset is quantum-capable"""
+  quantumCapable: Boolean
+}
+
+"""
+Same field order as `Asset`. Summary fields are filled from asset lists; `filesystems`,
+`hasRemediation`, and `analytic` are not populated there and will be empty on list results.
+When you need those details, please use the `asset` query (`asset(args: AssetInput): Asset`).
+"""
+type AssetListItem {
+  orgId: String
+  id: String
+  type: AssetType
+  name: String
+  vendor: String
+  product: String
+  version: String
+  assetCpe: String
+  status: ProcessingStatus
+  createdAt: String
+  updatedAt: String
+  firstAnalysisTime: String
+  risk: RiskScore
+  fileName: String
+  filesystems(args: FilesystemsInput): [Filesystem!] @deprecated(reason: "Not available on asset list results. Please use the `asset` query when you need filesystem data.")
+  sha256: String
+  hasRemediation: Boolean @deprecated(reason: "Not available on asset list results. Please use the `asset` query when you need remediation information.")
+  analytic: AssetAnalytic @deprecated(reason: "Not available on asset list results. Please use the `asset` query when you need analytics.")
+  assetGroupCount: Int
+  assetGroupIds: [ID!]
+  uploadedBy: String
+  sizeBytes: BigInt
+
+  """Indicates whether the asset is quantum-capable"""
+  quantumCapable: Boolean
+}
+
+type LatestSnapshot {
+  status: ProcessingStatus
+  snapshotId: String
+  runId: String
+}
+
+type AssetUploadResponse {
+  uploadId: String
+  assetId: String
+  uploaded: Boolean
+}
+
+enum AssetType {
+  UNSPECIFIED
+  FIRMWARE
+  CYCLONE_DX_JSON
+  CYCLONE_DX_XML
+  SPDX_JSON
+  SPDX_TAG
+}
+
+type Filesystem {
+  id: ID!
+  files(args: FilesInput): Files
+}
+
+input FilesInput {
+  cursor: CursorV3
+  filter: ListFilesFilter
+  sort: ListFilesSort
+}
+
+input FilesystemsInput {
+  filesystemId: ID
+}
+
+input ListFilesSort {
+  field: ListFilesSortField
+  order: SortOrder
+}
+
+enum ListFilesFilterFieldEnum {
+  ASSET_ID
+  PATH
+  MIME_TYPE
+  PERMISSIONS
+  SHA1
+  MD5
+  SHA256
+}
+
+enum ListFilesSortField {
+  PATH
+  MIME_TYPE
+  PERMISSIONS
+  SHA1
+  MD5
+  SHA256
+}
+
+input ListFilesFilter {
+  fields: [ListFilesFilterField]
+  hideFailed: Boolean
+  search: SimilaritySearchInput
+  selectedSeverityFilters: [RiskCategoryFilter]
+}
+
+input ListFilesFilterField {
+  fieldName: ListFilesFilterFieldEnum
+  value: [String!]!
+  operation: FieldFilterOperation
+}
+
+input SimilaritySearchInput {
+  text: String!
+  threshold: Float!
+}
+
+type Files implements PaginatedResponse {
+  filesList: [FilesystemFile]
+  pageInfo: PageInfoV3
+}
+
+type ListFile implements PaginatedResponse {
+  files: [File]
+  pageInfo: PageInfoV3
+}
+
+type AssetComponent {
+  id: ID!
+  type: ComponentType!
+  digest: Digest
+  version: StringVersion
+  file: File
+  pb_package: Package
+  kernelModule: KernelModule
+  firmware: Firmware
+  sbom: AssetSBOM
+}
+
+type AssetSBOM {
+  spdx: AssetSBOMSpdx
+  cyclonedx: AssetSBOMCycloneDx
+}
+
+type AssetSBOMCycloneDx {
+  fileMetadata: CycloneDxMetadata
+  bomVersion: Int
+  tools: [CycloneDxTool]
+  contributors: [CycloneDxContributor]
+  licenses: [CycloneDxLicense]
+  creationTimestamp: String
+  serial: String
+}
+
+type CycloneDxLicense {
+  licenseId: String
+  licenseExpression: String
+}
+
+type CycloneDxContributor {
+  contactInfo: CycloneDxContributorsContactInfo
+  type: CycloneDxContributorsType
+}
+
+enum CycloneDxContributorsType {
+  CONTRIBUTOR_TYPE_UNSPECIFIED
+  CONTRIBUTOR_TYPE_AUTHOR
+  CONTRIBUTOR_TYPE_MAINTAINER
+  CONTRIBUTOR_TYPE_ORIGINATOR
+  CONTRIBUTOR_TYPE_SUPPLIER
+  CONTRIBUTOR_TYPE_MANUFACTURER
+}
+
+type CycloneDxContributorsContactInfo {
+  name: String
+  email: String
+  url: String
+  phone: String
+  other: String
+  type: CycloneDxContributorsContactInfoType
+}
+
+enum CycloneDxContributorsContactInfoType {
+  CONTACT_TYPE_UNSPECIFIED
+  CONTACT_TYPE_PERSON
+  CONTACT_TYPE_ORGANIZATION
+}
+
+type CycloneDxTool {
+  vendor: String
+  name: String
+  version: String
+  digest: CycloneDxToolDigest
+}
+
+type CycloneDxToolDigest {
+  sha256: String
+  sha1: String
+  md5: String
+  sha224: String
+  sha384: String
+  sha512: String
+  sha3256: String
+  sha3384: String
+  sha3512: String
+  blake2b256: String
+  blake2b384: String
+  blake2b512: String
+  blake3: String
+  md2: String
+  md4: String
+  md6: String
+  adler32: String
+}
+
+type CycloneDxMetadata {
+  version: CycloneDxVersion
+  format: CycloneDxFormat
+}
+
+enum CycloneDxVersion {
+  VERSION_UNSPECIFIED
+  VERSION_V1_6
+  VERSION_V1_5
+  VERSION_V1_4
+  VERSION_V1_3
+  VERSION_V1_2
+  VERSION_V1_1
+}
+
+enum CycloneDxFormat {
+  FORMAT_UNSPECIFIED
+  FORMAT_JSON
+  FORMAT_XML
+}
+
+type AssetSBOMSpdx {
+  dataLicense: String
+  identifier: String
+  namespace: String
+  name: String
+  licenseListVersion: String
+  creationTimestamp: String
+  fileMetadata: SpdxMetadata
+}
+
+type SpdxMetadata {
+  version: SpdxVersion
+  format: SpdxFormat
+}
+
+enum SpdxVersion {
+  VERSION_UNSPECIFIED
+  VERSION_V2_3
+  VERSION_V2_2
+  VERSION_V2_1
+}
+
+enum SpdxFormat {
+  FORMAT_UNSPECIFIED
+  FORMAT_JSON
+  FORMAT_TAG
+  FORMAT_XML
+  FORMAT_YAML
+}
+
+type Firmware {
+  name: String
+  manufacturer: String
+  model: String
+  version: String
+  architecture: String
+  kernelVersion: String
+  os: String
+  bitness: Int
+}
+
+type FilesystemFile {
+  fileId: String
+  file: File
+}
+
+type File {
+  digest: Digest
+  path: String
+  mimeType: String
+  permissions: String
+  similarity: SiftSimilarity
+  size: BigInt
+  createdAt: String
+  updatedAt: String
+  assets: [Asset]
+  hasChildren: Boolean
+}
+
+type Similarity {
+  ordinal: Int
+  value: Float
+  text: String
+}
+
+type KernelModule {
+  author: String
+  description: String
+  license: String
+  name: String
+  vermagic: String
+  srcmagic: String
+}
+
+type AssetsConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [AssetEdge]
+}
+
+type AssetEdge implements Edge {
+  cursor: String
+  node: AssetListItem
+}
+
+input AssetsRelayInput {
+  cursor: Cursor!
+  filter: AssetsFilter
+  sort: AssetsSort
+}
+
+input AssetsFilter {
+  fields: [AssetsFieldFilter]
+  hideFailed: Boolean
+  selectedSeverityFilters: [RiskCategoryFilter]
+}
+
+input AssetsFieldFilter {
+  fieldName: AssetsFilterField!
+  value: [JSON!]!
+  operation: FieldFilterOperation!
+}
+
+enum AssetsFilterField {
+  ID
+  NAME
+  VENDOR
+  PRODUCT
+  VERSION
+  TYPE
+  SHA256
+  PROCESSINGSTATUS
+  RISKCATEGORY
+  RISKSCORE
+  ASSETGROUPCOUNT
+  ASSETGROUPS
+  UPLOADEDBY
+  SIZEBYTES
+}
+
+input AssetsSort {
+  field: AssetsSortField
+  order: SortOrder
+}
+
+enum AssetsSortField {
+  NAME
+  VENDOR
+  PRODUCT
+  VERSION
+  CREATEDAT
+  UPDATEDAT
+  ENDTIME
+  PROCESSINGSTATUS
+  TYPE
+  RISKCATEGORY
+  RISKSCORE
+  ASSETGROUPCOUNT
+  UPLOADEDBY
+  SIZEBYTES
+}
+
+input AssetOverviewInput {
+  assetGroupIds: [ID!]
+  filter: AssetOverviewFilter
+  sort: AssetOverviewSort
+  cursor: Cursor!
+}
+
+type AssetOverviewConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [AssetOverviewEdge]
+}
+
+type AssetOverviewEdge implements Edge {
+  cursor: String
+  node: AssetOverview
+}
+
+input AssetOverviewFilter {
+  vulnerabilityId: String
+  inTheWild: Boolean
+  exploitFound: Boolean
+  riskScoreCategory: AssetOverviewRiskCategory
+  inKnownExploitedVulnerabilities: Boolean
+  highProfileVulnerabilities: HighProfileExploitCategoryFilter
+}
+
+input HighProfileExploitCategoryFilter {
+  category: HighProfileCategory
+  name: String
+}
+
+enum HighProfileCategory {
+  KNOWNATTACKS
+  THREATACTORS
+}
+
+enum AssetOverviewRiskCategory {
+  UNDETERMINED
+  NEGLIGIBLE
+  CONSERVATIVE
+  MODERATE
+  SIGNIFICANT
+  SEVERE
+}
+
+input AssetOverviewSort {
+  field: AssetOverviewSortField
+  order: SortOrder
+}
+
+enum AssetOverviewSortField {
+  RISKSCORE
+  VENDOR
+  PRODUCT
+  CREATEDAT
+  VERSION
+}
+
+"""Component with summary data"""
+type AssetOverview {
+  composedAssetId: ID!
+  name: String
+  operatingSystem: String
+  operatingSystemKernelVersion: String
+  vendor: String
+  version: String
+  risk: RiskScore
+  submitDatetime: DateTime
+  inBotnets: Boolean
+  inRansomware: Boolean
+  inKnownAttacks: Boolean
+  inTheWild: Boolean
+  inThreatActors: Boolean
+  exploitFound: Boolean
+  inKnownExploitedVulnerabilities: Boolean
+  associatedCves: [String]
+  knownAttacks: [String]
+  threatActors: [String]
+  botnets: [String]
+  product: String
+  type: AssetType
+}
+
+type ValidationError {
+  line: Int
+  message: String
+}
+
+type GetSBOM {
+  signedUrl: SignedUrl
+}
+
+type SignedUrl {
+  url: String
+  signedHeaders: [SignedHeader]
+}
+
+type SignedHeader {
+  key: String
+  value: String
+}
+
+input AssetsInput {
+  cursor: CursorV3
+  filter: ListComponentFilter
+  sort: ListComponentSort
+}
+
+input AssetInput {
+  assetId: String
+}
+
+input AssetStatusInput {
+  assetId: String!
+}
+
+type AssetStatus {
+  assetId: String!
+  lastUpdatedTime: String
+  hasRunningJob: Boolean!
+}
+
+input AssetUploadInput {
+  uploadId: String
+}
+
+type DownloadQueries {
+  """Generate a download url for a File"""
+  file(args: FileDownloadInput!): TaskDownloadResponse!
+
+  """Generate a download url for the FileList"""
+  fileList(args: FileListDownloadInput!): TaskDownloadResponse!
+
+  """Generate a download url for an Extracted Firmware"""
+  extractedFirmware(args: ExtractedFirmwareDownloadInput!): TaskDownloadResponse!
+
+  """Generate a download url for a Firmware"""
+  firmware(args: FirmwareDownloadInput!): TaskDownloadResponse!
+}
+
+type TaskDownloadResponse {
+  downloadUrlsList: [String]
+  pathsList: [String]
+}
+
+input FileDownloadInput {
+  assetId: String!
+  filesystemId: ID
+  fileId: ID
+  filePaths: [String!]!
+}
+
+input FileListDownloadInput {
+  assetId: String!
+}
+
+input ExtractedFirmwareDownloadInput {
+  assetId: String!
+  filesystemId: ID
+}
+
+input FirmwareDownloadInput {
+  assetId: String!
+}
+
+enum RiskCategoryFilter {
+  UNSPECIFIED
+  NEGLIGIBLE
+  CONSERVATIVE
+  MODERATE
+  SIGNIFICANT
+  SEVERE
+}
+
+input ListComponentFilter {
+  fields: [ListComponentFilterField]
+  hideFailed: Boolean
+  selectedSeverityFilters: [RiskCategoryFilter]
+}
+
+input ListComponentFilterField {
+  fieldName: ListComponentFilterFieldEnum
+  value: [String!]!
+  operation: FieldFilterOperation
+}
+
+enum FieldFilterOperation {
+  CONTAINS
+  NOTCONTAINS
+  STARTSWITH
+  ENDSWITH
+  EQUAL
+  NOTEQUAL
+  GREATERTHAN
+  GREATERTHANOREQUAL
+  LESSTHAN
+  LESSTHANOREQUAL
+  ENUM
+  REGEX
+}
+
+input ListComponentSort {
+  field: ListComponentSortField
+  order: SortOrder
+}
+
+enum ListComponentFilterFieldEnum {
+  ID
+  NAME
+  VENDOR
+  PRODUCT
+  VERSION
+  TYPE
+  SHA256
+  PROCESSINGSTATUS
+  RISKCATEGORY
+  RISKSCORE
+}
+
+enum ListComponentSortField {
+  NAME
+  VENDOR
+  PRODUCT
+  VERSION
+  CREATEDAT
+  UPDATEDAT
+  ENDTIME
+  PROCESSINGSTATUS
+  TYPE
+  RISKCATEGORY
+  RISKSCORE
+}
+
+type AssetsResponse implements PaginatedResponse {
+  assets: [Asset]
+  pageInfo: PageInfoV3
+}
+
+enum ProcessingStatus {
+  UNSPECIFIED
+  INPROGRESS
+  SUCCESS
+  FAIL
+}
+
+type AssetMutations {
+  submit(fileName: String!, args: SubmitAssetInput): SubmitAssetResponse!
+  update(args: UpdateAssetInput): Asset
+  removeDependencies(args: IdentificationInput!): ErrResponse
+  addDependency(args: AddDependencyInput!): ErrResponse
+  modifyDependency(args: ModifyDependencyInput!): ErrResponse
+}
+
+input IdentificationInput {
+  composedAssetId: String!
+  identificationIds: [String!]!
+}
+
+"""Dependency details of the component to be added."""
+input DependencyDetailsInput {
+  """Component's name"""
+  name: String!
+
+  """Type of the component (e.g., library, application)"""
+  type: ComponentType!
+
+  """Component's vendor"""
+  vendor: String
+
+  """Component's version"""
+  version: String
+
+  """Optional description of the component"""
+  description: String
+
+  """List of associated Package URLs (PURLs)"""
+  purls: [String]
+
+  """List of associated CPE identifiers"""
+  cpes: [String]
+
+  """List of associated licenses"""
+  license: [String]
+}
+
+"""Request input for adding an dependency to an asset."""
+input AddDependencyInput {
+  """ID of the target asset"""
+  composedAssetId: String!
+
+  """Reason for adding this dependency"""
+  reason: String
+
+  """Dependency details"""
+  dependencyFields: DependencyDetailsInput!
+}
+
+"""Request input for editing an existing dependency."""
+input ModifyDependencyInput {
+  """Targeting existing dependency via composedAssetId + identificationIds"""
+  identification: IdentificationInput!
+
+  """New dependency data to replace the existing one"""
+  dependencyFields: DependencyDetailsInput!
+
+  """Optional new reason for the edit"""
+  reason: String
+}
+
+input UpdateAssetInput {
+  id: ID!
+
+  """Component's vendor / vendor"""
+  vendor: String
+
+  """Component's name"""
+  name: String
+
+  """Component's version"""
+  version: String
+
+  """Component's model/product"""
+  product: String
+}
+
+input SubmitAssetInput {
+  name: String
+  manufacturer: String
+  model: String
+  version: String
+  assetCpe: String
+  architecture: String
+  kernelVersion: String
+  os: String
+  bitness: Int
+  family: String
+  type: AssetType
+
+  """
+  sbomType = Whether is SBOM ingestion or FIRMWARE ingestion. value means SBOM ingestion //  CycloneDX, SPDX
+  """
+  sbomType: SbomType
+
+  """
+  version: SBOM version if applies // CYCLONEDX_V1_4, SPDX_V2_2. SPDX_V2_3
+  """
+  sbomVersion: SbomVersion
+
+  """format: JSON, XML, SPDX"""
+  sbomFormat: SbomFormat
+  assetGroupIds: [ID!]
+  license: String
+}
+
+enum SbomType {
+  VERSION_UNSPECIFIED
+  CycloneDX
+  SPDX
+}
+
+type SubmitAssetResponse {
+  uploadUrl: String!
+  asset: Asset
+  uploadId: String!
+}
+
+input AssetsByStatusInput {
+  assetGroupIds: [ID!]
+}
+
+input AssetsCountInput {
+  assetGroupIds: [ID!]
+}
+
+input FilesCountInput {
+  assetGroupIds: [ID!]
+}
+
+input VulnerabilitiesCountInput {
+  assetGroupIds: [ID!]
+}
+
+type Metrics {
+  """Count of Assets by Processing Status"""
+  assetsByStatus(args: AssetsByStatusInput): [Metric!]!
+
+  """Count of Assets"""
+  assetsCount(args: AssetsCountInput): [Metric!]!
+
+  """Count of total files"""
+  filesCount(args: FilesCountInput): [Metric!]!
+
+  """Count of assets by risk category"""
+  assetsByRiskCategory: [Metric!]!
+
+  """Count of Vulnerabilities"""
+  vulnerabilitiesCount(args: VulnerabilitiesCountInput): [Metric!]!
+}
+
+"""Count of Assets by Processing Status"""
+type Metric {
+  status: String
+  count: Int!
+}
+
+type AssetGroup {
+  id: ID!
+  name: String!
+  description: String
+}
+
+type AssetGroupsConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [AssetGroupEdge]
+}
+
+type AssetGroupEdge implements Edge {
+  cursor: String
+  node: AssetGroupNode
+}
+
+type AssetGroupNode {
+  id: ID!
+  name: String!
+  description: String
+  assetsCount: Int
+  updatedAt: String
+  highestAssetRisk: Float
+}
+
+type AssetGroupTypesResponse {
+  types: [String!]
+}
+
+input AssetGroupMembersInput {
+  groupId: String!
+  cursor: Cursor!
+  sort: AssetsSort
+}
+
+input AssetGroupAnalyticsInput {
+  groupId: ID!
+}
+
+type AssetGroupAnalytic {
+  totalComponents: Int
+  exploits: Int
+  misconfigurations: Int
+  invalidCertificates: Int
+  crackedCredentials: Int
+}
+
+input RemoveAllAssetGroupsFromAssetsInput {
+  assetIds: [String!]!
+}
+
+input AddAssetGroupsToAssetsInput {
+  assetIds: [String!]!
+  groupIds: [String!]
+}
+
+input SetAssetsToAssetGroupInput {
+  groupId: ID!
+  assetIds: [String!]
+}
+
+input SetAssetGroupsToAssetInput {
+  assetId: ID!
+  groupIds: [String!]
+}
+
+type AssetGroupMutationResponse {
+  assetGroup: AssetGroup
+}
+
+enum AssetGroupMutationResultEnum {
+  ASSET_GROUP_RESULT_UNSPECIFIED
+  ASSET_GROUP_RESULT_SUCCESS
+  ASSET_GROUP_RESULT_NAME_EXISTS
+}
+
+input AssetGroupsInput {
+  cursor: Cursor!
+  filter: String
+  sort: AssetGroupsSort
+}
+
+input AssetGroupsSort {
+  field: AssetGroupsField
+  order: SortOrder
+}
+
+enum AssetGroupsField {
+  NAME
+  ASSET_COUNT
+  UPDATED_AT
+}
+
+input CreateAssetGroupInput {
+  name: String!
+  description: String
+  assetIds: [String!]
+}
+
+input UpdateAssetGroupInput {
+  id: ID!
+  name: String!
+  description: String
+}
+
+input DeleteAssetGroupInput {
+  id: ID!
+}
+
+input AddAssetsToAssetGroupInput {
+  id: ID!
+  assetIds: [String!]!
+}
+
+input RemoveAssetsFromAssetGroupInput {
+  id: ID!
+  assetIds: [String!]!
+}
+
+input BinaryProtectionsSummaryInput {
+  composedAssetId: ID!
+}
+
+type BinaryProtectionsSummary {
+  relroEnabled: Int!
+  relroDisabled: Int!
+  canaryEnabled: Int!
+  canaryDisabled: Int!
+  nxEnabled: Int!
+  nxDisabled: Int!
+  pieEnabled: Int!
+  pieDisabled: Int!
+}
+
+input GetCertificateReachabilityInput {
+  composedAssetId: String!
+  filePath: String!
+  sha256: String!
+}
+
+input packageDependenciesByIdInput {
+  composedAssetId: ID!
+  identificationIds: [String!]
+}
+
+type PackageDependencies {
+  """Associated files identified with this dependency component."""
+  associatedFiles: [ComponentNeighbor!]
+
+  """
+  Components within the root component that this dependency component depends on.
+  """
+  dependencies: Dependencies
+}
+
+type GroupedDependencyConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [GroupedDependencyEdge]
+}
+
+type GroupedDependencyEdge implements Edge {
+  cursor: String
+  node: GroupedDependencies
+}
+
+type GroupedDependencies {
+  vendor: String
+  vendors: Int
+  components: Int
+  licenses: Int
+  license: String
+  type: String
+  subtype: String
+  analytic: AssetAnalytic
+}
+
+input GroupedDependenciesInput {
+  composedAssetId: ID!
+  filter: GroupedDependencyFilter
+  sort: GroupedDependencySort
+  cursor: Cursor
+
+  """Regular dependency input up to here"""
+  groupedBy: DependencyGroupByField
+}
+
+enum DependencyGroupByField {
+  VENDOR
+  LICENSE
+  TYPE
+  SUBTYPE
+}
+
+type DependencyConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [DependencyEdge]
+}
+
+type DependencyEdge implements Edge {
+  cursor: String
+  node: Dependency
+}
+
+input DependencyKnownExploitsInput {
+  """This is the identification's id list of the dependency"""
+  identificationIds: [String!]!
+
+  """This is the composedAssetId"""
+  composedAssetId: ID!
+}
+
+input DependencyInput {
+  composedAssetId: ID!
+  filter: DependencyFilter
+  sort: DependencySort
+  cursor: Cursor
+}
+
+input DependencyFilter {
+  """Filter by vulnerability fields"""
+  analyticFilter: DependencyAnalyticFilter
+  fields: [DependencyFieldFilter]
+  packageMatch: ValueFilter
+
+  """When true, only dependencies marked as reachable (reachability v2)."""
+  isReachable: Boolean
+}
+
+input DependencyAnalyticFilter {
+  vulnerability: ValueFilter
+  exploit: ValueFilter
+}
+
+input DependencySort {
+  field: DependencySortField
+  order: SortOrder
+}
+
+input GroupedDependencySort {
+  field: GroupedDependencySortField
+  order: SortOrder
+}
+
+input GroupedDependencyFilter {
+  """Filter by grouped dependency fields"""
+  fields: [GroupedDependencyFieldFilter]
+
+  """Filter by vulnerability fields"""
+  analyticFilter: DependencyAnalyticFilter
+}
+
+interface FieldFilter {
+  fieldName: String
+  value: String
+  operation: String
+}
+
+input DependencyFieldFilter {
+  fieldName: DependencyField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+input GroupedDependencyFieldFilter {
+  fieldName: GroupedDependencyField!
+  value: JSON!
+  operation: FilterFieldOperation!
+}
+
+enum GroupedDependencyField {
+  VENDOR
+  VENDORS
+  TYPE
+  SUBTYPE
+  LICENSE
+  LICENSES
+  COMPONENTS
+  ISAI
+}
+
+enum GroupedDependencySortField {
+  VENDOR
+  VENDORS
+  TYPE
+  SUBTYPE
+  LICENSE
+  LICENSES
+  COMPONENTS
+  VULNERABILITY
+  EXPLOIT
+  CORRELATIONS
+  SBOM_DEPENDENCIES_COUNT
+  SCOPE
+}
+
+"""Attributes about a discovered AI model."""
+type AiModelAttributes {
+  modelCategory: AiModelCategory
+
+  """Risk severity score from 0.0 to 10.0 (inclusive)."""
+  severity: Float
+
+  """Open ended map of attributes about the model."""
+  modelAttributes: JSON
+}
+
+"""Category of an AI model."""
+enum AiModelCategory {
+  AI_MODEL_CATEGORY_UNSPECIFIED
+  AI_MODEL_CATEGORY_LLM
+  AI_MODEL_CATEGORY_BIOMETRIC
+  AI_MODEL_CATEGORY_DIFFUSION
+  AI_MODEL_CATEGORY_IMAGE_SEGMENTATION
+  AI_MODEL_CATEGORY_OBJECT_DETECTION
+  AI_MODEL_CATEGORY_OBJECT_TRACKING
+}
+
+input ListAiProvidersInput {
+  composedAssetId: ID
+}
+
+type ListAiProvidersResponse {
+  aiProviders: [String!]!
+}
+
+"""
+AI model metadata from Components service (turbinepp.components.v1.AiModelData).
+"""
+type AiModelData {
+  version: String
+  name: String
+  author: String
+  organization: String
+  description: String
+  license: String
+  aiArchitecture: String
+}
+
+input GetAiModelDataInput {
+  composedAssetId: ID!
+  componentId: String!
+}
+
+type GetAiModelDataResponse {
+  aiModelData: AiModelData
+}
+
+"""Possible component dependency scopes."""
+enum ComponentScope {
+  """
+  Components bundled into the final product and required for the application to function in production.
+  """
+  RUNTIME
+
+  """
+  Components used only during local development or build processes, such as linters or compilers. Not included in the final production artifact.
+  """
+  DEVELOPMENT
+
+  """
+  Components necessary for building or compiling the application. These are required at build time but are typically not executed at runtime.
+  """
+  COMPILE
+
+  """Components used for testing."""
+  TEST
+
+  """
+  Components that are only included or activated under specific conditions.
+  """
+  CONDITIONAL
+
+  """Other component scope. Use the name field for the exact string."""
+  OTHER
+}
+
+"""Scope of the dependency component."""
+type Scope {
+  """The scope of the dependency component."""
+  value: ComponentScope
+
+  """Description of the scope, used for tooltips."""
+  description: String
+
+  """
+  The actual scope(s) of the dependency component as a comma-separated string.
+  """
+  actualScope: String
+}
+
+enum IdentifiedViaCategory {
+  """Category not specified."""
+  UNSPECIFIED
+
+  """
+  Identifies components using binary-level analysis of compiled code structures.
+  """
+  BINARY_FINGERPRINT
+
+  """Detects Linux kernel modules (.ko files) through file analysis."""
+  KERNEL_MODULE
+
+  """
+  Matches file hashes against our maintained database of known component files across distributions.
+  """
+  CURATED_HASH
+
+  """
+  Matches file hashes against a historical reference list of known files.
+  """
+  LEGACY_HASH
+
+  """
+  Identifies shared libraries using both filename and version information extracted from the file.
+  """
+  LIBRARY_VERSION
+
+  """
+  Identifies shared libraries using only the filename without version matching.
+  """
+  LIBRARY_NAME
+
+  """
+  Extracts component information directly from package manager files (npm, pip, cargo, etc.).
+  """
+  PACKAGE_MANIFEST
+
+  """
+  Identifies Windows components using metadata embedded in Portable Executable files.
+  """
+  PE_METADATA
+
+  """
+  Identifies components using pattern matching against known software signatures.
+  """
+  SIGNATURE_DETECTION
+
+  """
+  Matches components based on exported function and symbol tables in binaries.
+  """
+  SYMBOL_INDEX
+
+  """Identifies components that were manually remediated by the user."""
+  USER_MODIFIED
+
+  """Identifies the root component of the asset."""
+  ROOT
+}
+
+type IdentificationRemediation {
+  author: String
+  reason: String
+  remediationAction: IdentificationRemediationAction
+  createdAt: String
+  operationId: String
+  operationType: IdentificationRemediationOperationType
+  identificationId: String
+}
+
+enum IdentificationRemediationAction {
+  UNSPECIFIED
+  ADD
+  REMOVE
+}
+
+enum IdentificationRemediationOperationType {
+  UNSPECIFIED
+  ADD
+  REMOVE
+  MODIFY
+}
+
+"""A related, neighbor component with its edge properties."""
+type ComponentNeighbor {
+  component: Component!
+
+  """Derived properties about the Component neighbor by it's relationships."""
+  badges: [ComponentBadge!]
+
+  """
+  Component neighbor is derived from a concrete, exact version (1.0.0) and not a relative version expression such as a package manifest constraint (>1.0.0).
+  """
+  isConcrete: Boolean!
+}
+
+"""
+Badges indicate where a Component’s dependency was identified to facilitate further investigation.
+"""
+enum ComponentBadge {
+  """
+  Files associated with this component were found on the same disk. This acts as an indicator to confirm that the dependency is already resolved and is not something that happens at runtime.
+  """
+  FOUNDONDISK
+
+  """
+  Evidence of this component was found but no exact file matches were located. This means the component is likely embedded within another on the same disk.
+  """
+  EMBEDDED
+}
+
+type Dependencies {
+  """
+  An explicit dependency of the package, application, or library component.
+  """
+  direct: [ComponentNeighbor!]
+
+  """
+  A transitive dependency of the package, application, or library component.
+  """
+  indirect: [ComponentNeighbor!]
+
+  """
+  Components within the root component that depend on this dependency component.
+  """
+  dependents: [ComponentNeighbor!]
+}
+
+"""Methods used for component identification."""
+type Verification {
+  heuristic: Boolean!
+  cryptographic: Boolean!
+  package: Boolean!
+  functionHashing: Boolean!
+  symIndex: Boolean!
+  userModified: Boolean!
+}
+
+input ValueFilter {
+  any: [String!]
+  all: [String!]
+  has: BooleanFilter
+}
+
+type DependencyKnownExploitsData {
+  """Exploit References"""
+  exploits: [ExploitReference!]
+
+  """Botnet References"""
+  botnets: [BotnetReference!]
+
+  """Threat Actors References"""
+  threatActors: [ThreatActorReference!]
+
+  """Ransomware References"""
+  ransomware: [RansomwareReference!]
+
+  """Exploit known attack"""
+  knownAttacks: [String!]
+
+  """Known Exploited Vulnerabilities"""
+  knownExploitedVulnerabilities: [KnownExploitedVulnerabilityReference!]
+}
+
+type KnownExploitedVulnerabilityReference {
+  action: String
+  dateAdded: String
+  dueDate: String
+  name: String
+}
+
+input GetDependencyReachabilityInput {
+  composedAssetId: String!
+  componentId: String!
+}
+
+enum JiraIntegrationStatus {
+  NOT_CONNECTED
+  CONNECTED
+  PENDING
+  INSTALL_FAILED
+  AUTH_EXPIRED
+}
+
+enum JiraSystemCheckStatus {
+  ACTIVE
+  WARNING
+}
+
+enum JiraSyncDirection {
+  JIRA_TO_NETRISE
+  NETRISE_TO_JIRA
+}
+
+enum JiraConnectionEventLogType {
+  SYNC
+  WARNING
+  AUTH
+  ERROR
+}
+
+enum JiraConnectionAlertType {
+  INFO
+  ERROR
+  WARNING
+}
+
+type JiraIntegration {
+  """Current connection status of the Jira integration."""
+  status: JiraIntegrationStatus!
+
+  """Jira Cloud instance URL shown on the integration card."""
+  instanceUrl: String
+
+  """Number of connected Jira spaces."""
+  spacesCount: Int
+
+  """Human-readable last updated timestamp for the integration card."""
+  lastUpdated: String
+
+  """Connection and health details for the Jira integration detail view."""
+  connectionHealth: JiraIntegrationConnectionHealth!
+}
+
+type JiraIntegrationConnectionHealth {
+  """Jira Cloud hostname displayed in the Connection & Health header."""
+  instanceUrl: String!
+
+  """Human-readable connection status label (e.g. Connected)."""
+  connectionStatusLabel: String!
+
+  """OAuth authorization summary shown below the instance URL."""
+  oauthSummary: String
+  metrics: JiraConnectionMetrics!
+  systemChecks: [JiraSystemCheck!]!
+  syncDirections: [JiraSyncDirectionSetting!]!
+  eventLog: [JiraConnectionEventLogEntry!]!
+  alerts: [JiraConnectionAlert!]!
+}
+
+type JiraConnectionMetrics {
+  oauthMethod: String!
+  connectedSpaces: String!
+  activeRules: String!
+  jiraCloudTickets: String!
+  lastSync: String!
+  failedJobs: String!
+}
+
+type JiraSystemCheck {
+  id: String!
+  title: String!
+  description: String!
+  status: JiraSystemCheckStatus!
+  actionLabel: String
+}
+
+type JiraSyncDirectionSetting {
+  direction: JiraSyncDirection!
+  enabled: Boolean!
+}
+
+type JiraConnectionEventLogEntry {
+  type: JiraConnectionEventLogType!
+  event: String!
+  timestamp: String!
+}
+
+type JiraConnectionAlert {
+  type: JiraConnectionAlertType!
+  message: String!
+}
+
+input MisconfigurationsInput {
+  assetId: String!
+  cursor: Cursor!
+  filter: MisconfigurationsFilter
+  sort: MisconfigurationsSort
+}
+
+type MisconfigurationsConnection implements Connection {
+  edges: [MisconfigurationEdge]
+  pageInfo: PageInfo!
+}
+
+type MisconfigurationEdge implements Edge {
+  cursor: String!
+  node: MisconfigurationNode
+}
+
+type MisconfigurationNode {
+  displayName: String
+  checkId: String
+  category: MisconfigurationCategoryType
+  severity: MisconfigurationSeverityType
+  result: MisconfigurationStatusType
+  checkDescription: String
+  checkRecommendation: String
+  context: JSON
+  correlationsCount: Int
+  correlations: [AssetCorrelation] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+}
+
+enum MisconfigurationCategoryType {
+  UNSPECIFIED
+  AUTHENTICATION
+  CONFIGURATION
+  CRYPTOGRAPHY
+  DATA
+  DEPENDENCIES
+  HARDWARE
+  NETWORK
+}
+
+enum MisconfigurationSeverityType {
+  UNSPECIFIED
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MisconfigurationStatusType {
+  UNSPECIFIED
+  NOT_APPLICABLE
+  PASSED
+  FAILED
+}
+
+input MisconfigurationsFilter {
+  fields: [MisconfigurationsFilterField]
+}
+
+input MisconfigurationsFilterField {
+  fieldName: MisconfigurationsField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+enum MisconfigurationsField {
+  NAME
+  CATEGORY
+  STATUS
+  SEVERITY
+  CORRELATIONS
+}
+
+input MisconfigurationsSort {
+  field: MisconfigurationsField
+  order: SortOrder
+}
+
+"""
+Represents a Security Group used for RBAC, grouping users together for access control.
+"""
+type SecurityGroup {
+  id: ID!
+  name: String!
+  description: String
+  createdTime: String
+  lastModifiedTime: String
+  createdBy: String
+  memberCount: Int
+  lastSeenTime: String
+}
+
+"""Connection payload for the `listSecurityGroups` query."""
+type SecurityGroupConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [SecurityGroupEdge]
+}
+
+"""
+Edge wrapping a single `SecurityGroup` node in the `SecurityGroupConnection`.
+"""
+type SecurityGroupEdge implements Edge {
+  cursor: String
+  node: SecurityGroup
+}
+
+"""
+Possible sources for a security group member, indicating how the user became a member.
+Maps to the RBAC service `SecurityGroupMemberSource` proto enum.
+"""
+enum SecurityGroupMemberSource {
+  UNSPECIFIED
+  MANUAL
+  IDP
+}
+
+"""
+Direct user member of the security group requested by `listSecurityGroupMembers(securityGroupId: ...)`.
+Mirrors the fields exposed on the `SecurityGroupMember` proto message.
+"""
+type SecurityGroupMember {
+  userId: ID
+  email: String
+  displayName: String
+  source: SecurityGroupMemberSource!
+  createdTime: String
+  lastSeenTime: String
+  accessibleAssetCount: Int
+}
+
+"""Connection payload for the `listSecurityGroupMembers` query."""
+type SecurityGroupMemberConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [SecurityGroupMemberEdge]
+}
+
+"""
+Edge wrapping a single `SecurityGroupMember` node in the `SecurityGroupMemberConnection`.
+"""
+type SecurityGroupMemberEdge implements Edge {
+  cursor: String
+  node: SecurityGroupMember
+}
+
+"""
+Input payload for the `addSecurityGroupMember` mutation. Adds a user as a member
+of the targeted security group via the RBAC service.
+"""
+input AddSecurityGroupMemberInput {
+  """The id of the security group to add the user to."""
+  securityGroupId: String!
+
+  """The id of the user to add as a member of the security group."""
+  userId: String!
+}
+
+"""Response payload for the `addSecurityGroupMember` mutation."""
+type AddSecurityGroupMemberResponse {
+  member: SecurityGroupMember
+}
+
+"""
+Input payload for the `removeSecurityGroupMember` mutation. Removes a user from
+the targeted security group via the RBAC service.
+"""
+input RemoveSecurityGroupMemberInput {
+  """The id of the security group to remove the user from."""
+  securityGroupId: String!
+
+  """The id of the user to remove from the security group."""
+  userId: String!
+}
+
+"""Response payload for the `removeSecurityGroupMember` mutation."""
+type RemoveSecurityGroupMemberResponse {
+  """The id of the security group the user was removed from."""
+  securityGroupId: String!
+
+  """The id of the user that was removed from the security group."""
+  userId: String!
+
+  """Whether the remove call succeeded."""
+  success: Boolean!
+}
+
+"""
+Input payload for the `createSecurityGroup` mutation. Creates a security group
+in the current organization via the RBAC service.
+"""
+input CreateSecurityGroupInput {
+  """Display name for the new security group."""
+  name: String!
+
+  """Optional description shown in the Users & Access UI."""
+  description: String
+
+  """
+  Org user emails to add as direct members when the group is created.
+  Each email must match an existing org user; unknown emails fail the request.
+  """
+  memberEmails: [String!]
+}
+
+"""Response payload for the `createSecurityGroup` mutation."""
+type CreateSecurityGroupResponse {
+  securityGroup: SecurityGroup
+}
+
+"""
+Input payload for the `updateSecurityGroup` mutation. Updates name and/or description
+for an existing security group via the RBAC service.
+"""
+input UpdateSecurityGroupInput {
+  """The id of the security group to update."""
+  securityGroupId: String!
+
+  """New display name for the security group."""
+  name: String!
+
+  """Optional description. Omit or pass empty string to clear."""
+  description: String
+
+  """
+  When provided, replaces the group's direct member set with these org user emails.
+  An empty list clears direct members. Omit to leave membership unchanged.
+  """
+  memberEmails: [String!]
+}
+
+"""Response payload for the `updateSecurityGroup` mutation."""
+type UpdateSecurityGroupResponse {
+  securityGroup: SecurityGroup
+}
+
+"""
+Input payload for the `deleteSecurityGroup` mutation. Deletes a security group
+via the RBAC service.
+"""
+input DeleteSecurityGroupInput {
+  """The id of the security group to delete."""
+  securityGroupId: String!
+}
+
+"""Response payload for the `deleteSecurityGroup` mutation."""
+type DeleteSecurityGroupResponse {
+  securityGroupId: String!
+  success: Boolean!
+}
+
+"""
+Represents an IDP (Identity Provider) group → NetRise security group mapping used during SSO sync.
+"""
+type IDPGroupMapping {
+  id: ID!
+  idpGroupName: String!
+  securityGroupId: String!
+  securityGroupName: String!
+  lastSyncTime: String
+  createdTime: String
+  createdBy: String
+}
+
+"""Response payload for the `listIDPGroupMappings` query."""
+type ListIDPGroupMappingsResponse {
+  mappings: [IDPGroupMapping!]!
+}
+
+"""
+Input payload for the `inviteUser` mutation. Invites a user to the current organization
+through the RBAC service.
+"""
+input InviteOrgUserInput {
+  """The email address of the user to invite."""
+  email: String!
+
+  """Optional display name for the invited user."""
+  displayName: String
+
+  """
+  Optional list of security group IDs to add the invited user to upon creation.
+  """
+  securityGroupIds: [String!]
+
+  """
+  Optional role to grant the invited user directly at the organization level.
+  When set, the RBAC service creates an organization-scoped ACR granting this
+  role to the new user, independent of any security group membership.
+  """
+  roleId: String
+}
+
+"""
+A user that has been invited to (or exists in) the organization, as returned by the RBAC service.
+"""
+type InvitedOrgUser {
+  id: ID!
+  orgId: String!
+  email: String!
+  displayName: String
+  status: String
+  createdTime: String
+  lastSeenTime: String
+  lastModifiedTime: String
+  accessibleAssetCount: Int
+}
+
+"""Response payload for the `inviteUser` mutation."""
+type InviteUserResponse {
+  user: InvitedOrgUser
+}
+
+"""
+A user that belongs to the current organization, as returned by the RBAC service.
+Mirrors the fields exposed on the `OrgUser` proto message, plus a (currently mocked)
+`securityGroups` list of the security group names the user belongs to.
+"""
+type OrgUser {
+  id: ID!
+  orgId: String!
+  email: String!
+  displayName: String
+  status: String
+  createdTime: String
+  lastSeenTime: String
+  lastModifiedTime: String
+  disabledAt: String
+  disabledBy: String
+  accessibleAssetCount: Int
+
+  """
+  Security groups this user belongs to directly, ordered by max role precedence then name.
+  """
+  securityGroups: [SecurityGroupRef!]!
+}
+
+"""
+Lightweight security group reference on an org user. Mirrors `SecurityGroupRef` proto.
+"""
+type SecurityGroupRef {
+  id: ID!
+  name: String!
+  maxRolePrecedence: Int!
+}
+
+"""Connection payload for the `listOrgUsers` query."""
+type OrgUserConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [OrgUserEdge]
+}
+
+"""Edge wrapping a single `OrgUser` node in the `OrgUserConnection`."""
+type OrgUserEdge implements Edge {
+  cursor: String
+  node: OrgUser
+}
+
+"""
+An RBAC role in the current organization, as returned by the RBAC service.
+Mirrors the fields exposed on the `Role` proto message.
+"""
+type Role {
+  id: ID!
+  orgId: String!
+  name: String!
+  description: String
+  isBuiltin: Boolean!
+  permissions: [String!]!
+  precedence: Int
+  lastModifiedTime: String
+  lastModifiedBy: String
+}
+
+"""
+A single permission from the RBAC catalog. Mirrors the `Permission` proto message.
+"""
+type Permission {
+  id: ID!
+  description: String!
+  category: String!
+}
+
+"""Response payload for the `listPermissions` query."""
+type ListPermissionsResponse {
+  permissions: [Permission!]!
+}
+
+"""Connection payload for the `listRoles` query."""
+type RoleConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [RoleEdge]
+}
+
+"""Edge wrapping a single `Role` node in the `RoleConnection`."""
+type RoleEdge implements Edge {
+  cursor: String
+  node: Role
+}
+
+"""Response payload for the `getRole` query."""
+type GetRoleResponse {
+  role: Role
+}
+
+"""
+Input payload for the `createCustomRole` mutation. Creates an org-scoped
+custom RBAC role via the RBAC service.
+"""
+input CreateCustomRoleInput {
+  """Display name for the new custom role."""
+  name: String!
+
+  """Optional description shown in the Users & Access UI."""
+  description: String
+
+  """Permission identifiers that should be granted to this role."""
+  permissions: [String!]!
+}
+
+"""Response payload for the `createCustomRole` mutation."""
+type CreateCustomRoleResponse {
+  role: Role
+}
+
+"""
+Input payload for the `updateCustomRole` mutation. Updates an existing custom
+role via the RBAC service.
+"""
+input UpdateCustomRoleInput {
+  """The id of the custom role to update."""
+  roleId: String!
+
+  """New display name for the custom role."""
+  name: String!
+
+  """Optional description. Omit or pass empty string to clear."""
+  description: String
+
+  """Permission identifiers that should be granted to this role."""
+  permissions: [String!]!
+}
+
+"""Response payload for the `updateCustomRole` mutation."""
+type UpdateCustomRoleResponse {
+  role: Role
+}
+
+"""
+Input payload for the `deleteCustomRole` mutation. Deletes a custom role
+via the RBAC service.
+"""
+input DeleteCustomRoleInput {
+  """The id of the custom role to delete."""
+  roleId: String!
+}
+
+"""Response payload for the `deleteCustomRole` mutation."""
+type DeleteCustomRoleResponse {
+  roleId: String!
+  success: Boolean!
+}
+
+"""
+Entity type for an access control record binding.
+Maps to the RBAC service `ACREntityType` proto enum.
+"""
+enum AcrEntityType {
+  USER
+  SECURITY_GROUP
+}
+
+"""
+Resource scope for an access control record.
+Maps to the RBAC service `ACRResourceType` proto enum.
+"""
+enum AcrResourceType {
+  ORGANIZATION
+  ASSET_GROUP
+  ASSET
+}
+
+"""
+An access control record (ACR) binding an entity to a role or direct permissions on a resource.
+Mirrors the fields exposed on the `ACRRecord` proto message.
+"""
+type AccessControlRecord {
+  id: ID!
+  orgId: String!
+  entityType: AcrEntityType!
+  entityId: String!
+  entityName: String
+  roleId: String
+  roleName: String
+  resourceType: AcrResourceType!
+  resourceId: String
+  resourceName: String
+  createdTime: String
+  createdBy: String
+  expiresAt: String
+  directPermissions: [String!]!
+  lastModifiedTime: String
+  lastModifiedBy: String
+  entityMemberCount: Int
+}
+
+"""
+Shared binding fields for create and replace ACR mutations.
+Exactly one of `roleId` or `directPermissionIds` must be provided.
+"""
+input AcrBindingInput {
+  entityType: AcrEntityType!
+  entityId: String!
+
+  """Role to grant. Omit or pass empty string for direct-permission ACRs."""
+  roleId: String
+  resourceType: AcrResourceType!
+
+  """
+  Resource identifier. Omit for organization-level grants when not applicable.
+  """
+  resourceId: String
+
+  """Optional ISO-8601 expiration time. Omit for non-expiring grants."""
+  expiresAt: String
+
+  """Permission identifiers for role-less (direct-permission) ACRs."""
+  directPermissionIds: [String!]
+}
+
+"""Input payload for the `createACR` mutation."""
+input CreateAcrInput {
+  binding: AcrBindingInput!
+}
+
+"""Response payload for the `createACR` mutation."""
+type CreateAcrResponse {
+  acr: AccessControlRecord
+}
+
+"""Input payload for the `deleteACR` mutation."""
+input DeleteAcrInput {
+  acrId: String!
+}
+
+"""Response payload for the `deleteACR` mutation."""
+type DeleteAcrResponse {
+  acrId: String!
+  success: Boolean!
+}
+
+"""Input payload for the `replaceACR` mutation."""
+input ReplaceAcrInput {
+  acrId: String!
+  binding: AcrBindingInput!
+}
+
+"""Response payload for the `replaceACR` mutation."""
+type ReplaceAcrResponse {
+  replacedAcr: AccessControlRecord
+  newAcr: AccessControlRecord
+}
+
+"""Connection payload for the `listACRs` query."""
+type AccessControlRecordConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [AccessControlRecordEdge]
+}
+
+"""
+Edge wrapping a single `AccessControlRecord` node in the `AccessControlRecordConnection`.
+"""
+type AccessControlRecordEdge implements Edge {
+  cursor: String
+  node: AccessControlRecord
+}
+
+"""
+Possible statuses that can be applied to an org user via `setOrgUserStatus`.
+Maps to the RBAC service `UserStatus` proto enum.
+"""
+enum OrgUserStatus {
+  ENABLED
+  DISABLED
+}
+
+"""
+Input payload for the `setOrgUserStatus` mutation. Enables or disables a user
+in the current organization through the RBAC service.
+"""
+input SetOrgUserStatusInput {
+  """The id of the user whose status should be updated."""
+  userId: String!
+
+  """The new status to apply to the user."""
+  status: OrgUserStatus!
+}
+
+"""Response payload for the `setOrgUserStatus` mutation."""
+type SetOrgUserStatusResponse {
+  user: OrgUser
+}
+
+"""
+Input payload for the `removeOrgUser` mutation. Permanently removes a user from
+the current organization through the RBAC service.
+"""
+input RemoveOrgUserInput {
+  """The id of the user to remove from the current organization."""
+  userId: String!
+}
+
+"""Response payload for the `removeOrgUser` mutation."""
+type RemoveOrgUserResponse {
+  """The id of the user that was removed."""
+  userId: String!
+
+  """Whether the remove call succeeded."""
+  success: Boolean!
+}
+
+"""
+Input payload for the `resetOrgUserPassword` mutation. Triggers a password
+reset flow for the targeted user.
+"""
+input ResetOrgUserPasswordInput {
+  """The id of the user whose password should be reset."""
+  userId: String!
+}
+
+"""Response payload for the `resetOrgUserPassword` mutation."""
+type ResetOrgUserPasswordResponse {
+  """The id of the user whose password reset was requested."""
+  userId: String!
+
+  """Whether the password reset request succeeded."""
+  success: Boolean!
+}
+
+input GetSecretReachabilityInput {
+  composedAssetId: String!
+  secretId: String!
+}
+
+type UserOrganization {
+  DisplayName: String!
+  Id: ID!
+}
+
+type UserMutations {
+  """Changes user's role"""
+  setUserRole(args: SetUserRoleInput!): User
+
+  """Enables / disables user"""
+  action(args: UserActionInput!): User
+
+  """Deletes user"""
+  delete(args: UserInput!): ErrResponse
+
+  """Removes user from organization"""
+  remove(args: UserInput!): ErrResponse
+
+  """Invites user to organization"""
+  invite(args: InviteUserInput!): User
+
+  """Updates user's data"""
+  updateUser(args: UpdateUserInput!): User
+
+  """Resets user's password"""
+  resetPassword(args: UserInput!): User
+}
+
+input UsersInput {
+  cursor: Cursor!
+}
+
+type UserConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [UserEdge]
+}
+
+type UserEdge implements Edge {
+  cursor: String
+  node: User
+}
+
+type User {
+  id: ID!
+  createdAt: String
+  updatedAt: String
+  name: String!
+  email: String!
+  role: String
+  organization: String
+  isOrgDomainUser: Boolean
+  lastSuccessfulLogin: String
+  verified: Boolean
+  disabled: Boolean
+  passwordDisabled: Boolean
+  picture: String
+  deletedAt: String
+  lastPasswordReset: String
+  lastFailedLogin: String
+  failedLoginAttempts: Int
+  disabledReason: String
+}
+
+input SetUserRoleInput {
+  nextRole: String!
+  userId: String!
+}
+
+input UserActionInput {
+  type: UserActionEnum!
+  userId: String!
+}
+
+enum UserActionEnum {
+  DISABLE
+  ENABLE
+}
+
+type ErrResponse {
+  err: String
+}
+
+input UserInput {
+  id: String!
+}
+
+input InviteUserInput {
+  email: String!
+  role: String!
+}
+
+input UpdateUserInput {
+  userId: String!
+  name: String
+  confirm: String
+  password: String
+}
+
+"""Source of Advisory"""
+enum AdvisorySource {
+  """
+  Open Source Vulnerability (OSV) Database
+  
+  All advisories in this database use the OpenSSF OSV format, which was developed in collaboration with open source communities.
+  
+  https://osv.dev/
+  """
+  OSV
+
+  """
+  GitHub Advisory Database (GHSA)
+  
+  Security vulnerability database inclusive of CVEs and GitHub originated security advisories from the world of open source software.
+  
+  https://github.com/advisories
+  """
+  GHSA
+
+  """
+  Node Security Working Group (NSWG)
+  
+  The Ecosystem Security Working Group works to improve the security of the Node.js Ecosystem.
+  
+  https://github.com/nodejs/security-wg
+  """
+  NSWG
+}
+
+"""Advisory"""
+type Advisory {
+  """Unique identifier for the vulnerability, e.g. cve-id"""
+  id: ID!
+
+  """Source of Vulnerability or Advisory"""
+  source: AdvisorySource!
+
+  """Advisory severity"""
+  severity: String!
+
+  """Date the vulnerability was published"""
+  createdDatetime: String!
+
+  """Date the vulnerability was last updated"""
+  updatedDatetime: String!
+
+  """Date the vulnerability was processed in the NetRise platform"""
+  processedDatetime: String!
+
+  """Title of the advisory"""
+  title: String!
+
+  """Description of the advisory"""
+  description: String!
+
+  """Advisory URL"""
+  url: String!
+
+  """References to external resources associated with the advisory"""
+  references: [VulnerabilityReference!]
+
+  """CVEs associated with the Advisory"""
+  cves: [String!]
+}
+
+type Impact {
+  """Impact Base"""
+  base: ImpactBase!
+
+  """Impact Temporal"""
+  temporal: ImpactTemporal!
+}
+
+type ImpactBase {
+  """Vector string of impact"""
+  vectorString: String!
+
+  """Attack Vector"""
+  attackVector: String!
+
+  """Attack Complexity"""
+  attackComplexity: String!
+
+  """Privileges Required"""
+  privilegesRequired: String!
+
+  """User Interaction"""
+  userInteraction: String!
+
+  """Scope"""
+  scope: String!
+
+  """Confidentiality Impact"""
+  confidentialityImpact: String!
+
+  """Integrity Impact"""
+  integrityImpact: String!
+
+  """Availability Impact"""
+  availabilityImpact: String!
+
+  """Base Score"""
+  baseScore: Float!
+
+  """Base Severity"""
+  baseSeverity: String!
+
+  """Impact Score"""
+  impactScore: Float!
+
+  """Exploitability Score"""
+  exploitabilityScore: Float!
+}
+
+type ImpactTemporal {
+  """Vector string"""
+  vectorString: String!
+
+  """Exploit Code Maturity"""
+  exploitCodeMaturity: String!
+
+  """Remediation Level"""
+  remediationLevel: String!
+
+  """Report Confidence"""
+  reportConfidence: String!
+
+  """Temporal Score"""
+  temporalScore: Float!
+}
+
+type ImpactBaseV2 {
+  """Impact Base Version"""
+  version: String!
+
+  """Vector String"""
+  vectorString: String!
+
+  """Access Vector"""
+  accessVector: String!
+
+  """Access Complexity"""
+  accessComplexity: String!
+
+  """Authentication"""
+  authentication: String!
+
+  """Integrity Impact"""
+  integrityImpact: String!
+
+  """Confidentiality Impact"""
+  confidentialityImpact: String!
+
+  """Availability Impact"""
+  availabilityImpact: String!
+
+  """Base Score"""
+  baseScore: Float!
+
+  """Impact Score"""
+  impactScore: Float!
+
+  """Exploitability Score"""
+  exploitabilityScore: Float!
+
+  """Severity category"""
+  severity: String!
+}
+
+type ImpactTemporalV2 {
+  """Impact Temporal Version"""
+  version: String!
+
+  """Vector String"""
+  vectorString: String!
+
+  """Exploitability"""
+  exploitability: String!
+
+  """Remediation Level"""
+  remediationLevel: String!
+
+  """Report Confidence"""
+  reportConfidence: String!
+
+  """Temporal Score"""
+  temporalScore: Float!
+}
+
+type ImpactV2 {
+  """CVSSv2 Base"""
+  base: ImpactBaseV2!
+
+  """Impact Temporal"""
+  temporal: ImpactTemporalV2!
+}
+
+type ImpactV31 {
+  """Metric"""
+  metric: ImpactV31Metric
+
+  """Impact Temporal"""
+  temporal: ImpactTemporal
+}
+
+type ImpactV31Metric {
+  source: String
+  type: String
+  cvssData: CVSSv31Data
+  exploitabilityScore: Float
+  impactScore: Float
+}
+
+type CVSSv31Data {
+  version: String
+  vectorString: String
+  attackVector: String
+  attackComplexity: String
+  privilegesRequired: String
+  userInteraction: String
+  scope: String
+  confidentialityImpact: String
+  integrityImpact: String
+  availabilityImpact: String
+  baseScore: Float
+  baseSeverity: String
+  temporalScore: Float
+  environmentalScore: Float
+}
+
+type ImpactV4 {
+  source: String
+  type: String
+  cvssData: CVSSDataV4
+  threatCvssSecondary: ThreatCvssV4Secondary
+}
+
+type ThreatCvssV4Secondary {
+  exploitMaturity: String
+  baseThreatSeverity: String
+  baseThreatScore: Float
+  associatedBaseMetricV40: AssociatedBaseMetricV4
+}
+
+type AssociatedBaseMetricV4 {
+  source: String
+  type: String
+  baseScore: Float
+}
+
+type CVSSDataV4 {
+  version: String
+  vectorString: String
+  baseScore: Float
+  baseSeverity: String
+  attackVector: String
+  attackComplexity: String
+  attackRequirements: String
+  privilegesRequired: String
+  userInteraction: String
+  vulnConfidentialityImpact: String
+  vulnIntegrityImpact: String
+  vulnAvailabilityImpact: String
+  subConfidentialityImpact: String
+  subIntegrityImpact: String
+  subAvailabilityImpact: String
+  exploitMaturity: String
+  confidentialityRequirement: String
+  integrityRequirement: String
+  availabilityRequirement: String
+  modifiedAttackVector: String
+  modifiedAttackComplexity: String
+  modifiedAttackRequirements: String
+  modifiedPrivilegesRequired: String
+  modifiedUserInteraction: String
+  modifiedVulnConfidentialityImpact: String
+  modifiedVulnIntegrityImpact: String
+  modifiedVulnAvailabilityImpact: String
+  modifiedSubConfidentialityImpact: String
+  modifiedSubIntegrityImpact: String
+  modifiedSubAvailabilityImpact: String
+  safety: String
+  automatable: String
+  recovery: String
+  valueDensity: String
+  vulnerabilityResponseEffort: String
+  providerUrgency: String
+}
+
+type Exploit {
+  """Publish Datetime"""
+  publishDatetime: String
+
+  """Exploit Datetime"""
+  exploitDatetime: String
+
+  """Recent Exploit Datetime"""
+  recentExploitDatetime: String
+
+  """POC Datetime"""
+  pocDatetime: String
+
+  """Weaponize Datetime"""
+  weaponizeDatetime: String
+
+  """Threat Actor Datetime"""
+  threatActorDatetime: String
+
+  """Recent Threat Actor Datetime"""
+  recentThreatActorDatetime: String
+
+  """Ransomware Datetime"""
+  ransomwareDatetime: String
+
+  """Recent Ransomware Datetime"""
+  recentRansomwareDatetime: String
+
+  """Botnet Datetime"""
+  botnetDatetime: String
+
+  """Recent Botnet Datetime"""
+  recentBotnetDatetime: String
+
+  """Exploit Found"""
+  found: Boolean!
+
+  """Date added to the Known Exploited Vulnerability (KEV) Catalog"""
+  kevAddedDatetime: String
+
+  """Date that action for resolving the KEV is due"""
+  kevDueDatetime: String
+
+  """Maturity"""
+  maturity: String!
+
+  """In the wild"""
+  inTheWild: Boolean!
+
+  """In named thread actors"""
+  inThreatActors: Boolean!
+
+  """In ransomware"""
+  inRansomware: Boolean!
+
+  """In botnets"""
+  inBotnets: Boolean!
+
+  """In trending github"""
+  isTrendingGithub: Boolean!
+
+  """In list of known exploited vulnerabilities"""
+  inKnownExploitedVulnerabilities: Boolean!
+
+  """EPSS score"""
+  epss: EPSSScore
+
+  """Prevalence"""
+  prevalence: Prevalence
+
+  """Exploit References"""
+  references: ExploitReferences
+
+  """Exploit known attack"""
+  knownAttacks: [String!]
+}
+
+type ExploitReferences {
+  """Exploit References"""
+  exploits: [ExploitReference!]
+
+  """Botnet References"""
+  botnets: [BotnetReference!]
+
+  """Threat Actors References"""
+  threatActors: [ThreatActorReference!]
+
+  """Ransomware References"""
+  ransomware: [RansomwareReference!]
+
+  """Reference data for CISA KEV entry"""
+  knownExploitedVulnerabilities: KnownExploitedVulnerabilitiesEntry
+
+  """Known attacks"""
+  knownAttacks: [KnownAttack!]
+}
+
+type KnownAttack {
+  name: String
+  displayName: String
+  associatedVulnerabilitiesList: [String]
+}
+
+type KnownExploitedVulnerabilitiesEntry {
+  action: String!
+  description: String!
+  dateAdded: String!
+  dueDate: String!
+  vendor: String!
+  name: String!
+  product: String!
+  notes: String!
+}
+
+type ExploitReference {
+  """URL"""
+  url: String!
+
+  """Exploit name"""
+  name: String!
+
+  """RefSource"""
+  refsource: String!
+
+  """Date Added"""
+  dateAdded: String!
+
+  """Exploit Maturity"""
+  exploitMaturity: String!
+
+  """Exploit Availability"""
+  exploitAvailability: String!
+}
+
+type RansomwareReference {
+  """Family names"""
+  families: [String!]!
+
+  """References for ransomware"""
+  references: [RansomwareReferenceData!]!
+}
+
+type RansomwareReferenceData {
+  """URL to reference data"""
+  url: String!
+
+  """Date the reference was found."""
+  date: String!
+}
+
+type BotnetReference {
+  """Botnet Name"""
+  botnetName: String!
+
+  """Date Added"""
+  dateAdded: String!
+
+  """url"""
+  url: String
+}
+
+type ThreatActorReference {
+  """Threat Actor Name"""
+  name: String!
+
+  """Alias names associated with the same threat actor"""
+  aliases: [String!]
+
+  """Malpedia URL to reference information about the threat actor"""
+  url: String!
+}
+
+"""
+Count of observed exploit, threat actor, and botnet occurrences and references.
+"""
+type Prevalence {
+  """Exploit"""
+  exploit: Int!
+
+  """Threat Actors"""
+  threatActors: Int!
+
+  """Botnets"""
+  botnets: Int!
+
+  """Known Attacks"""
+  knownAttacks: Int!
+
+  """Ransomware"""
+  ransomware: Int
+}
+
+"""
+Exploit Prediction Scoring System (EPSS)
+
+Estimation of likelihood that a software vulnerability will be exploited in the wild.
+
+https://www.first.org/epss/
+"""
+type EPSSScore {
+  """Epss Score"""
+  score: Float!
+
+  """Percentile"""
+  percentile: Float!
+}
+
+input GetVulnReachabilityInput {
+  assetId: String!
+  advisoryId: String!
+  identificationIds: [String!]!
+}
+
+type ReachabilityEvidence {
+  cveId: String
+  user: String
+  entryPoint: String
+  entryType: EvidenceEntryType
+  scripts: [EvidenceScript]
+}
+
+type EvidenceScript {
+  path: String
+  invocation: String
+  edgeType: EvidenceEdgeType
+  detail: String
+}
+
+enum EvidenceEdgeType {
+  EXECUTES
+  BINARY_IMPORT
+  SOURCE_IMPORT
+  PYTHON_IMPORT
+  CERT_REFERENCE
+  SECRET_REFERENCE
+}
+
+enum EvidenceEntryType {
+  SYSTEMD
+  CRON
+  INITD
+  INITTAB
+  RCLOCAL
+  SYSTEMDTIMER
+  UPSTART
+  XINETD
+  UNSPECIFIED
+}
+
+enum VexStatus {
+  UNSPECIFIED
+  NOT_AFFECTED
+  AFFECTED
+  FIXED
+  UNDER_INVESTIGATION
+  FALSE_POSITIVE
+  RESOLVED_WITH_PEDIGREE
+}
+
+enum VexJustification {
+  CODE_NOT_PRESENT
+  CODE_NOT_REACHABLE
+  REQUIRES_CONFIGURATION
+  REQUIRES_DEPENDENCY
+  REQUIRES_ENVIRONMENT
+  PROTECTED_BY_COMPILER
+  PROTECTED_AT_RUNTIME
+  PROTECTED_AT_PERIMETER
+  PROTECTED_BY_MITIGATING_CONTROL
+}
+
+enum RemediationResponses {
+  CANNOT_FIX
+  WILL_NOT_FIX
+  UPDATE
+  ROLLBACK
+  WORKAROUND_AVAILABLE
+}
+
+input CreateAssetVulnerabilityRemediationInput {
+  assetId: ID!
+  remediationId: RemediationId!
+  justification: VexJustification
+  responses: [RemediationResponses]
+  description: String
+  status: VexStatus!
+}
+
+input CreateAssetVulnerabilityRemediationsInput {
+  assetId: ID!
+  remediationIds: [RemediationId!]!
+  justification: VexJustification
+  responses: [RemediationResponses]
+  description: String
+  status: VexStatus!
+}
+
+input RemediationId {
+  vulnerabilityId: ID!
+  identificationIds: [String!]
+}
+
+type AssetVulnerabilityRemediation {
+  assetId: ID
+  vulnerabilityId: ID!
+  identificationIds: [String]
+  justification: VexJustification
+  responses: [RemediationResponses]
+  response: RemediationResponses @deprecated(reason: "Use responses (array of RemediationResponses) instead.")
+  description: String
+  createdAt: String!
+  author: String!
+  status: VexStatus!
+}
+
+input AssetVulnerabilityRemediationInput {
+  assetId: ID!
+  remediationId: ID!
+  vulnerabilityId: ID!
+}
+
+input CreateAllAssetVulnerabilitiesRemediationInput {
+  assetId: ID!
+  vulnerabilityFilter: VulnerabilityFilter!
+  justification: VexJustification
+  responses: [RemediationResponses]
+  description: String
+  status: VexStatus!
+}
+
+"""
+Risk Score is the weighted average of occurrences of
+CVSS severity categories.
+"""
+type RiskScore {
+  rawScore: Float
+  score: Float
+  category: RiskCategory
+}
+
+"""Category of risk based on score range."""
+enum RiskCategory {
+  """Score range equal 0."""
+  UNSPECIFIED
+
+  """Score range under 2."""
+  NEGLIGIBLE
+
+  """Score range between 2 and 4."""
+  CONSERVATIVE
+
+  """Score range between 4 and 6."""
+  MODERATE
+
+  """Score range between 6 and 8."""
+  SIGNIFICANT
+
+  """Score range between 8 and 10."""
+  SEVERE
+}
+
+input VulnerabilityOverviewInput {
+  filter: VulnerabilityOverviewFilter
+  sort: VulnerabilityOverviewSort
+  cursor: Cursor!
+  assetGroupIds: [ID!]
+}
+
+input VulnerabilityOverviewFilter {
+  inTheWild: Boolean
+  inRansomware: Boolean
+  inThreatActors: Boolean
+  inBotnets: Boolean
+  exploitFound: Boolean
+  inKnownExploitedVulnerabilities: Boolean
+  vulnerabilityIsReachable: Boolean
+  kevDueDatetime: DateTimeFilter
+  createdDatetime: DateTimeFilter
+  attacks: HighProfileExploitCategoryFilter
+  vulnerabilityId: String
+  priorityScoreStr: String
+  severity: Severity
+  fields: [VulnerabilityOverviewFieldFilter]
+}
+
+enum Severity {
+  UNSPECIFIED
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+type VulnerabilityOverviewConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [VulnerabilityOverviewEdge]
+}
+
+type VulnerabilityOverviewEdge implements Edge {
+  cursor: String
+  node: VulnerabilityOverview
+}
+
+type VulnerabilityOverview {
+  cve: String
+  component: String
+  occurrences: Int
+  inAssets: Int
+  cisaDueDate: DateTime
+  inBotnets: Boolean
+  inKnownAttacks: Boolean
+  inRansomware: Boolean
+  inTheWild: Boolean
+  inThreatActors: Boolean
+  inKnownExploitedVulnerabilities: Boolean
+  dateAdded: DateTime
+  netrisePriorityRating: Int
+  severity: Severity
+  knownAttacksList: [String]
+  threatActorsList: [String]
+  botnetsList: [String]
+  epssScore: Float
+  epssPercentile: Float
+  exploitFound: Boolean
+  priority: String
+  cvssScore: Float
+}
+
+input VulnerabilityOverviewSort {
+  field: VulnerabilityOverviewSortField
+  order: SortOrder
+}
+
+enum VulnerabilityOverviewSortField {
+  CVE
+  INASSETS
+  CISADUEDATE
+  COMPONENT
+  OCCURRENCES
+  EPSSSCORE
+  CVSSSCORE
+  SEVERITY
+}
+
+input VulnerabilityOverviewFieldFilter {
+  fieldName: VulnerabilityOverviewFilterField!
+  value: JSON!
+  operation: FieldFilterOperation!
+}
+
+enum VulnerabilityOverviewFilterField {
+  CVE
+  INASSETS
+  CISADUEDATE
+  COMPONENT
+  OCCURRENCES
+  EPSSSCORE
+  EPSSPERCENTILE
+  CVSSSCORE
+  SEVERITY
+  MATURITY
+  ATTACKVECTOR
+  ATTACKCOMPLEXITY
+  VULNERABILITYREMEDIATIONSTATUS
+}
+
+"""Vulnerability"""
+input MatchVulnerabilitiesInput {
+  identifier: ID!
+}
+
+input VulnerabilityInput {
+  """Unique identifier for the vulnerability, e.g. cve-id"""
+  id: String!
+}
+
+type Vulnerability {
+  """Unique identifier for the vulnerability, e.g. cve-id"""
+  id: ID!
+
+  """
+  Netrise Priority Score for individual vulnerability that normalizes CVSS, EPSS, and supporting exploit features on a 0-1 scale.
+  """
+  priorityScore: Float!
+
+  """Overall severity"""
+  severity: String!
+
+  """Date the vulnerability was published"""
+  createdDatetime: String!
+
+  """Date the vulnerability was last updated"""
+  updatedDatetime: String!
+
+  """Date the vulnerability was processed in the NetRise platform"""
+  processedDatetime: String!
+
+  """Description of the vulnerability"""
+  description: String
+
+  """Problem types associated with the vulnerability"""
+  problemTypes: [ProblemType!]
+
+  """References to external resources associated with the vulnerability"""
+  references: [VulnerabilityReference!]
+
+  """Tags associated with the vulnerability, for filtering"""
+  tags: [String!]
+
+  """CVSS-3 impact for the vulnerability"""
+  impact: Impact
+
+  """CVSS-2 impact for the vulnerability"""
+  impactV2: ImpactV2
+
+  """CVSS-3.1 impact for the vulnerability"""
+  impactV31: ImpactV31
+
+  """CVSS-4 impact for the vulnerability"""
+  impactV4: ImpactV4
+
+  """Exploit availability for the vulnerability"""
+  exploit: Exploit
+
+  """The most recent vulnerability remediation for a given assetId"""
+  currentRemediation: AssetVulnerabilityRemediation
+
+  """
+  The analysis status of the vulnerability as categorized by NVD (e.g., REJECTED, ANALYZED, AWAITING_ANALYSIS, MODIFIED, UNDERGOING_ANALYSIS, DEFERRED, RECEIVED).
+  """
+  nvdStatus: VulnerabilityNVDStatus
+}
+
+enum VulnerabilityNVDStatus {
+  UNSPECIFIED
+  REJECTED
+  ANALYZED
+  AWAITING_ANALYSIS
+  MODIFIED
+  UNDERGOING_ANALYSIS
+  DEFERRED
+  RECEIVED
+}
+
+"""Problem type for vulnerability, e.g. Common Weakness Enumeration"""
+type ProblemType {
+  """Value"""
+  value: String!
+
+  """Name"""
+  name: String
+
+  """URL"""
+  url: String!
+}
+
+type VulnerabilityReference {
+  """URL"""
+  url: String!
+
+  """Name"""
+  name: String
+
+  """Reference Source"""
+  refsource: String!
+}
+
+type DetectedVulnerability {
+  id: ID!
+  cve: String
+  name: String
+  identificationIds: [String]
+  version: String
+  fixVersions: [String]
+  vendor: String
+  maturity: String
+  filePath: String
+  severity: String
+  cvssScore: Float
+  attackVector: String
+  attackComplexity: String
+  inKnownExploitedVulnerabilities: Boolean
+  correlations: [AssetCorrelation] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
+  correlationsCount: Int
+  currentRemediation: AssetVulnerabilityRemediation
+  epssScore: Float
+  epssPercentile: Float
+  isReachable: Boolean
+}
+
+type VulnerabilityConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [VulnerabilityEdge]
+}
+
+type DetailedVulnerabilitiesConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [DetailedVulnerabilityEdge]
+}
+
+type DetailedVulnerabilityEdge implements Edge {
+  cursor: String
+  node: DetailedVulnerability
+}
+
+type DetailedVulnerability {
+  id: String
+  severity: String
+  createdDatetime: String
+  updatedDatetime: String
+  processedDatetime: String
+  description: String
+
+  """Problem types associated with the vulnerability"""
+  problemTypes: [ProblemType!]
+
+  """References to external resources associated with the vulnerability"""
+  references: [VulnerabilityReference!]
+
+  """CVSS-3 impact for the vulnerability"""
+  impact: Impact
+
+  """CVSS-2 impact for the vulnerability"""
+  impactV2: ImpactV2
+
+  """CVSS-3.1 impact for the vulnerability"""
+  impactV31: ImpactV31
+
+  """CVSS-4 impact for the vulnerability"""
+  impactV4: ImpactV4
+
+  """Exploit availability for the vulnerability. No longer mandatory"""
+  exploit: Exploit
+}
+
+type VulnerabilityEdge implements Edge {
+  cursor: String
+  node: DetectedVulnerability
+}
+
+input PaginatedVulnerabilitiesInput {
+  assetId: ID!
+  cursor: Cursor
+  filter: VulnerabilityFilter
+  sort: VulnerabilitySort
+}
+
+input PaginatedDetailedVulnerabilitiesInput {
+  assetId: ID!
+  cursor: Cursor
+  filter: DetailedVulnerabilityFilter
+}
+
+input DetailedVulnerabilityFilter {
+  createdDatetime: DateTimeFilter
+  updatedDatetime: DateTimeFilter
+}
+
+input VulnerabilityFilter {
+  fields: [VulnerabilityFieldFilter]
+  vulnerability: StringFilter
+  inBotnets: BooleanFilter
+  inThreatActors: BooleanFilter
+  inRansomware: BooleanFilter
+  inKnownAttacks: BooleanFilter
+  exploits: BooleanFilter
+  inKnownExploitedVulnerabilities: BooleanFilter
+  hasFixVersion: BooleanFilter
+  isReachable: BooleanFilter
+  kevDueDatetime: DateTimeFilter
+}
+
+input VulnerabilityFieldFilter {
+  fieldName: VulnerabilityField
+  value: JSON
+  operation: FilterFieldOperation
+}
+
+input VulnerabilitySort {
+  field: VulnerabilitySortField
+  order: SortOrder
+}
+
+enum VulnerabilityField {
+  CVE
+  SEVERITY
+  NAME
+  VERSION
+  VENDOR
+  MATURITY
+  CORRELATIONS
+  FILEPATH
+  ATTACKVECTOR
+  ATTACKCOMPLEXITY
+  VULNERABILITYREMEDIATIONSTATUS
+  EPSSSCORE
+  EPSSPERCENTILE
+}
+
+enum VulnerabilitySortField {
+  CVE
+  SEVERITY
+  NAME
+  VERSION
+  VENDOR
+  MATURITY
+  CORRELATIONS
+  FILEPATH
+  ATTACKVECTOR
+  ATTACKCOMPLEXITY
+  VULNERABILITYREMEDIATIONSTATUS
+  EPSSSCORE
+  EPSSPERCENTILE
+}
+
+input VulnerabilityExternalFiltersInput {
+  assetId: ID!
+}
+
+type VulnerabilityExternalFilters {
+  inBotnets: Int
+  inThreatActors: Int
+  inRansomware: Int
+  inKnownAttacks: Int
+  exploits: Int
+  low: Int
+  medium: Int
+  high: Int
+  critical: Int
+}
+
+"""Hashing digests"""
+type Digest {
+  md5: String
+  sha1: String
+  sha256: String
+}
+
+"""Component type"""
+enum ComponentType {
+  UNSPECIFIED
+  APPLICATION
+  CONTAINER
+  DEVICE
+  FRAMEWORK
+  KERNEL
+  KERNEL_MODULE
+  LIBRARY
+  OPERATING_SYSTEM
+  PACKAGE
+  SBOM
+  BINARY
+  ROOT
+  AI_MODEL
+}
+
+"""Subtype of component"""
+enum ComponentSubType {
+  """Real-Time Operating System"""
+  RTOS
+
+  """Linux or Embedded Linux"""
+  LINUX
+
+  """Debian Package"""
+  DPKG
+
+  """Node Package"""
+  NPM
+
+  """Executable and Linkable Format"""
+  ELF
+
+  """Executable"""
+  EXE
+
+  """Command Line Application"""
+  CLI
+
+  """Docker/OCI Container Layer"""
+  CONTAINER_LAYER
+
+  """Python EGG"""
+  EGG
+
+  """Python Wheel"""
+  WHEEL
+
+  """Red Hat Package Manager"""
+  RPM
+}
+
+"""
+ Language including machine, intermediate, and high level
+programming languages
+"""
+enum Language {
+  """Machine code"""
+  BINARY
+  ASSEMBLY
+  C
+  CPP
+  CSHARP
+  GOLANG
+  PERL
+  BASH
+  JAVA
+  PYTHON
+  JAVASCRIPT
+  UNKNOWN
+}
+
+"""
+ Component Identifier URI
+Human readable URI for different component or package
+identification standards
+"""
+type Identifier {
+  """Identifier uri"""
+  uri: String!
+
+  """Format for identifier URI"""
+  type: IdentifierFormat!
+}
+
+"""Format for identifier URI"""
+enum IdentifierFormat {
+  """
+   Common Platform Enumeration v2.2
+  https://cpe.mitre.org/specification/
+  """
+  CPE_22
+
+  """
+   Common Platform Enumeration v2.3
+  https://cpe.mitre.org/specification/
+  """
+  CPE_23
+
+  """
+   Package "Mostly Universal" URL
+  https://github.com/package-url/purl-spec
+  """
+  PURL
+
+  """
+   Software Identification Tag
+  https://github.com/package-url/purl-spec
+  """
+  SWID
+
+  """Netrise Component Identification Spec"""
+  NETRISE
+}
+
+"""
+Ranks the fidelity of the sources and methods used to identify this type.
+"""
+enum Fidelity {
+  LOW
+  MEDIUM
+  HIGH
+  CERTAIN
+}
+
+enum Confidence {
+  """Confidence not specified"""
+  UNSPECIFIED
+
+  """Low confidence"""
+  LOW
+
+  """Medium confidence"""
+  MEDIUM
+
+  """High confidence"""
+  HIGH
+}
+
+"""A coordinate identifying a location where a component was found."""
+type Coordinate {
+  """Method of component identification used to associate this coordinate"""
+  method: String!
+
+  """Digest hashes identifying the content at the coordinate"""
+  digest: Digest!
+
+  """Identifies the type of the coordinate."""
+  type: CoordinateType!
+
+  """Carries a marshalled form of the coordinate."""
+  value: String!
+
+  """Indicates a confidence level in the relationship."""
+  fidelity: Fidelity!
+}
+
+"""Identifies the type of coordinate."""
+enum CoordinateType {
+  """A standard path type coordinate."""
+  PATH
+}
+
+"""A package that is kept within a package management system."""
+type Package {
+  """Name of the package"""
+  name: String!
+
+  """Identifies the type of package, such as DPKG, NPM, etc."""
+  type: String
+
+  """The source language behind the component (presumed)"""
+  language: [Language!]
+
+  """License(s) of the package (raw)"""
+  license: String
+
+  """Version identified as primary; the version displayed to users."""
+  version: StringVersion
+
+  """
+  The raw version of the package, used for more advanced parsing and relative dependency relationships.
+  """
+  rawVersion: StringVersion
+
+  """Various reference links for the component."""
+  referenceLinks: [ReferenceLink!]
+
+  """A short summary of the description of the package."""
+  summary: String
+
+  """Other names that the package provides."""
+  provides: [PackageDependency!]
+
+  """
+  Files that are reported to be associated with the package.  Some package managers, like DPKG and NPM provide this info.
+  """
+  associatedFiles: [Coordinate!]
+
+  """
+  A list of dependencies reported by the package manager; other packages that this package depends on.
+  """
+  dependencies: [PackageDependency!]
+
+  """The contacts who authored the package."""
+  authors: [Email!]
+
+  """The contacts who maintain the package."""
+  maintainers: [Email!]
+}
+
+"""
+A simple reference to a dependency, such as for listing packages that a more detailed package reference is dependent on.
+"""
+type PackageDependency {
+  """The name of the referenced package."""
+  name: String!
+
+  """
+  The raw, unparsed and uninterpreted dependency version, which may include range information.
+  """
+  version: StringVersion!
+}
+
+"""A link on a component for things like docs, source, etc."""
+type ReferenceLink {
+  type: ReferenceLinkType!
+  url: String!
+}
+
+"""The various types of reference links for asset."""
+enum ReferenceLinkType {
+  ORIGIN
+  HOMEPAGE
+  REPO
+  ISSUES
+  DONATE
+  DOCS
+  CHANGES
+  CI
+  TWITTER
+  CHAT
+  MAILING_LISTS
+  DOWNLOAD
+  OTHER
+}
+
+"""
+Known `purl` package types
+
+https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst
+"""
+enum PackageType {
+  GENERIC
+  NPM
+  PYPI
+  CARGO
+  RPM
+  IPK
+  DEB
+  GOLANG
+  GITHUB
+  NUGET
+  DOCKER
+  MAVEN
+  ALPM
+  SWID
+  BITBUCKET
+  COCOAPODS
+  COMPOSER
+  CONAN
+  CONDA
+  CRAN
+  GEM
+  HACKAGE
+  HEX
+  OCI
+  PKGCONFIG
+  PUB
+  SWIFT
+  OPENWRT
+  ALPINEAPK
+  JAR
+  YOCTO
+  WINDOWS
+}
+
+"""Package URL"""
+type PURL {
+  """Type of package"""
+  type: Package!
+
+  """Prefix of the package/group"""
+  namespace: String
+
+  """Name of the package"""
+  name: String!
+
+  """Version of the package"""
+  version: String
+
+  """Package-specific data qualifiers"""
+  qualifiers: [PURLQualifier!]
+
+  """Extra subpath within a package"""
+  subpath: String
+}
+
+"""Extra data qualifiers"""
+type PURLQualifier {
+  key: String!
+  value: String!
+}
+
+"""Semantic versioning"""
+type SemanticVersion {
+  """Major version tag"""
+  major: String
+
+  """Minor version tag"""
+  minor: String
+
+  """Build version tag"""
+  build: String
+
+  """Release version tag"""
+  release: String
+}
+
+"""Calendar versioning"""
+type CalendarVersion {
+  """Major version tag"""
+  major: Int
+
+  """Minor version tag"""
+  minor: Int
+
+  """Micro version tag"""
+  micro: Int
+
+  """Version Modifier"""
+  modifier: String
+}
+
+"""Version identifier"""
+type StringVersion {
+  """Version Id"""
+  id: String
+
+  """Alternative version identifiers"""
+  alternatives: [String!]
+
+  """
+  Version is derived from a concrete, exact version (1.0.0) and not a relative version expression such as a package manifest constraint (>1.0.0).
+  """
+  isConcrete: Boolean!
+}
+
+"""Generic Array Version"""
+type ArrayVersion {
+  """Version Id"""
+  id: String!
+
+  """Version Components"""
+  components: [String!]!
+}
+
+"""Different types of versioning schemas"""
+union Version = SemanticVersion | CalendarVersion | StringVersion | ArrayVersion

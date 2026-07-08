@@ -6,7 +6,7 @@ from typing import Optional
 
 import typer
 
-from ._common import run_graphql_by_name, run_list
+from ._common import FILTER_HELP, run_graphql_by_name, run_list
 
 APP_NAME = "user"
 APP_HELP = "Organization users."
@@ -21,10 +21,10 @@ def register(app: typer.Typer) -> None:
 
 def list_users(
     ctx: typer.Context,
-    filter_json: Optional[str] = typer.Option(None, "--filter"),
+    filter_json: Optional[str] = typer.Option(None, "--filter", help=FILTER_HELP),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List organization users."""

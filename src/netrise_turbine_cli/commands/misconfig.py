@@ -6,7 +6,7 @@ from typing import Optional
 
 import typer
 
-from ._common import resolve_asset_id, run_list
+from ._common import FILTER_HELP, resolve_asset_id, run_list
 from ._registry import MISCONFIG_LIST_METHODS
 
 APP_NAME = "misconfig"
@@ -22,10 +22,10 @@ def list_misconfigs(
     asset_id: Optional[str] = typer.Argument(None, help="Asset ID (or use --asset)."),
     asset: Optional[str] = typer.Option(None, "--asset", help="Asset ID."),
     detail: str = typer.Option("lite", "--detail", help="lite|full"),
-    filter_json: Optional[str] = typer.Option(None, "--filter"),
+    filter_json: Optional[str] = typer.Option(None, "--filter", help=FILTER_HELP),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List misconfigurations for an asset."""
