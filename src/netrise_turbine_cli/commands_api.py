@@ -100,7 +100,10 @@ def schema_show(
 def _default_schema_path() -> Path | None:
     here = Path(__file__).resolve()
     candidates = [
-        here.parents[4] / "sdk-artifacts" / "schema.graphql",
+        # Bundled snapshot (present in wheels and in generated checkouts).
+        here.parent / "_generated" / "schema.graphql",
+        # Monorepo layout: turbine/cli/src/netrise_turbine_cli → turbine/sdk-artifacts.
+        here.parents[3] / "sdk-artifacts" / "schema.graphql",
         Path.cwd() / "sdk-artifacts" / "schema.graphql",
     ]
     for c in candidates:

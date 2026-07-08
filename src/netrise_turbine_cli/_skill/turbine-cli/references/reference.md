@@ -196,7 +196,7 @@ Prefer these noun-verb commands for everyday tasks:
 - **Prefer:** `turbine vuln remediate --all`
 - **Input model:** `CreateAllAssetVulnerabilitiesRemediationInput`
 - **Schema:** `turbine api remediate-all-asset-vulnerabilities --schema`
-- **Flags:** --asset-id, --justification, --description, --status
+- **Flags:** --asset-id, --justification, --responses, --description, --status
 
 ### `api remediate-asset-vulnerabilities`
 
@@ -207,7 +207,7 @@ Prefer these noun-verb commands for everyday tasks:
 - **Prefer:** `turbine vuln remediate --bulk`
 - **Input model:** `CreateAssetVulnerabilityRemediationsInput`
 - **Schema:** `turbine api remediate-asset-vulnerabilities --schema`
-- **Flags:** --asset-id, --justification, --description, --status
+- **Flags:** --asset-id, --justification, --responses, --description, --status
 
 ### `api remediate-asset-vulnerability`
 
@@ -218,7 +218,7 @@ Prefer these noun-verb commands for everyday tasks:
 - **Prefer:** `turbine vuln remediate`
 - **Input model:** `CreateAssetVulnerabilityRemediationInput`
 - **Schema:** `turbine api remediate-asset-vulnerability --schema`
-- **Flags:** --asset-id, --justification, --description, --status
+- **Flags:** --asset-id, --justification, --responses, --description, --status
 
 ### `api remediate-certificates`
 

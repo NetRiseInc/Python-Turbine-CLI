@@ -1,12 +1,17 @@
 [tool.poetry]
 name = "netrise-turbine-cli"
-version = "0.1.2"
+version = "0.1.4"
 description = "Turbine GraphQL CLI for human operators and AI agents"
 authors = ["NetRise <anthony.feddersen@netrise.io>"]
 readme = "README.md"
 packages = [{ include = "netrise_turbine_cli", from = "src" }]
-# Bundled agent skill (installed via `turbine skill install`)
-include = [{ path = "src/netrise_turbine_cli/_skill/**/*", format = ["sdist", "wheel"] }]
+# Bundled agent skill (installed via `turbine skill install`) and generated
+# non-Python artifacts (catalog, schema snapshot for `turbine api schema`).
+include = [
+    { path = "src/netrise_turbine_cli/_skill/**/*", format = ["sdist", "wheel"] },
+    { path = "src/netrise_turbine_cli/_generated/*.json", format = ["sdist", "wheel"] },
+    { path = "src/netrise_turbine_cli/_generated/*.graphql", format = ["sdist", "wheel"] },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12"

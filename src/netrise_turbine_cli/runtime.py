@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -267,11 +268,29 @@ class RuntimeContext:
         sys.stdout.write(json.dumps(data, separators=(",", ":"), default=str) + "\n")
 
 
-def _to_jsonable(value: Any) -> Any:
+# Field names whose values may carry the API's internal composed asset ID
+# shape ("<id>|<revision>"). The suffix is an implementation detail users
+# should never see; every input surface accepts the bare ID.
+_COMPOSED_ID_KEYS = frozenset({"composedAssetId", "composed_asset_id", "assetId", "asset_id"})
+
+_COMPOSED_ID_RE = re.compile(r"^(.+)\|\d+$")
+
+
+def _strip_composed_suffix(value: Any) -> Any:
+    if isinstance(value, str):
+        match = _COMPOSED_ID_RE.match(value)
+        if match:
+            return match.group(1)
+    return value
+
+
+def _to_jsonable(value: Any, *, key: str | None = None) -> Any:
     if hasattr(value, "model_dump"):
-        return value.model_dump(mode="json", by_alias=True)
+        return _to_jsonable(value.model_dump(mode="json", by_alias=True), key=key)
     if isinstance(value, list):
-        return [_to_jsonable(v) for v in value]
+        return [_to_jsonable(v, key=key) for v in value]
     if isinstance(value, dict):
-        return {k: _to_jsonable(v) for k, v in value.items()}
+        return {k: _to_jsonable(v, key=k) for k, v in value.items()}
+    if key in _COMPOSED_ID_KEYS:
+        return _strip_composed_suffix(value)
     return value

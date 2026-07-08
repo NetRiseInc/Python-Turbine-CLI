@@ -222,14 +222,14 @@ files = [
 
 [[package]]
 name = "netrise-turbine-sdk"
-version = "0.1.17"
+version = "0.1.22"
 description = "Turbine GraphQL Python SDK (generated via ariadne-codegen)"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "netrise_turbine_sdk-0.1.17-py3-none-any.whl", hash = "sha256:26345776f88755b8b50d3da66b16b7dd4f0faf80d3d5744b07e4c8f23998fa2c"},
-    {file = "netrise_turbine_sdk-0.1.17.tar.gz", hash = "sha256:bea546d8e47fe83534461ca2158c666978b155d919201e59fce99054e55397e8"},
+    {file = "netrise_turbine_sdk-0.1.22-py3-none-any.whl", hash = "sha256:103857372c969c4faf3b707995f3c1c1e6c5dc627246029cd4058636667b9560"},
+    {file = "netrise_turbine_sdk-0.1.22.tar.gz", hash = "sha256:01d057d0b09d0d6c4b49eff37183ee04209c0c2721bfee770ae523fff6a5b923"},
 ]
 
 [package.dependencies]

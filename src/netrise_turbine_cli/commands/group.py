@@ -8,7 +8,7 @@ from typing import Optional
 import typer
 
 from ..runtime import RuntimeContext
-from ._common import resolve_group_id, run_graphql_by_name, run_list
+from ._common import FILTER_HELP, SORT_HELP, resolve_group_id, run_graphql_by_name, run_list
 
 APP_NAME = "group"
 APP_HELP = "Asset groups: list, members, and membership management."
@@ -26,11 +26,11 @@ def register(app: typer.Typer) -> None:
 
 def list_groups(
     ctx: typer.Context,
-    filter_json: Optional[str] = typer.Option(None, "--filter"),
-    sort_json: Optional[str] = typer.Option(None, "--sort"),
+    filter_json: Optional[str] = typer.Option(None, "--filter", help=FILTER_HELP),
+    sort_json: Optional[str] = typer.Option(None, "--sort", help=SORT_HELP),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List asset groups."""
@@ -52,7 +52,7 @@ def list_members(
     group: Optional[str] = typer.Option(None, "--group", help="Group ID."),
     limit: int = typer.Option(100, "--limit"),
     after: Optional[str] = typer.Option(None, "--after", help="Resume after this cursor."),
-    fields: Optional[str] = typer.Option(None, "--fields"),
+    fields: Optional[str] = typer.Option(None, "--fields", help="Comma-separated dot-path projection, e.g. id,name,risk.score."),
     dry_run: bool = typer.Option(False, "--dry-run"),
 ) -> None:
     """List members of an asset group."""

@@ -17,11 +17,13 @@ def org_info(ctx: typer.Context) -> None:
     """Show organization-level information."""
     from ._common import run_graphql_by_name
 
+    # The operation takes an args object (all fields optional) — it must be
+    # passed explicitly or the generated client raises a TypeError.
     run_graphql_by_name(
         ctx,
         method_name="query_org_level_information",
-        input_model_name=None,
-        input_param=None,
+        input_model_name="OrgLevelInformationInput",
+        input_param="org_level_information_args",
         payload={},
         risk="read",
     )

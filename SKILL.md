@@ -52,11 +52,44 @@ turbine asset status --upload-id UPLOAD_ID -o json          # single non-blockin
 
 When done, fetch results: `turbine asset get ASSET_ID`, `turbine vuln list ASSET_ID --detail lite -o json`. Do not poll `asset list` to find the upload — `asset status --upload-id` is the direct path.
 
+## Vague asks — route, summarize, then offer drill-downs
+
+"Risk" in Turbine spans several finding categories: vulnerabilities (CVEs), exploit exposure, misconfigurations, secrets and credentials, certificates and keys, and license issues. When the user asks broadly — "what risk does this asset have?", "how bad is it?", "any security issues?", "what did the scan find?" — do NOT fan out across every list command. Run the one-call summary:
+
+```bash
+turbine asset risk ASSET_ID -o json     # risk score + counts per category
+turbine asset risk --latest -o json     # most recently created asset ("the asset I just uploaded")
+```
+
+Each category in the output includes its `drillDown` command. Present the score and the non-zero counts, then ask which category to explore, e.g.: "Which type of risk are you interested in — CVEs, misconfigurations, certificate issues, detected secrets, license issues?" Only drill down immediately when the request names a category or one category obviously dominates.
+
+Routing for specific phrases:
+
+| User says | Run |
+| --- | --- |
+| "last/latest asset I uploaded" | `turbine asset risk --latest` or `turbine asset list --sort createdAt:desc --limit 1` |
+| "risk", "posture", "findings", "issues" | `turbine asset risk ASSET_ID` |
+| "CVEs", "vulnerabilities", "exploits" | `turbine vuln list ASSET_ID --detail lite` |
+| "misconfigurations", "hardening" | `turbine misconfig list ASSET_ID` |
+| "secrets", "passwords", "credentials" | `turbine secret list ASSET_ID` / `turbine credential list ASSET_ID` |
+| "certificates", "keys", "crypto" | `turbine cert list ASSET_ID` / `turbine key list ASSET_ID` |
+| "licenses", "legal" | `turbine license list ASSET_ID` |
+| "components", "SBOM", "dependencies" | `turbine component list ASSET_ID` |
+
+## Asset IDs
+
+Some operations name their input `composedAssetId` — it is interchangeable with the plain asset ID. Always pass the bare `ASSET_ID` (never an `id|revision` value); the CLI strips any `|<revision>` suffix from output, so IDs you read back are always safe to reuse.
+
 ## Token discipline
 
 - Prefer curated list commands with `--detail summary|lite` and `--limit` / `--fields`.
 - List output is NDJSON in agent mode (one JSON object per line).
 - Use `api graphql` only when necessary.
+
+## Sort and filter
+
+- `--sort FIELD[:asc|desc]`, e.g. `--sort createdAt:desc`. Case-insensitive field names; no `--sort-by`/`--sort-order` flags exist. Invalid fields error with the valid field list.
+- `--filter` takes resource-specific JSON, e.g. `--filter '{"fields":[{"fieldName":"NAME","value":["router"],"operation":"CONTAINS"}]}'`. Exact shape: `turbine api <operation> --schema -o json`.
 
 ## Safety
 
