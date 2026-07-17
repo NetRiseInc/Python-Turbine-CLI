@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "netrise-turbine-cli"
-version = "0.1.4"
+version = "0.1.5"
 description = "Turbine GraphQL CLI for human operators and AI agents"
 authors = ["NetRise <anthony.feddersen@netrise.io>"]
 readme = "README.md"

@@ -107,7 +107,7 @@ Some operations name their input `composedAssetId` — it is interchangeable wit
 
 ## Generated API index
 
-Total API operations: **114** (regenerated from SDK).
+Total API operations: **144** (regenerated from SDK).
 
 Use curated commands first (`turbine asset list`, `turbine vuln remediate`, …).
 Fall back to `turbine api <operation>` for full GraphQL coverage.
@@ -116,17 +116,26 @@ Fall back to `turbine api <operation>` for full GraphQL coverage.
 | --- | --- | --- |
 | `add-asset-groups-to-assets` | write | — |
 | `add-assets-to-asset-group` | write | group add-assets |
+| `add-security-group-member` | write | — |
 | `asset-add-dependency` | write | — |
 | `asset-modify-dependency` | write | — |
 | `asset-remove-dependencies` | write | — |
 | `asset-submit` | write | asset submit |
 | `asset-update` | write | asset update |
+| `bulk-delete-ac-rs` | write | — |
+| `create-acr` | write | — |
 | `create-asset-comparison-report` | write | — |
 | `create-asset-group` | write | group create |
+| `create-custom-role` | write | — |
 | `create-notification-configuration` | write | — |
+| `create-security-group` | write | — |
+| `delete-acr` | destructive | — |
 | `delete-asset-comparison-report` | destructive | — |
 | `delete-asset-group` | destructive | group delete |
+| `delete-custom-role` | destructive | — |
 | `delete-notification-configuration` | destructive | — |
+| `delete-security-group` | destructive | — |
+| `invite-user` | write | — |
 | `notify-notification-configuration` | write | — |
 | `remediate-all-asset-vulnerabilities` | destructive | vuln remediate --all |
 | `remediate-asset-vulnerabilities` | destructive | vuln remediate --bulk |
@@ -138,25 +147,16 @@ Fall back to `turbine api <operation>` for full GraphQL coverage.
 | `remediate-secrets` | destructive | — |
 | `remove-all-asset-groups-from-assets` | destructive | — |
 | `remove-assets-from-asset-group` | destructive | group remove-assets |
+| `remove-org-user` | destructive | — |
+| `remove-security-group-member` | destructive | — |
+| `replace-acr` | write | — |
 | `set-asset-groups-to-asset` | write | — |
 | `set-assets-to-asset-group` | write | — |
+| `set-org-user-status` | write | — |
 | `submit-rise-ai-analysis` | write | — |
-| `update-asset-group` | write | group update |
-| `update-notification-configuration` | write | — |
-| `update-org-level-settings` | write | — |
-| `user-action` | write | — |
-| `user-delete` | destructive | user delete |
-| `user-invite` | write | user invite |
-| `user-remove` | destructive | user remove |
-| `user-reset-password` | write | — |
-| `user-set-user-role` | write | — |
-| `user-update-user` | write | — |
-| `activity` | read | — |
-| `analytics` | read | — |
-| `asset` | read | asset get |
 | … | … | … |
 
-See [references/reference.md](references/reference.md) for all 114 API operations.
+See [references/reference.md](references/reference.md) for all 144 API operations.
 
 <!-- AUTO-GENERATED-CLI-SECTION:END -->
 
