@@ -81,6 +81,47 @@ def _cmd_mutation_add_assets_to_asset_group(
         yes=yes,
     )
 
+def _cmd_mutation_add_security_group_member(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    security_group_id: Optional[str] = typer.Option(None, '--security-group-id', help='str (required) [required]'),
+    user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
+) -> None:
+    """Add a user as a member of an RBAC security group."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import AddSecurityGroupMemberInput
+        runtime.emit_schema(AddSecurityGroupMemberInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import AddSecurityGroupMemberInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if security_group_id is not None:
+        payload['security_group_id'] = security_group_id
+    if user_id is not None:
+        payload['user_id'] = user_id
+    try:
+        model = AddSecurityGroupMemberInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'security-group-id', 'user-id'}))
+    kwargs = {'add_security_group_member_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_add_security_group_member',
+        method_name='mutation_add_security_group_member',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_asset_add_dependency(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -217,7 +258,8 @@ def _cmd_mutation_asset_submit(
     family: Optional[str] = typer.Option(None, '--family', help='Optional[str] (optional)'),
     type: Optional[str] = typer.Option(None, '--type', help='Optional[AssetType] (optional)'),
     sbom_type: Optional[str] = typer.Option(None, '--sbom-type', help='Optional[SbomType] (optional)'),
-    sbom_version: Optional[str] = typer.Option(None, '--sbom-version', help='Optional[SbomVersion] (optional)'),
+    cyclonedx_version: Optional[str] = typer.Option(None, '--cyclonedx-version', help='Optional[CycloneDxVersion] (optional)'),
+    spdx_version: Optional[str] = typer.Option(None, '--spdx-version', help='Optional[SpdxVersion] (optional)'),
     sbom_format: Optional[str] = typer.Option(None, '--sbom-format', help='Optional[SbomFormat] (optional)'),
     license: Optional[str] = typer.Option(None, '--license', help='Optional[str] (optional)'),
 ) -> None:
@@ -258,8 +300,10 @@ def _cmd_mutation_asset_submit(
         payload['type'] = type
     if sbom_type is not None:
         payload['sbom_type'] = sbom_type
-    if sbom_version is not None:
-        payload['sbom_version'] = sbom_version
+    if cyclonedx_version is not None:
+        payload['cyclonedx_version'] = cyclonedx_version
+    if spdx_version is not None:
+        payload['spdx_version'] = spdx_version
     if sbom_format is not None:
         payload['sbom_format'] = sbom_format
     if license is not None:
@@ -267,7 +311,7 @@ def _cmd_mutation_asset_submit(
     try:
         model = SubmitAssetInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'architecture', 'asset-cpe', 'bitness', 'family', 'kernel-version', 'license', 'manufacturer', 'model', 'name', 'os', 'sbom-format', 'sbom-type', 'sbom-version', 'type', 'version'}))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'architecture', 'asset-cpe', 'bitness', 'cyclonedx-version', 'family', 'kernel-version', 'license', 'manufacturer', 'model', 'name', 'os', 'sbom-format', 'sbom-type', 'spdx-version', 'type', 'version'}))
     kwargs = {'asset_submit_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_submit',
@@ -322,6 +366,80 @@ def _cmd_mutation_asset_update(
     runtime.run_graphql_op(
         op_name='mutation_asset_update',
         method_name='mutation_asset_update',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_bulk_delete_ac_rs(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Delete multiple access control records in one call; already-deleted records are treated as success."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import BulkDeleteAcrsInput
+        runtime.emit_schema(BulkDeleteAcrsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import BulkDeleteAcrsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+
+    try:
+        model = BulkDeleteAcrsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
+    kwargs = {'bulk_delete_ac_rs_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_bulk_delete_ac_rs',
+        method_name='mutation_bulk_delete_ac_rs',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_create_acr(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Create an access control record granting a user or security group a role on a resource."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import CreateAcrInput
+        runtime.emit_schema(CreateAcrInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import CreateAcrInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+
+    try:
+        model = CreateAcrInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
+    kwargs = {'create_acr_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_create_acr',
+        method_name='mutation_create_acr',
         kwargs=kwargs,
         risk='write',
         dry_run=dry_run,
@@ -410,6 +528,47 @@ def _cmd_mutation_create_asset_group(
         yes=yes,
     )
 
+def _cmd_mutation_create_custom_role(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
+    description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
+) -> None:
+    """Create an org-scoped custom role with a chosen set of permissions."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import CreateCustomRoleInput
+        runtime.emit_schema(CreateCustomRoleInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import CreateCustomRoleInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if name is not None:
+        payload['name'] = name
+    if description is not None:
+        payload['description'] = description
+    try:
+        model = CreateCustomRoleInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'description', 'name'}))
+    kwargs = {'create_custom_role_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_create_custom_role',
+        method_name='mutation_create_custom_role',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_create_notification_configuration(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -443,6 +602,85 @@ def _cmd_mutation_create_notification_configuration(
         method_name='mutation_create_notification_configuration',
         kwargs=kwargs,
         risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_create_security_group(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
+    description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
+) -> None:
+    """Create a new RBAC security group in the current organization."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import CreateSecurityGroupInput
+        runtime.emit_schema(CreateSecurityGroupInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import CreateSecurityGroupInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if name is not None:
+        payload['name'] = name
+    if description is not None:
+        payload['description'] = description
+    try:
+        model = CreateSecurityGroupInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'description', 'name'}))
+    kwargs = {'create_security_group_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_create_security_group',
+        method_name='mutation_create_security_group',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_delete_acr(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    acr_id: Optional[str] = typer.Option(None, '--acr-id', help='str (required) [required]'),
+) -> None:
+    """Delete a single access control record, revoking the associated grant."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import DeleteAcrInput
+        runtime.emit_schema(DeleteAcrInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import DeleteAcrInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if acr_id is not None:
+        payload['acr_id'] = acr_id
+    try:
+        model = DeleteAcrInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'acr-id'}))
+    kwargs = {'delete_acr_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_delete_acr',
+        method_name='mutation_delete_acr',
+        kwargs=kwargs,
+        risk='destructive',
         dry_run=dry_run,
         yes=yes,
     )
@@ -523,6 +761,44 @@ def _cmd_mutation_delete_asset_group(
         yes=yes,
     )
 
+def _cmd_mutation_delete_custom_role(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    role_id: Optional[str] = typer.Option(None, '--role-id', help='str (required) [required]'),
+) -> None:
+    """Permanently delete a custom role from the organization."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import DeleteCustomRoleInput
+        runtime.emit_schema(DeleteCustomRoleInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import DeleteCustomRoleInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if role_id is not None:
+        payload['role_id'] = role_id
+    try:
+        model = DeleteCustomRoleInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'role-id'}))
+    kwargs = {'delete_custom_role_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_delete_custom_role',
+        method_name='mutation_delete_custom_role',
+        kwargs=kwargs,
+        risk='destructive',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_delete_notification_configuration(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -557,6 +833,88 @@ def _cmd_mutation_delete_notification_configuration(
         method_name='mutation_delete_notification_configuration',
         kwargs=kwargs,
         risk='destructive',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_delete_security_group(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    security_group_id: Optional[str] = typer.Option(None, '--security-group-id', help='str (required) [required]'),
+) -> None:
+    """Permanently delete a security group from the organization."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import DeleteSecurityGroupInput
+        runtime.emit_schema(DeleteSecurityGroupInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import DeleteSecurityGroupInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if security_group_id is not None:
+        payload['security_group_id'] = security_group_id
+    try:
+        model = DeleteSecurityGroupInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'security-group-id'}))
+    kwargs = {'delete_security_group_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_delete_security_group',
+        method_name='mutation_delete_security_group',
+        kwargs=kwargs,
+        risk='destructive',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_invite_user(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    email: Optional[str] = typer.Option(None, '--email', help='str (required) [required]'),
+    display_name: Optional[str] = typer.Option(None, '--display-name', help='Optional[str] (optional)'),
+    role_id: Optional[str] = typer.Option(None, '--role-id', help='Optional[str] (optional)'),
+) -> None:
+    """Invite a user to the organization with a role and optional security group memberships."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import InviteOrgUserInput
+        runtime.emit_schema(InviteOrgUserInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import InviteOrgUserInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if email is not None:
+        payload['email'] = email
+    if display_name is not None:
+        payload['display_name'] = display_name
+    if role_id is not None:
+        payload['role_id'] = role_id
+    try:
+        model = InviteOrgUserInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'display-name', 'email', 'role-id'}))
+    kwargs = {'invite_user_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_invite_user',
+        method_name='mutation_invite_user',
+        kwargs=kwargs,
+        risk='write',
         dry_run=dry_run,
         yes=yes,
     )
@@ -1044,6 +1402,123 @@ def _cmd_mutation_remove_assets_from_asset_group(
         yes=yes,
     )
 
+def _cmd_mutation_remove_org_user(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
+) -> None:
+    """Permanently remove a user from the current organization."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import RemoveOrgUserInput
+        runtime.emit_schema(RemoveOrgUserInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import RemoveOrgUserInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if user_id is not None:
+        payload['user_id'] = user_id
+    try:
+        model = RemoveOrgUserInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'user-id'}))
+    kwargs = {'remove_org_user_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_remove_org_user',
+        method_name='mutation_remove_org_user',
+        kwargs=kwargs,
+        risk='destructive',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_remove_security_group_member(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    security_group_id: Optional[str] = typer.Option(None, '--security-group-id', help='str (required) [required]'),
+    user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
+) -> None:
+    """Remove a user from an RBAC security group."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import RemoveSecurityGroupMemberInput
+        runtime.emit_schema(RemoveSecurityGroupMemberInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import RemoveSecurityGroupMemberInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if security_group_id is not None:
+        payload['security_group_id'] = security_group_id
+    if user_id is not None:
+        payload['user_id'] = user_id
+    try:
+        model = RemoveSecurityGroupMemberInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'security-group-id', 'user-id'}))
+    kwargs = {'remove_security_group_member_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_remove_security_group_member',
+        method_name='mutation_remove_security_group_member',
+        kwargs=kwargs,
+        risk='destructive',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_replace_acr(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    acr_id: Optional[str] = typer.Option(None, '--acr-id', help='str (required) [required]'),
+) -> None:
+    """Replace an access control record with a new grant in one atomic delete-and-create operation."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import ReplaceAcrInput
+        runtime.emit_schema(ReplaceAcrInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import ReplaceAcrInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if acr_id is not None:
+        payload['acr_id'] = acr_id
+    try:
+        model = ReplaceAcrInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'acr-id'}))
+    kwargs = {'replace_acr_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_replace_acr',
+        method_name='mutation_replace_acr',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_set_asset_groups_to_asset(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -1114,6 +1589,47 @@ def _cmd_mutation_set_assets_to_asset_group(
     runtime.run_graphql_op(
         op_name='mutation_set_assets_to_asset_group',
         method_name='mutation_set_assets_to_asset_group',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_set_org_user_status(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
+    status: Optional[str] = typer.Option(None, '--status', help='OrgUserStatus (required) [required]'),
+) -> None:
+    """Enable or disable a user account within the current organization."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import SetOrgUserStatusInput
+        runtime.emit_schema(SetOrgUserStatusInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import SetOrgUserStatusInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if user_id is not None:
+        payload['user_id'] = user_id
+    if status is not None:
+        payload['status'] = status
+    try:
+        model = SetOrgUserStatusInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'status', 'user-id'}))
+    kwargs = {'set_org_user_status_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_set_org_user_status',
+        method_name='mutation_set_org_user_status',
         kwargs=kwargs,
         risk='write',
         dry_run=dry_run,
@@ -1196,6 +1712,50 @@ def _cmd_mutation_update_asset_group(
     runtime.run_graphql_op(
         op_name='mutation_update_asset_group',
         method_name='mutation_update_asset_group',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_update_custom_role(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    role_id: Optional[str] = typer.Option(None, '--role-id', help='str (required) [required]'),
+    name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
+    description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
+) -> None:
+    """Update the name, description, or permissions of an existing custom role."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import UpdateCustomRoleInput
+        runtime.emit_schema(UpdateCustomRoleInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import UpdateCustomRoleInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if role_id is not None:
+        payload['role_id'] = role_id
+    if name is not None:
+        payload['name'] = name
+    if description is not None:
+        payload['description'] = description
+    try:
+        model = UpdateCustomRoleInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'description', 'name', 'role-id'}))
+    kwargs = {'update_custom_role_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_update_custom_role',
+        method_name='mutation_update_custom_role',
         kwargs=kwargs,
         risk='write',
         dry_run=dry_run,
@@ -1310,6 +1870,50 @@ def _cmd_mutation_update_org_level_settings(
     runtime.run_graphql_op(
         op_name='mutation_update_org_level_settings',
         method_name='mutation_update_org_level_settings',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_update_security_group(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    security_group_id: Optional[str] = typer.Option(None, '--security-group-id', help='str (required) [required]'),
+    name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
+    description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
+) -> None:
+    """Update the name or description of an existing security group."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import UpdateSecurityGroupInput
+        runtime.emit_schema(UpdateSecurityGroupInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import UpdateSecurityGroupInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if security_group_id is not None:
+        payload['security_group_id'] = security_group_id
+    if name is not None:
+        payload['name'] = name
+    if description is not None:
+        payload['description'] = description
+    try:
+        model = UpdateSecurityGroupInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'description', 'name', 'security-group-id'}))
+    kwargs = {'update_security_group_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_update_security_group',
+        method_name='mutation_update_security_group',
         kwargs=kwargs,
         risk='write',
         dry_run=dry_run,
@@ -2857,6 +3461,122 @@ def _cmd_query_get_dependency_reachability(
         yes=yes,
     )
 
+def _cmd_query_get_my_permissions(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Retrieve the flat union of permission IDs the calling user holds across all their access grants."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_my_permissions',
+        method_name='query_get_my_permissions',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_resource_permissions(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Retrieve the caller's effective permissions on a specific resource, defaulting to the organization level."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_resource_permissions',
+        method_name='query_get_resource_permissions',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_role(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Retrieve a single RBAC role by its ID."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_role',
+        method_name='query_get_role',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_role_delete_impact(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Preview which users would retain or lose platform access if a custom role were deleted."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_role_delete_impact',
+        method_name='query_get_role_delete_impact',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_get_secret_reachability(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -2892,6 +3612,35 @@ def _cmd_query_get_secret_reachability(
     runtime.run_graphql_op(
         op_name='query_get_secret_reachability',
         method_name='query_get_secret_reachability',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_security_group_delete_impact(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Preview which members would retain or lose platform access if a security group were deleted."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_security_group_delete_impact',
+        method_name='query_get_security_group_delete_impact',
         kwargs=kwargs,
         risk='read',
         dry_run=dry_run,
@@ -3273,6 +4022,53 @@ def _cmd_query_licenses_spdx_ids(
         yes=yes,
     )
 
+def _cmd_query_list_ac_rs(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    first: Optional[int] = typer.Option(None, '--first', help='Optional[int] (optional)'),
+    after: Optional[str] = typer.Option(None, '--after', help='Optional[str] (optional)'),
+    last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
+    before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
+) -> None:
+    """List access control records for the organization, optionally filtered to a specific user."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import Cursor
+        runtime.emit_schema(Cursor)
+        return
+    from netrise_turbine_sdk_graphql.input_types import Cursor
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if first is not None:
+        payload['first'] = first
+    if after is not None:
+        payload['after'] = after
+    if last is not None:
+        payload['last'] = last
+    if before is not None:
+        payload['before'] = before
+    try:
+        model = Cursor.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'after', 'before', 'first', 'last'}))
+    kwargs = {'list_ac_rs_cursor': model}
+    runtime.run_graphql_op(
+        op_name='query_list_ac_rs',
+        method_name='query_list_ac_rs',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_list_ai_providers(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -3436,6 +4232,147 @@ def _cmd_query_list_asset_crypto_libraries(
         yes=yes,
     )
 
+def _cmd_query_list_entity_assets(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    first: Optional[int] = typer.Option(None, '--first', help='Optional[int] (optional)'),
+    after: Optional[str] = typer.Option(None, '--after', help='Optional[str] (optional)'),
+    last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
+    before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
+) -> None:
+    """List the assets accessible to a specific user or security group."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import Cursor
+        runtime.emit_schema(Cursor)
+        return
+    from netrise_turbine_sdk_graphql.input_types import Cursor
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if first is not None:
+        payload['first'] = first
+    if after is not None:
+        payload['after'] = after
+    if last is not None:
+        payload['last'] = last
+    if before is not None:
+        payload['before'] = before
+    try:
+        model = Cursor.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'after', 'before', 'first', 'last'}))
+    kwargs = {'list_entity_assets_cursor': model}
+    runtime.run_graphql_op(
+        op_name='query_list_entity_assets',
+        method_name='query_list_entity_assets',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_list_my_ac_rs(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    first: Optional[int] = typer.Option(None, '--first', help='Optional[int] (optional)'),
+    after: Optional[str] = typer.Option(None, '--after', help='Optional[str] (optional)'),
+    last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
+    before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
+) -> None:
+    """List the access control records that apply to the calling user."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import Cursor
+        runtime.emit_schema(Cursor)
+        return
+    from netrise_turbine_sdk_graphql.input_types import Cursor
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if first is not None:
+        payload['first'] = first
+    if after is not None:
+        payload['after'] = after
+    if last is not None:
+        payload['last'] = last
+    if before is not None:
+        payload['before'] = before
+    try:
+        model = Cursor.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'after', 'before', 'first', 'last'}))
+    kwargs = {'list_my_ac_rs_cursor': model}
+    runtime.run_graphql_op(
+        op_name='query_list_my_ac_rs',
+        method_name='query_list_my_ac_rs',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_list_my_security_groups(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    first: Optional[int] = typer.Option(None, '--first', help='Optional[int] (optional)'),
+    after: Optional[str] = typer.Option(None, '--after', help='Optional[str] (optional)'),
+    last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
+    before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
+) -> None:
+    """List the security groups the calling user belongs to."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import Cursor
+        runtime.emit_schema(Cursor)
+        return
+    from netrise_turbine_sdk_graphql.input_types import Cursor
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if first is not None:
+        payload['first'] = first
+    if after is not None:
+        payload['after'] = after
+    if last is not None:
+        payload['last'] = last
+    if before is not None:
+        payload['before'] = before
+    try:
+        model = Cursor.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'after', 'before', 'first', 'last'}))
+    kwargs = {'list_my_security_groups_cursor': model}
+    runtime.run_graphql_op(
+        op_name='query_list_my_security_groups',
+        method_name='query_list_my_security_groups',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_list_notification_configurations(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -3510,6 +4447,223 @@ def _cmd_query_list_notification_logs(
         yes=yes,
     )
 
+def _cmd_query_list_org_users(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    first: Optional[int] = typer.Option(None, '--first', help='Optional[int] (optional)'),
+    after: Optional[str] = typer.Option(None, '--after', help='Optional[str] (optional)'),
+    last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
+    before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
+) -> None:
+    """List all users in the organization with their security groups and accessible asset counts."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import Cursor
+        runtime.emit_schema(Cursor)
+        return
+    from netrise_turbine_sdk_graphql.input_types import Cursor
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if first is not None:
+        payload['first'] = first
+    if after is not None:
+        payload['after'] = after
+    if last is not None:
+        payload['last'] = last
+    if before is not None:
+        payload['before'] = before
+    try:
+        model = Cursor.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'after', 'before', 'first', 'last'}))
+    kwargs = {'list_org_users_cursor': model}
+    runtime.run_graphql_op(
+        op_name='query_list_org_users',
+        method_name='query_list_org_users',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_list_permissions(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Retrieve the full permission catalog available for building custom roles."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_list_permissions',
+        method_name='query_list_permissions',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_list_roles(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    first: Optional[int] = typer.Option(None, '--first', help='Optional[int] (optional)'),
+    after: Optional[str] = typer.Option(None, '--after', help='Optional[str] (optional)'),
+    last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
+    before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
+) -> None:
+    """List all RBAC roles defined for the current organization."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import Cursor
+        runtime.emit_schema(Cursor)
+        return
+    from netrise_turbine_sdk_graphql.input_types import Cursor
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if first is not None:
+        payload['first'] = first
+    if after is not None:
+        payload['after'] = after
+    if last is not None:
+        payload['last'] = last
+    if before is not None:
+        payload['before'] = before
+    try:
+        model = Cursor.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'after', 'before', 'first', 'last'}))
+    kwargs = {'list_roles_cursor': model}
+    runtime.run_graphql_op(
+        op_name='query_list_roles',
+        method_name='query_list_roles',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_list_security_group_members(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    first: Optional[int] = typer.Option(None, '--first', help='Optional[int] (optional)'),
+    after: Optional[str] = typer.Option(None, '--after', help='Optional[str] (optional)'),
+    last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
+    before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
+) -> None:
+    """List the users who are members of a specific security group."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import Cursor
+        runtime.emit_schema(Cursor)
+        return
+    from netrise_turbine_sdk_graphql.input_types import Cursor
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if first is not None:
+        payload['first'] = first
+    if after is not None:
+        payload['after'] = after
+    if last is not None:
+        payload['last'] = last
+    if before is not None:
+        payload['before'] = before
+    try:
+        model = Cursor.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'after', 'before', 'first', 'last'}))
+    kwargs = {'list_security_group_members_cursor': model}
+    runtime.run_graphql_op(
+        op_name='query_list_security_group_members',
+        method_name='query_list_security_group_members',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_list_security_groups(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    first: Optional[int] = typer.Option(None, '--first', help='Optional[int] (optional)'),
+    after: Optional[str] = typer.Option(None, '--after', help='Optional[str] (optional)'),
+    last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
+    before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
+) -> None:
+    """List all RBAC security groups defined for the current organization."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import Cursor
+        runtime.emit_schema(Cursor)
+        return
+    from netrise_turbine_sdk_graphql.input_types import Cursor
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if first is not None:
+        payload['first'] = first
+    if after is not None:
+        payload['after'] = after
+    if last is not None:
+        payload['last'] = last
+    if before is not None:
+        payload['before'] = before
+    try:
+        model = Cursor.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'after', 'before', 'first', 'last'}))
+    kwargs = {'list_security_groups_cursor': model}
+    runtime.run_graphql_op(
+        op_name='query_list_security_groups',
+        method_name='query_list_security_groups',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_match_vulnerabilities(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -3542,6 +4696,35 @@ def _cmd_query_match_vulnerabilities(
     runtime.run_graphql_op(
         op_name='query_match_vulnerabilities',
         method_name='query_match_vulnerabilities',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_me(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Retrieve the authenticated user's profile including their editable display name."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_me',
+        method_name='query_me',
         kwargs=kwargs,
         risk='read',
         dry_run=dry_run,
@@ -4604,17 +5787,26 @@ def _cmd_query_vulnerability_lite(
 def register_api_commands(api_app) -> None:
     api_app.command(name='add-asset-groups-to-assets', help='Associate a list of existing asset groups with selected assets.')(_cmd_mutation_add_asset_groups_to_assets)
     api_app.command(name='add-assets-to-asset-group', help='Add specified assets to an existing asset group for organization.')(_cmd_mutation_add_assets_to_asset_group)
+    api_app.command(name='add-security-group-member', help='Add a user as a member of an RBAC security group.')(_cmd_mutation_add_security_group_member)
     api_app.command(name='asset-add-dependency', help="Manually inject a missing dependency component into an asset's inventory.")(_cmd_mutation_asset_add_dependency)
     api_app.command(name='asset-modify-dependency', help='Update metadata or details for a manually added asset dependency.')(_cmd_mutation_asset_modify_dependency)
     api_app.command(name='asset-remove-dependencies', help='Remove specific dependencies from the component list of an asset.')(_cmd_mutation_asset_remove_dependencies)
     api_app.command(name='asset-submit', help='Upload firmware or SBOMs with metadata, group assignments, and CPEs.')(_cmd_mutation_asset_submit)
     api_app.command(name='asset-update', help='Modify metadata such as name, vendor, or version for assets.')(_cmd_mutation_asset_update)
+    api_app.command(name='bulk-delete-ac-rs', help='Delete multiple access control records in one call; already-deleted records are treated as success.')(_cmd_mutation_bulk_delete_ac_rs)
+    api_app.command(name='create-acr', help='Create an access control record granting a user or security group a role on a resource.')(_cmd_mutation_create_acr)
     api_app.command(name='create-asset-comparison-report', help='Create a new comparison report to diff vulnerabilities and components between two assets.')(_cmd_mutation_create_asset_comparison_report)
     api_app.command(name='create-asset-group', help='Create a new named group to organize and track assets.')(_cmd_mutation_create_asset_group)
+    api_app.command(name='create-custom-role', help='Create an org-scoped custom role with a chosen set of permissions.')(_cmd_mutation_create_custom_role)
     api_app.command(name='create-notification-configuration', help='Create a notification configuration defining channel, scopes, and triggers for alerts.')(_cmd_mutation_create_notification_configuration)
+    api_app.command(name='create-security-group', help='Create a new RBAC security group in the current organization.')(_cmd_mutation_create_security_group)
+    api_app.command(name='delete-acr', help='Delete a single access control record, revoking the associated grant.')(_cmd_mutation_delete_acr)
     api_app.command(name='delete-asset-comparison-report', help='Permanently delete an asset comparison report by its ID.')(_cmd_mutation_delete_asset_comparison_report)
     api_app.command(name='delete-asset-group', help='Permanently remove an asset group while keeping contained assets intact.')(_cmd_mutation_delete_asset_group)
+    api_app.command(name='delete-custom-role', help='Permanently delete a custom role from the organization.')(_cmd_mutation_delete_custom_role)
     api_app.command(name='delete-notification-configuration', help='Permanently delete a notification configuration by its ID.')(_cmd_mutation_delete_notification_configuration)
+    api_app.command(name='delete-security-group', help='Permanently delete a security group from the organization.')(_cmd_mutation_delete_security_group)
+    api_app.command(name='invite-user', help='Invite a user to the organization with a role and optional security group memberships.')(_cmd_mutation_invite_user)
     api_app.command(name='notify-notification-configuration', help='Send a test notification using an existing notification configuration.')(_cmd_mutation_notify_notification_configuration)
     api_app.command(name='remediate-all-asset-vulnerabilities', help='Apply a remediation status to all vulnerabilities matching specific filters.')(_cmd_mutation_remediate_all_asset_vulnerabilities)
     api_app.command(name='remediate-asset-vulnerabilities', help='Bulk apply VEX remediation status to multiple vulnerabilities on assets.')(_cmd_mutation_remediate_asset_vulnerabilities)
@@ -4626,12 +5818,18 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='remediate-secrets', help='Apply remediation status and justification to exposed secrets in assets.')(_cmd_mutation_remediate_secrets)
     api_app.command(name='remove-all-asset-groups-from-assets', help='Disassociate all asset groups from a specified list of assets.')(_cmd_mutation_remove_all_asset_groups_from_assets)
     api_app.command(name='remove-assets-from-asset-group', help='Remove selected assets from a specific asset group container configuration.')(_cmd_mutation_remove_assets_from_asset_group)
+    api_app.command(name='remove-org-user', help='Permanently remove a user from the current organization.')(_cmd_mutation_remove_org_user)
+    api_app.command(name='remove-security-group-member', help='Remove a user from an RBAC security group.')(_cmd_mutation_remove_security_group_member)
+    api_app.command(name='replace-acr', help='Replace an access control record with a new grant in one atomic delete-and-create operation.')(_cmd_mutation_replace_acr)
     api_app.command(name='set-asset-groups-to-asset', help='Replace all current group associations for an asset with new ones.')(_cmd_mutation_set_asset_groups_to_asset)
     api_app.command(name='set-assets-to-asset-group', help='Overwrite the member list of an asset group with new assets.')(_cmd_mutation_set_assets_to_asset_group)
+    api_app.command(name='set-org-user-status', help='Enable or disable a user account within the current organization.')(_cmd_mutation_set_org_user_status)
     api_app.command(name='submit-rise-ai-analysis', help='Request a RISE AI analysis for an eligible asset to generate insights.')(_cmd_mutation_submit_rise_ai_analysis)
     api_app.command(name='update-asset-group', help='Rename or update the description of an existing asset group.')(_cmd_mutation_update_asset_group)
+    api_app.command(name='update-custom-role', help='Update the name, description, or permissions of an existing custom role.')(_cmd_mutation_update_custom_role)
     api_app.command(name='update-notification-configuration', help='Update channel, scopes, triggers, or status for an existing notification configuration.')(_cmd_mutation_update_notification_configuration)
     api_app.command(name='update-org-level-settings', help='Configure global organization settings such as idle session timeout duration.')(_cmd_mutation_update_org_level_settings)
+    api_app.command(name='update-security-group', help='Update the name or description of an existing security group.')(_cmd_mutation_update_security_group)
     api_app.command(name='user-action', help='Perform administrative actions like enabling or disabling specific user accounts.')(_cmd_mutation_user_action)
     api_app.command(name='user-delete', help='Permanently delete a user account and remove their access rights.')(_cmd_mutation_user_delete)
     api_app.command(name='user-invite', help='Invite a new user to the organization with a specific role.')(_cmd_mutation_user_invite)
@@ -4671,7 +5869,12 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='get-asset-comparison-report', help='Retrieve a completed asset comparison report including vulnerability, component, and summary diffs.')(_cmd_query_get_asset_comparison_report)
     api_app.command(name='get-certificate-reachability', help='Determine whether discovered certificates are reachable via executable scripts or system paths.')(_cmd_query_get_certificate_reachability)
     api_app.command(name='get-dependency-reachability', help='Determine whether a dependency is reachable via executable scripts or system paths.')(_cmd_query_get_dependency_reachability)
+    api_app.command(name='get-my-permissions', help='Retrieve the flat union of permission IDs the calling user holds across all their access grants.')(_cmd_query_get_my_permissions)
+    api_app.command(name='get-resource-permissions', help="Retrieve the caller's effective permissions on a specific resource, defaulting to the organization level.")(_cmd_query_get_resource_permissions)
+    api_app.command(name='get-role', help='Retrieve a single RBAC role by its ID.')(_cmd_query_get_role)
+    api_app.command(name='get-role-delete-impact', help='Preview which users would retain or lose platform access if a custom role were deleted.')(_cmd_query_get_role_delete_impact)
     api_app.command(name='get-secret-reachability', help='Determine whether discovered secrets are reachable via executable scripts or system paths.')(_cmd_query_get_secret_reachability)
+    api_app.command(name='get-security-group-delete-impact', help='Preview which members would retain or lose platform access if a security group were deleted.')(_cmd_query_get_security_group_delete_impact)
     api_app.command(name='get-vuln-reachability', help='Determine if a vulnerability can be executed via system paths.')(_cmd_query_get_vuln_reachability)
     api_app.command(name='grouped-dependencies', help='View dependencies aggregated by vendor, license, or specific component type.')(_cmd_query_grouped_dependencies)
     api_app.command(name='hashes', help='List cryptographic hashes for files identified within the asset filesystem.')(_cmd_query_hashes)
@@ -4681,13 +5884,23 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='license-issues', help='List license compliance issues identified across asset components.')(_cmd_query_license_issues)
     api_app.command(name='license-issues-external-filters', help='Retrieve available filter options for license issue queries.')(_cmd_query_license_issues_external_filters)
     api_app.command(name='licenses-spdx-ids', help='List available SPDX license identifiers for filtering and reference.')(_cmd_query_licenses_spdx_ids)
+    api_app.command(name='list-ac-rs', help='List access control records for the organization, optionally filtered to a specific user.')(_cmd_query_list_ac_rs)
     api_app.command(name='list-ai-providers', help='List available AI provider integrations and their current status.')(_cmd_query_list_ai_providers)
     api_app.command(name='list-asset-comparison-reports', help='List all asset comparison reports with pagination, filtering, and sorting.')(_cmd_query_list_asset_comparison_reports)
     api_app.command(name='list-asset-correlations', help='Retrieve cross-asset correlation data linking shared components and vulnerabilities.')(_cmd_query_list_asset_correlations)
     api_app.command(name='list-asset-crypto-libraries', help='List cryptographic libraries and algorithms detected within an asset.')(_cmd_query_list_asset_crypto_libraries)
+    api_app.command(name='list-entity-assets', help='List the assets accessible to a specific user or security group.')(_cmd_query_list_entity_assets)
+    api_app.command(name='list-my-ac-rs', help='List the access control records that apply to the calling user.')(_cmd_query_list_my_ac_rs)
+    api_app.command(name='list-my-security-groups', help='List the security groups the calling user belongs to.')(_cmd_query_list_my_security_groups)
     api_app.command(name='list-notification-configurations', help='List all notification configurations with their channels, scopes, and triggers.')(_cmd_query_list_notification_configurations)
     api_app.command(name='list-notification-logs', help='Retrieve a paginated log of notification delivery events and their statuses.')(_cmd_query_list_notification_logs)
+    api_app.command(name='list-org-users', help='List all users in the organization with their security groups and accessible asset counts.')(_cmd_query_list_org_users)
+    api_app.command(name='list-permissions', help='Retrieve the full permission catalog available for building custom roles.')(_cmd_query_list_permissions)
+    api_app.command(name='list-roles', help='List all RBAC roles defined for the current organization.')(_cmd_query_list_roles)
+    api_app.command(name='list-security-group-members', help='List the users who are members of a specific security group.')(_cmd_query_list_security_group_members)
+    api_app.command(name='list-security-groups', help='List all RBAC security groups defined for the current organization.')(_cmd_query_list_security_groups)
     api_app.command(name='match-vulnerabilities', help='Find specific vulnerabilities matching a provided component identifier or package.')(_cmd_query_match_vulnerabilities)
+    api_app.command(name='me', help="Retrieve the authenticated user's profile including their editable display name.")(_cmd_query_me)
     api_app.command(name='metrics', help='View organization-wide statistics on asset counts, processing, and risk.')(_cmd_query_metrics)
     api_app.command(name='misconfigurations', help='List failed security checks and configuration risks found in assets.')(_cmd_query_misconfigurations)
     api_app.command(name='misconfigurations-lite', help='List misconfigurations with trimmed fields — keeps check ID, name, severity, result, and correlation count; drops nested correlation objects.')(_cmd_query_misconfigurations_lite)

@@ -585,10 +585,40 @@ Determine whether a dependency is reachable via executable scripts or system pat
 turbine api get-dependency-reachability --composed-asset-id ASSET_ID --component-id VALUE
 ```
 
+#### api get-my-permissions
+Retrieve the flat union of permission IDs the calling user holds across all their access grants.
+```bash
+turbine api get-my-permissions
+```
+
+#### api get-resource-permissions
+Retrieve the caller's effective permissions on a specific resource, defaulting to the organization level.
+```bash
+turbine api get-resource-permissions
+```
+
+#### api get-role
+Retrieve a single RBAC role by its ID.
+```bash
+turbine api get-role
+```
+
+#### api get-role-delete-impact
+Preview which users would retain or lose platform access if a custom role were deleted.
+```bash
+turbine api get-role-delete-impact
+```
+
 #### api get-secret-reachability
 Determine whether discovered secrets are reachable via executable scripts or system paths.
 ```bash
 turbine api get-secret-reachability --composed-asset-id ASSET_ID --secret-id VALUE
+```
+
+#### api get-security-group-delete-impact
+Preview which members would retain or lose platform access if a security group were deleted.
+```bash
+turbine api get-security-group-delete-impact
 ```
 
 #### api get-vuln-reachability
@@ -645,6 +675,12 @@ List available SPDX license identifiers for filtering and reference.
 turbine api licenses-spdx-ids
 ```
 
+#### api list-ac-rs
+List access control records for the organization, optionally filtered to a specific user.
+```bash
+turbine api list-ac-rs
+```
+
 #### api list-ai-providers
 List available AI provider integrations and their current status.
 ```bash
@@ -669,6 +705,24 @@ List cryptographic libraries and algorithms detected within an asset.
 turbine api list-asset-crypto-libraries --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
+#### api list-entity-assets
+List the assets accessible to a specific user or security group.
+```bash
+turbine api list-entity-assets
+```
+
+#### api list-my-ac-rs
+List the access control records that apply to the calling user.
+```bash
+turbine api list-my-ac-rs
+```
+
+#### api list-my-security-groups
+List the security groups the calling user belongs to.
+```bash
+turbine api list-my-security-groups
+```
+
 #### api list-notification-configurations
 List all notification configurations with their channels, scopes, and triggers.
 ```bash
@@ -681,10 +735,46 @@ Retrieve a paginated log of notification delivery events and their statuses.
 turbine api list-notification-logs --input '{"cursor":{"first":10}}'
 ```
 
+#### api list-org-users
+List all users in the organization with their security groups and accessible asset counts.
+```bash
+turbine api list-org-users
+```
+
+#### api list-permissions
+Retrieve the full permission catalog available for building custom roles.
+```bash
+turbine api list-permissions
+```
+
+#### api list-roles
+List all RBAC roles defined for the current organization.
+```bash
+turbine api list-roles
+```
+
+#### api list-security-group-members
+List the users who are members of a specific security group.
+```bash
+turbine api list-security-group-members
+```
+
+#### api list-security-groups
+List all RBAC security groups defined for the current organization.
+```bash
+turbine api list-security-groups
+```
+
 #### api match-vulnerabilities
 Find specific vulnerabilities matching a provided component identifier or package.
 ```bash
 turbine api match-vulnerabilities --identifier VALUE
+```
+
+#### api me
+Retrieve the authenticated user's profile including their editable display name.
+```bash
+turbine api me
 ```
 
 #### api metrics
@@ -843,6 +933,12 @@ Associate a list of existing asset groups with selected assets.
 turbine api add-asset-groups-to-assets --input '{"asset_ids":["ASSET_ID"]}'
 ```
 
+#### api add-security-group-member
+Add a user as a member of an RBAC security group.
+```bash
+turbine api add-security-group-member --security-group-id GROUP_ID --user-id USER_ID
+```
+
 #### api asset-add-dependency
 Manually inject a missing dependency component into an asset's inventory.
 ```bash
@@ -861,10 +957,28 @@ Remove specific dependencies from the component list of an asset.
 turbine api asset-remove-dependencies --input '{"composed_asset_id":"ASSET_ID","identification_ids":["VALUE"]}'
 ```
 
+#### api bulk-delete-ac-rs
+Delete multiple access control records in one call; already-deleted records are treated as success.
+```bash
+turbine api bulk-delete-ac-rs --input '{"acr_ids":["VALUE"]}'
+```
+
+#### api create-acr
+Create an access control record granting a user or security group a role on a resource.
+```bash
+turbine api create-acr --input '{"binding":{"entity_type":"USER","entity_id":"VALUE","resource_type":"ORGANIZATION"}}'
+```
+
 #### api create-asset-comparison-report
 Create a new comparison report to diff vulnerabilities and components between two assets.
 ```bash
 turbine api create-asset-comparison-report --asset-a VALUE --asset-b VALUE
+```
+
+#### api create-custom-role
+Create an org-scoped custom role with a chosen set of permissions.
+```bash
+turbine api create-custom-role --input '{"name":"my-example","permissions":["VALUE"]}'
 ```
 
 #### api create-notification-configuration
@@ -873,16 +987,46 @@ Create a notification configuration defining channel, scopes, and triggers for a
 turbine api create-notification-configuration --input '{"configuration":{"type":"NOTIFICATION_TYPE_UNSPECIFIED","channel":"NOTIFICATION_CHANNEL_UNSPECIFIED","activity_scopes":[{}]}}'
 ```
 
+#### api create-security-group
+Create a new RBAC security group in the current organization.
+```bash
+turbine api create-security-group --name my-example
+```
+
+#### api delete-acr
+Delete a single access control record, revoking the associated grant.
+```bash
+turbine api delete-acr --acr-id VALUE --dry-run
+```
+
 #### api delete-asset-comparison-report
 Permanently delete an asset comparison report by its ID.
 ```bash
 turbine api delete-asset-comparison-report --report-id VALUE --dry-run
 ```
 
+#### api delete-custom-role
+Permanently delete a custom role from the organization.
+```bash
+turbine api delete-custom-role --role-id VALUE --dry-run
+```
+
 #### api delete-notification-configuration
 Permanently delete a notification configuration by its ID.
 ```bash
 turbine api delete-notification-configuration --id CONFIG_ID --dry-run
+```
+
+#### api delete-security-group
+Permanently delete a security group from the organization.
+```bash
+turbine api delete-security-group --security-group-id GROUP_ID --dry-run
+```
+
+#### api invite-user
+Invite a user to the organization with a role and optional security group memberships.
+```bash
+turbine api invite-user --email user@example.com
 ```
 
 #### api notify-notification-configuration
@@ -927,6 +1071,24 @@ Disassociate all asset groups from a specified list of assets.
 turbine api remove-all-asset-groups-from-assets --input '{"asset_ids":["ASSET_ID"]}' --dry-run
 ```
 
+#### api remove-org-user
+Permanently remove a user from the current organization.
+```bash
+turbine api remove-org-user --user-id USER_ID --dry-run
+```
+
+#### api remove-security-group-member
+Remove a user from an RBAC security group.
+```bash
+turbine api remove-security-group-member --security-group-id GROUP_ID --user-id USER_ID --dry-run
+```
+
+#### api replace-acr
+Replace an access control record with a new grant in one atomic delete-and-create operation.
+```bash
+turbine api replace-acr --input '{"acr_id":"VALUE","binding":{"entity_type":"USER","entity_id":"VALUE","resource_type":"ORGANIZATION"}}'
+```
+
 #### api set-asset-groups-to-asset
 Replace all current group associations for an asset with new ones.
 ```bash
@@ -939,10 +1101,22 @@ Overwrite the member list of an asset group with new assets.
 turbine api set-assets-to-asset-group --group-id GROUP_ID
 ```
 
+#### api set-org-user-status
+Enable or disable a user account within the current organization.
+```bash
+turbine api set-org-user-status --user-id USER_ID --status ENABLED
+```
+
 #### api submit-rise-ai-analysis
 Request a RISE AI analysis for an eligible asset to generate insights.
 ```bash
 turbine api submit-rise-ai-analysis --asset-id ASSET_ID
+```
+
+#### api update-custom-role
+Update the name, description, or permissions of an existing custom role.
+```bash
+turbine api update-custom-role --input '{"role_id":"VALUE","name":"my-example","permissions":["VALUE"]}'
 ```
 
 #### api update-notification-configuration
@@ -955,6 +1129,12 @@ turbine api update-notification-configuration --input '{"configuration":{"id":"C
 Configure global organization settings such as idle session timeout duration.
 ```bash
 turbine api update-org-level-settings --idle-timout-enabled
+```
+
+#### api update-security-group
+Update the name or description of an existing security group.
+```bash
+turbine api update-security-group --security-group-id GROUP_ID --name my-example
 ```
 
 #### api user-action

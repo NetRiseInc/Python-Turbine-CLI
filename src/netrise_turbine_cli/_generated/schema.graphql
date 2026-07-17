@@ -262,7 +262,14 @@ type Query {
   metrics: Metrics!
 
   """Retrieves a paginated list of all users within the organization."""
-  users(args: UsersInput!): UserConnection!
+  users(args: UsersInput!): UserConnection! @deprecated(reason: "Use `listOrgUsers` for RBAC org users (includes securityGroups and accessibleAssetCount). Requires `settings:administration_view` (org-wide).")
+
+  """
+  Returns the authenticated user's profile, including the editable display
+  name. Source of truth for display name is orgs-service's UserProfiles
+  store, falling back to Auth0's name for users who have never edited it.
+  """
+  me: User
 
   """
   Retrieves a list of organizations the currently authenticated user belongs to.
@@ -349,6 +356,82 @@ type Query {
   Execution-path reachability evidence for a dependency component on the asset.
   """
   getDependencyReachability(args: GetDependencyReachabilityInput!): [ReachabilityEvidence!]
+
+  """
+  Retrieves a list of all RBAC security groups for the current organization.
+  """
+  listSecurityGroups(cursor: Cursor): SecurityGroupConnection!
+
+  """
+  Retrieves a list of all users in the current organization via the RBAC service.
+  """
+  listOrgUsers(cursor: Cursor): OrgUserConnection!
+
+  """Retrieves the members of a single security group via the RBAC service."""
+  listSecurityGroupMembers(securityGroupId: ID!, cursor: Cursor): SecurityGroupMemberConnection!
+
+  """
+  Previews the impact of deleting a security group via the RBAC service,
+  partitioning members into those who retain access and those who would lose
+  all platform access in the organization.
+  """
+  getSecurityGroupDeleteImpact(securityGroupId: ID!): SecurityGroupDeleteImpact!
+
+  """
+  Previews the impact of deleting a custom role via the RBAC service,
+  partitioning affected users into those who retain access and those who would
+  lose all platform access in the organization.
+  """
+  getRoleDeleteImpact(roleId: ID!): RoleDeleteImpact!
+
+  """
+  Retrieves all RBAC roles for the current organization via the RBAC service.
+  """
+  listRoles(cursor: Cursor): RoleConnection!
+
+  """Retrieves a single RBAC role by id via the RBAC service."""
+  getRole(roleId: ID!): Role
+
+  """
+  Retrieves the full permission catalog for the custom role builder via the RBAC service.
+  """
+  listPermissions: ListPermissionsResponse!
+
+  """
+  Retrieves access control records for the current organization via the RBAC service.
+  Optionally filter to grants that apply to a specific user.
+  """
+  listACRs(userId: ID, cursor: Cursor): AccessControlRecordConnection!
+
+  """
+  Retrieves access control records for the calling user via the RBAC service.
+  Available to any authenticated user.
+  """
+  listMyACRs(cursor: Cursor): AccessControlRecordConnection!
+
+  """
+  Retrieves the security groups the calling user belongs to via the RBAC service.
+  Available to any authenticated user.
+  """
+  listMySecurityGroups(cursor: Cursor): SecurityGroupConnection!
+
+  """
+  Retrieves the current caller's effective permissions on a specific resource via the RBAC service.
+  When `resourceId` is omitted the organization-level resource is assumed.
+  """
+  getResourcePermissions(resourceType: AcrResourceType!, resourceId: String): ResourcePermissions
+
+  """
+  Retrieves the flat union of permission IDs the calling user holds across all their ACRs.
+  Available to any authenticated user via the RBAC service.
+  """
+  getMyPermissions: CallerPermissions!
+
+  """
+  Retrieves the assets accessible to a user or security group, paginated.
+  Powers the "Access" drilldown in the Users & Access UI.
+  """
+  listEntityAssets(entityType: AcrEntityType!, entityId: ID!, cursor: Cursor): EntityAssetConnection!
 
   """
   Execution-path reachability evidence for an exposed secret on the asset.
@@ -852,6 +935,68 @@ type Mutation {
   Applies a remediation status to multiple secrets on a specific asset in a single operation.
   """
   remediateSecrets(args: CreateSecretsRemediationInput!): [SecretRemediation]
+
+  """
+  Invites a user to the current organization via the RBAC service. The user receives an
+  invitation and is optionally added to the provided security groups.
+  """
+  inviteUser(args: InviteOrgUserInput!): InviteUserResponse!
+
+  """
+  Updates the status of a user in the current organization via the RBAC service.
+  Used by the Users & Access UI to enable or disable a user.
+  """
+  setOrgUserStatus(args: SetOrgUserStatusInput!): SetOrgUserStatusResponse!
+
+  """
+  Permanently removes a user from the current organization via the RBAC service.
+  """
+  removeOrgUser(args: RemoveOrgUserInput!): RemoveOrgUserResponse!
+
+  """Adds a user as a member of a security group via the RBAC service."""
+  addSecurityGroupMember(args: AddSecurityGroupMemberInput!): AddSecurityGroupMemberResponse!
+
+  """Removes a user from a security group via the RBAC service."""
+  removeSecurityGroupMember(args: RemoveSecurityGroupMemberInput!): RemoveSecurityGroupMemberResponse!
+
+  """
+  Creates a new security group in the current organization via the RBAC service.
+  """
+  createSecurityGroup(args: CreateSecurityGroupInput!): CreateSecurityGroupResponse!
+
+  """
+  Updates an existing security group's name and description via the RBAC service.
+  """
+  updateSecurityGroup(args: UpdateSecurityGroupInput!): UpdateSecurityGroupResponse!
+
+  """Deletes a security group via the RBAC service."""
+  deleteSecurityGroup(args: DeleteSecurityGroupInput!): DeleteSecurityGroupResponse!
+
+  """Deletes a custom role via the RBAC service."""
+  deleteCustomRole(args: DeleteCustomRoleInput!): DeleteCustomRoleResponse!
+
+  """Creates a custom role via the RBAC service."""
+  createCustomRole(args: CreateCustomRoleInput!): CreateCustomRoleResponse!
+
+  """Updates a custom role via the RBAC service."""
+  updateCustomRole(args: UpdateCustomRoleInput!): UpdateCustomRoleResponse!
+
+  """Creates an access control record via the RBAC service."""
+  createACR(args: CreateAcrInput!): CreateAcrResponse!
+
+  """Deletes an access control record via the RBAC service."""
+  deleteACR(args: DeleteAcrInput!): DeleteAcrResponse!
+
+  """
+  Deletes multiple access control records via the RBAC service.
+  Already-deleted acr_ids are silently treated as success (no-op).
+  """
+  bulkDeleteACRs(args: BulkDeleteAcrsInput!): BulkDeleteAcrsResponse!
+
+  """
+  Replaces an access control record (atomic delete + create) via the RBAC service.
+  """
+  replaceACR(args: ReplaceAcrInput!): ReplaceAcrResponse!
 }
 
 """
@@ -2874,18 +3019,21 @@ enum SbomVersion {
   """Default version"""
   VERSION_UNSPECIFIED
 
-  """CycloneDX format, v1.1 a v1.6"""
+  """CycloneDX format, v1.1 through v1.7 (ingest)"""
   VERSION_V1_1
   VERSION_V1_2
   VERSION_V1_3
   VERSION_V1_4
   VERSION_V1_5
   VERSION_V1_6
+  VERSION_V1_7
 
-  """SPDX v2.1 a v2.3"""
+  """SPDX v2.1 through v2.3 and v3.0 / v3.0.1 (ingest)"""
   VERSION_V2_1
   VERSION_V2_2
   VERSION_V2_3
+  VERSION_V3_0
+  VERSION_V3_0_1
 }
 
 """
@@ -5220,6 +5368,7 @@ type CycloneDxMetadata {
 
 enum CycloneDxVersion {
   VERSION_UNSPECIFIED
+  VERSION_V1_7
   VERSION_V1_6
   VERSION_V1_5
   VERSION_V1_4
@@ -5254,6 +5403,8 @@ enum SpdxVersion {
   VERSION_V2_3
   VERSION_V2_2
   VERSION_V2_1
+  VERSION_V3_0
+  VERSION_V3_0_1
 }
 
 enum SpdxFormat {
@@ -5719,9 +5870,14 @@ input SubmitAssetInput {
   sbomType: SbomType
 
   """
-  version: SBOM version if applies // CYCLONEDX_V1_4, SPDX_V2_2. SPDX_V2_3
+  SBOM spec version for CycloneDX ingest (v1.1–v1.7). Prefer over sbomVersion.
   """
-  sbomVersion: SbomVersion
+  cyclonedxVersion: CycloneDxVersion
+
+  """
+  SBOM spec version for SPDX ingest (v2.1–v2.3, v3.0, v3.0.1). Prefer over sbomVersion.
+  """
+  spdxVersion: SpdxVersion
 
   """format: JSON, XML, SPDX"""
   sbomFormat: SbomFormat
@@ -6358,24 +6514,6 @@ enum JiraSystemCheckStatus {
   WARNING
 }
 
-enum JiraSyncDirection {
-  JIRA_TO_NETRISE
-  NETRISE_TO_JIRA
-}
-
-enum JiraConnectionEventLogType {
-  SYNC
-  WARNING
-  AUTH
-  ERROR
-}
-
-enum JiraConnectionAlertType {
-  INFO
-  ERROR
-  WARNING
-}
-
 type JiraIntegration {
   """Current connection status of the Jira integration."""
   status: JiraIntegrationStatus!
@@ -6389,6 +6527,16 @@ type JiraIntegration {
   """Human-readable last updated timestamp for the integration card."""
   lastUpdated: String
 
+  """
+  Whether Turbine has an active OAuth token for this org (may be true while disabled).
+  """
+  oauthTokenActive: Boolean!
+
+  """
+  Whether the NetRise Jira app is installed and API connectivity is healthy.
+  """
+  apiConnectivityActive: Boolean!
+
   """Connection and health details for the Jira integration detail view."""
   connectionHealth: JiraIntegrationConnectionHealth!
 }
@@ -6399,23 +6547,19 @@ type JiraIntegrationConnectionHealth {
 
   """Human-readable connection status label (e.g. Connected)."""
   connectionStatusLabel: String!
-
-  """OAuth authorization summary shown below the instance URL."""
-  oauthSummary: String
   metrics: JiraConnectionMetrics!
   systemChecks: [JiraSystemCheck!]!
-  syncDirections: [JiraSyncDirectionSetting!]!
-  eventLog: [JiraConnectionEventLogEntry!]!
-  alerts: [JiraConnectionAlert!]!
+  connectedSpaces: [JiraConnectedSpace!]!
+
+  """
+  Jira spaces available to connect that are not already in connectedSpaces.
+  """
+  addableSpaces: [JiraSetupSpace!]!
 }
 
 type JiraConnectionMetrics {
-  oauthMethod: String!
   connectedSpaces: String!
-  activeRules: String!
-  jiraCloudTickets: String!
   lastSync: String!
-  failedJobs: String!
 }
 
 type JiraSystemCheck {
@@ -6423,23 +6567,163 @@ type JiraSystemCheck {
   title: String!
   description: String!
   status: JiraSystemCheckStatus!
-  actionLabel: String
 }
 
-type JiraSyncDirectionSetting {
-  direction: JiraSyncDirection!
-  enabled: Boolean!
+type JiraConnectedSpace {
+  id: String!
+  name: String!
+  projectKey: String!
+  category: String!
+  openTicketsCount: Int!
+  linkedTicketsCount: Int!
+  iconColorIndex: Int!
+  avatarUrl: String
 }
 
-type JiraConnectionEventLogEntry {
-  type: JiraConnectionEventLogType!
-  event: String!
-  timestamp: String!
+type JiraTestConnectionResult {
+  success: Boolean!
+  error: String
 }
 
-type JiraConnectionAlert {
-  type: JiraConnectionAlertType!
+type JiraConnectedSpaceActionResult {
+  success: Boolean!
+  error: String
+}
+
+type JiraLinkedTicket {
+  id: ID!
+  ticketKey: String!
+  projectName: String!
+  status: String!
+  assignee: String
+  updatedAt: String!
+  url: String!
+}
+
+input VulnerabilityJiraTicketsInput {
+  assetId: ID!
+  advisoryId: ID!
+  identificationIds: [String!]
+}
+
+input JiraIntegrationUnlinkVulnerabilityTicketInput {
+  assetId: ID!
+  advisoryId: ID!
+  identificationIds: [String!]
+  ticketId: ID!
+}
+
+input JiraIntegrationDeleteConnectedSpaceInput {
+  spaceId: String!
+}
+
+input JiraIntegrationAddConnectedSpaceInput {
+  spaceId: String
+}
+
+enum JiraSetupMode {
+  SETUP
+  RECONNECT
+}
+
+enum JiraSetupStep {
+  AUTHORIZE
+  INSTALL_APP
+  SELECT_SPACES
+}
+
+enum JiraSetupStepStatus {
+  PENDING
+  ACTIVE
+  WAITING
+  COMPLETED
+}
+
+enum JiraSetupActionType {
+  OPEN_ATLASSIAN
+  CONTINUE
+  OPEN_MARKETPLACE
+  FINISH_SETUP
+  WAITING
+  RECONNECT
+}
+
+type JiraIntegrationSetup {
+  mode: JiraSetupMode!
+  currentStep: JiraSetupStep!
+  steps: [JiraSetupStepState!]!
+  error: JiraSetupError
+  availableSites: [JiraAtlassianSite!]!
+  selectedSiteId: String
+  availableSpaces: [JiraSetupSpace!]!
+  selectedSpaceIds: [String!]!
+  instanceUrl: String
+  appVersion: String
+  primaryAction: JiraSetupPrimaryAction!
+  reconnectSummary: JiraSetupReconnectSummary
+}
+
+type JiraSetupStepState {
+  step: JiraSetupStep!
+  status: JiraSetupStepStatus!
+  title: String!
+  description: String
+  detail: String
+}
+
+type JiraSetupError {
+  title: String!
   message: String!
+}
+
+type JiraAtlassianSite {
+  id: String!
+  url: String!
+  selectable: Boolean!
+}
+
+type JiraSetupSpace {
+  id: String!
+  name: String!
+  openTicketsCount: Int!
+  selected: Boolean!
+  avatarUrl: String
+}
+
+type JiraSetupPrimaryAction {
+  label: String!
+  actionType: JiraSetupActionType!
+  url: String
+  loading: Boolean!
+  disabled: Boolean!
+}
+
+type JiraSetupReconnectSummary {
+  connectedSpacesCount: Int!
+}
+
+enum JiraSetupAction {
+  START
+  START_AUTHORIZATION
+  RETRY_AUTHORIZATION
+  SELECT_SITE
+  OPEN_MARKETPLACE
+  POLL_STATUS
+  UPDATE_SPACE_SELECTION
+  FINISH_SETUP
+  CANCEL
+  START_RECONNECT
+}
+
+input JiraIntegrationSetupActionInput {
+  action: JiraSetupAction!
+  siteId: String
+  spaceIds: [String!]
+}
+
+input JiraIntegrationSetupInput {
+  mode: JiraSetupMode
+  initialize: Boolean
 }
 
 input MisconfigurationsInput {
@@ -6533,6 +6817,21 @@ type SecurityGroup {
   createdBy: String
   memberCount: Int
   lastSeenTime: String
+
+  """
+  Denormalized list of direct members, ordered by email ascending.
+  Mirrors the `members` field on the `SecurityGroup` proto message.
+  """
+  members: [OrgUserRef!]!
+}
+
+"""
+Lightweight reference to an org user. Mirrors the `OrgUserRef` proto message.
+"""
+type OrgUserRef {
+  userId: ID!
+  email: String!
+  displayName: String
 }
 
 """Connection payload for the `listSecurityGroups` query."""
@@ -6693,6 +6992,42 @@ type DeleteSecurityGroupResponse {
 }
 
 """
+Preview of the impact of deleting a security group. Partitions the group's
+members into those who keep access via another live ACR and those who would
+lose all platform access in the org. Mirrors the
+`GetSecurityGroupDeleteImpactResponse` proto message.
+"""
+type SecurityGroupDeleteImpact {
+  """Total number of direct members in the security group."""
+  totalMembers: Int!
+
+  """Members who retain access via another live ACR after deletion."""
+  usersWhoRetain: [OrgUserRef!]!
+
+  """Members who would lose all platform access in this org after deletion."""
+  usersWhoLoseAll: [OrgUserRef!]!
+}
+
+"""
+Preview of the impact of deleting a custom role. Partitions affected users into
+those who keep access via another live ACR and those who would lose all platform
+access in the org. Mirrors the `GetRoleDeleteImpactResponse` proto message.
+"""
+type RoleDeleteImpact {
+  """Number of ACRs that reference this role."""
+  acrCount: Int!
+
+  """Total number of distinct users affected by those ACRs."""
+  totalAffectedUsers: Int!
+
+  """Users who retain access via another live ACR after deletion."""
+  usersWhoRetain: [OrgUserRef!]!
+
+  """Users who would lose all platform access in this org after deletion."""
+  usersWhoLoseAll: [OrgUserRef!]!
+}
+
+"""
 Represents an IDP (Identity Provider) group → NetRise security group mapping used during SSO sync.
 """
 type IDPGroupMapping {
@@ -6734,24 +7069,9 @@ input InviteOrgUserInput {
   roleId: String
 }
 
-"""
-A user that has been invited to (or exists in) the organization, as returned by the RBAC service.
-"""
-type InvitedOrgUser {
-  id: ID!
-  orgId: String!
-  email: String!
-  displayName: String
-  status: String
-  createdTime: String
-  lastSeenTime: String
-  lastModifiedTime: String
-  accessibleAssetCount: Int
-}
-
 """Response payload for the `inviteUser` mutation."""
 type InviteUserResponse {
-  user: InvitedOrgUser
+  user: OrgUser
 }
 
 """
@@ -6764,7 +7084,7 @@ type OrgUser {
   orgId: String!
   email: String!
   displayName: String
-  status: String
+  status: OrgUserStatus
   createdTime: String
   lastSeenTime: String
   lastModifiedTime: String
@@ -6776,6 +7096,29 @@ type OrgUser {
   Security groups this user belongs to directly, ordered by max role precedence then name.
   """
   securityGroups: [SecurityGroupRef!]!
+
+  """Per-request from Auth0; not persisted. False on lookup failure."""
+  emailVerified: Boolean!
+
+  """
+  True when the user's email domain is not in the org's domain allowlist.
+  Per-request from orgs-service; not persisted. False on lookup failure.
+  """
+  isExternal: Boolean!
+
+  """
+  Direct ACRs assigned to this user in the org, with role and resource names
+  denormalized for display. Populated by `listOrgUsers`; empty on single-user
+  lookups. Mirrors the `OrgUser.acrs` proto field.
+  """
+  acrs: [AccessControlRecord!]!
+
+  """
+  Count of distinct permissions this user holds across all their ACRs (direct and
+  via security groups). Populated by `listOrgUsers`; zero on single-user lookups.
+  Mirrors the `OrgUser.permission_count` proto field.
+  """
+  permissionCount: Int
 }
 
 """
@@ -6813,6 +7156,13 @@ type Role {
   precedence: Int
   lastModifiedTime: String
   lastModifiedBy: String
+
+  """
+  Email of the user who last modified this role, resolved from org_users at query time.
+  Empty for built-in roles or when the modifier is no longer in the org.
+  Mirrors the `Role.last_modified_by_email` proto field.
+  """
+  lastModifiedByEmail: String
 }
 
 """
@@ -6839,11 +7189,6 @@ type RoleConnection implements Connection {
 type RoleEdge implements Edge {
   cursor: String
   node: Role
-}
-
-"""Response payload for the `getRole` query."""
-type GetRoleResponse {
-  role: Role
 }
 
 """
@@ -6941,10 +7286,30 @@ type AccessControlRecord {
   createdTime: String
   createdBy: String
   expiresAt: String
+
+  """
+  Permission IDs for direct-permission (role-less) ACRs. Not currently populated by
+  the RBAC service on read paths; reserved for future use. Clients should not rely
+  on this field today.
+  """
   directPermissions: [String!]!
   lastModifiedTime: String
   lastModifiedBy: String
   entityMemberCount: Int
+
+  """
+  Distinct, sorted emails of users this ACR applies to. For USER ACRs this is the
+  entity user's email; for SECURITY_GROUP ACRs this is every direct group member's
+  email. Populated by `listACRs`; empty on write-path responses.
+  Mirrors the `ACRRecord.user_emails` proto field.
+  """
+  userEmails: [String!]!
+
+  """
+  Expansion of `roleId` into permission IDs. Empty for direct-permission ACRs.
+  Mirrors the `ACRRecord.role_permissions` proto field.
+  """
+  rolePermissions: [String!]!
 }
 
 """
@@ -6992,6 +7357,19 @@ type DeleteAcrResponse {
   success: Boolean!
 }
 
+"""Input payload for the `bulkDeleteACRs` mutation."""
+input BulkDeleteAcrsInput {
+  acrIds: [String!]!
+}
+
+"""
+Response payload for the `bulkDeleteACRs` mutation.
+Already-deleted acr_ids are silently treated as success (no-op).
+"""
+type BulkDeleteAcrsResponse {
+  success: Boolean!
+}
+
 """Input payload for the `replaceACR` mutation."""
 input ReplaceAcrInput {
   acrId: String!
@@ -7016,6 +7394,61 @@ Edge wrapping a single `AccessControlRecord` node in the `AccessControlRecordCon
 type AccessControlRecordEdge implements Edge {
   cursor: String
   node: AccessControlRecord
+}
+
+"""
+The effective permissions the current caller holds on a specific resource.
+Mirrors the fields exposed on the `ResourcePermissions` proto message.
+"""
+type ResourcePermissions {
+  resourceType: AcrResourceType!
+  resourceId: String!
+  permissions: [String!]!
+}
+
+"""
+Effective role assignment with resource scope flags.
+Mirrors the `UserRoleAssignment` proto message.
+"""
+type UserRoleAssignment {
+  roleName: String!
+  atOrg: Boolean!
+  atAssetGroup: Boolean!
+  atAsset: Boolean!
+}
+
+"""
+The effective permissions held by the calling user across all their ACRs.
+Mirrors the `CallerPermissions` proto message.
+"""
+type CallerPermissions {
+  permissions: [String!]!
+  highestPrecedenceRole: String
+  roles: [UserRoleAssignment!]!
+}
+
+"""
+Minimal asset record for the entity access drilldown.
+Mirrors the `EntityAssetSummary` proto message.
+"""
+type EntityAssetSummary {
+  id: ID!
+  name: String!
+  assetType: String!
+}
+
+"""Connection payload for the `listEntityAssets` query."""
+type EntityAssetConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [EntityAssetEdge]
+}
+
+"""
+Edge wrapping a single `EntityAssetSummary` node in the `EntityAssetConnection`.
+"""
+type EntityAssetEdge implements Edge {
+  cursor: String
+  node: EntityAssetSummary
 }
 
 """
@@ -7062,24 +7495,6 @@ type RemoveOrgUserResponse {
   success: Boolean!
 }
 
-"""
-Input payload for the `resetOrgUserPassword` mutation. Triggers a password
-reset flow for the targeted user.
-"""
-input ResetOrgUserPasswordInput {
-  """The id of the user whose password should be reset."""
-  userId: String!
-}
-
-"""Response payload for the `resetOrgUserPassword` mutation."""
-type ResetOrgUserPasswordResponse {
-  """The id of the user whose password reset was requested."""
-  userId: String!
-
-  """Whether the password reset request succeeded."""
-  success: Boolean!
-}
-
 input GetSecretReachabilityInput {
   composedAssetId: String!
   secretId: String!
@@ -7092,19 +7507,19 @@ type UserOrganization {
 
 type UserMutations {
   """Changes user's role"""
-  setUserRole(args: SetUserRoleInput!): User
+  setUserRole(args: SetUserRoleInput!): User @deprecated(reason: "Use `replaceACR` for a direct org-level role swap, or `createACR` / `deleteACR` for add/remove. Requires `settings:administration_manage` (org-wide).")
 
   """Enables / disables user"""
-  action(args: UserActionInput!): User
+  action(args: UserActionInput!): User @deprecated(reason: "Use `setOrgUserStatus` with status ENABLED or DISABLED. Requires `settings:administration_manage` (org-wide). Does not affect the user's Auth0 account.")
 
   """Deletes user"""
-  delete(args: UserInput!): ErrResponse
+  delete(args: UserInput!): ErrResponse @deprecated(reason: "Use `removeOrgUser`. In RBAC D1, delete and remove are the same operation. Requires `settings:administration_manage` (org-wide).")
 
   """Removes user from organization"""
-  remove(args: UserInput!): ErrResponse
+  remove(args: UserInput!): ErrResponse @deprecated(reason: "Use `removeOrgUser`. Requires `settings:administration_manage` (org-wide).")
 
   """Invites user to organization"""
-  invite(args: InviteUserInput!): User
+  invite(args: InviteUserInput!): User @deprecated(reason: "Use `inviteUser` with `InviteOrgUserInput` (roleId and securityGroupIds instead of role). Requires `settings:administration_manage` (org-wide).")
 
   """Updates user's data"""
   updateUser(args: UpdateUserInput!): User

@@ -28,6 +28,22 @@
     "curated_alias": "group add-assets"
   },
   {
+    "name": "add-security-group-member",
+    "operation": "mutation_add_security_group_member",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Add a user as a member of an RBAC security group.",
+    "risk": "write",
+    "return_type": "MutationAddSecurityGroupMember",
+    "input_model": "AddSecurityGroupMemberInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "security-group-id",
+      "user-id"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "asset-add-dependency",
     "operation": "mutation_asset_add_dependency",
     "group": "api",
@@ -96,7 +112,8 @@
       "family",
       "type",
       "sbom-type",
-      "sbom-version",
+      "cyclonedx-version",
+      "spdx-version",
       "sbom-format",
       "license"
     ],
@@ -120,6 +137,32 @@
       "product"
     ],
     "curated_alias": "asset update"
+  },
+  {
+    "name": "bulk-delete-ac-rs",
+    "operation": "mutation_bulk_delete_ac_rs",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Delete multiple access control records in one call; already-deleted records are treated as success.",
+    "risk": "write",
+    "return_type": "MutationBulkDeleteACRs",
+    "input_model": "BulkDeleteAcrsInput",
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "create-acr",
+    "operation": "mutation_create_acr",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Create an access control record granting a user or security group a role on a resource.",
+    "risk": "write",
+    "return_type": "MutationCreateACR",
+    "input_model": "CreateAcrInput",
+    "has_nested_input": true,
+    "promoted_flags": [],
+    "curated_alias": null
   },
   {
     "name": "create-asset-comparison-report",
@@ -154,6 +197,22 @@
     "curated_alias": "group create"
   },
   {
+    "name": "create-custom-role",
+    "operation": "mutation_create_custom_role",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Create an org-scoped custom role with a chosen set of permissions.",
+    "risk": "write",
+    "return_type": "MutationCreateCustomRole",
+    "input_model": "CreateCustomRoleInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "name",
+      "description"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "create-notification-configuration",
     "operation": "mutation_create_notification_configuration",
     "group": "api",
@@ -164,6 +223,37 @@
     "input_model": "CreateNotificationConfigurationInput",
     "has_nested_input": true,
     "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "create-security-group",
+    "operation": "mutation_create_security_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Create a new RBAC security group in the current organization.",
+    "risk": "write",
+    "return_type": "MutationCreateSecurityGroup",
+    "input_model": "CreateSecurityGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "name",
+      "description"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "delete-acr",
+    "operation": "mutation_delete_acr",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Delete a single access control record, revoking the associated grant.",
+    "risk": "destructive",
+    "return_type": "MutationDeleteACR",
+    "input_model": "DeleteAcrInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "acr-id"
+    ],
     "curated_alias": null
   },
   {
@@ -197,6 +287,21 @@
     "curated_alias": "group delete"
   },
   {
+    "name": "delete-custom-role",
+    "operation": "mutation_delete_custom_role",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Permanently delete a custom role from the organization.",
+    "risk": "destructive",
+    "return_type": "MutationDeleteCustomRole",
+    "input_model": "DeleteCustomRoleInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "role-id"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "delete-notification-configuration",
     "operation": "mutation_delete_notification_configuration",
     "group": "api",
@@ -208,6 +313,38 @@
     "has_nested_input": false,
     "promoted_flags": [
       "id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "delete-security-group",
+    "operation": "mutation_delete_security_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Permanently delete a security group from the organization.",
+    "risk": "destructive",
+    "return_type": "MutationDeleteSecurityGroup",
+    "input_model": "DeleteSecurityGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "security-group-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "invite-user",
+    "operation": "mutation_invite_user",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Invite a user to the organization with a role and optional security group memberships.",
+    "risk": "write",
+    "return_type": "MutationInviteUser",
+    "input_model": "InviteOrgUserInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "email",
+      "display-name",
+      "role-id"
     ],
     "curated_alias": null
   },
@@ -397,6 +534,52 @@
     "curated_alias": "group remove-assets"
   },
   {
+    "name": "remove-org-user",
+    "operation": "mutation_remove_org_user",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Permanently remove a user from the current organization.",
+    "risk": "destructive",
+    "return_type": "MutationRemoveOrgUser",
+    "input_model": "RemoveOrgUserInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "user-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "remove-security-group-member",
+    "operation": "mutation_remove_security_group_member",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Remove a user from an RBAC security group.",
+    "risk": "destructive",
+    "return_type": "MutationRemoveSecurityGroupMember",
+    "input_model": "RemoveSecurityGroupMemberInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "security-group-id",
+      "user-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "replace-acr",
+    "operation": "mutation_replace_acr",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Replace an access control record with a new grant in one atomic delete-and-create operation.",
+    "risk": "write",
+    "return_type": "MutationReplaceACR",
+    "input_model": "ReplaceAcrInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "acr-id"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "set-asset-groups-to-asset",
     "operation": "mutation_set_asset_groups_to_asset",
     "group": "api",
@@ -423,6 +606,22 @@
     "has_nested_input": false,
     "promoted_flags": [
       "group-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "set-org-user-status",
+    "operation": "mutation_set_org_user_status",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Enable or disable a user account within the current organization.",
+    "risk": "write",
+    "return_type": "MutationSetOrgUserStatus",
+    "input_model": "SetOrgUserStatusInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "user-id",
+      "status"
     ],
     "curated_alias": null
   },
@@ -457,6 +656,23 @@
       "description"
     ],
     "curated_alias": "group update"
+  },
+  {
+    "name": "update-custom-role",
+    "operation": "mutation_update_custom_role",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update the name, description, or permissions of an existing custom role.",
+    "risk": "write",
+    "return_type": "MutationUpdateCustomRole",
+    "input_model": "UpdateCustomRoleInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "role-id",
+      "name",
+      "description"
+    ],
+    "curated_alias": null
   },
   {
     "name": "update-notification-configuration",
@@ -496,6 +712,23 @@
       "idle-timeout-seconds",
       "rise-ai-conversational-gpt-enabled",
       "rise-ai-insights-report-enabled"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "update-security-group",
+    "operation": "mutation_update_security_group",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update the name or description of an existing security group.",
+    "risk": "write",
+    "return_type": "MutationUpdateSecurityGroup",
+    "input_model": "UpdateSecurityGroupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "security-group-id",
+      "name",
+      "description"
     ],
     "curated_alias": null
   },
@@ -1090,6 +1323,58 @@
     "curated_alias": null
   },
   {
+    "name": "get-my-permissions",
+    "operation": "query_get_my_permissions",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the flat union of permission IDs the calling user holds across all their access grants.",
+    "risk": "read",
+    "return_type": "QueryGetMyPermissions",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-resource-permissions",
+    "operation": "query_get_resource_permissions",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the caller's effective permissions on a specific resource, defaulting to the organization level.",
+    "risk": "read",
+    "return_type": "QueryGetResourcePermissions",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-role",
+    "operation": "query_get_role",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve a single RBAC role by its ID.",
+    "risk": "read",
+    "return_type": "QueryGetRole",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-role-delete-impact",
+    "operation": "query_get_role_delete_impact",
+    "group": "api",
+    "kind": "query",
+    "summary": "Preview which users would retain or lose platform access if a custom role were deleted.",
+    "risk": "read",
+    "return_type": "QueryGetRoleDeleteImpact",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
     "name": "get-secret-reachability",
     "operation": "query_get_secret_reachability",
     "group": "api",
@@ -1103,6 +1388,19 @@
       "composed-asset-id",
       "secret-id"
     ],
+    "curated_alias": null
+  },
+  {
+    "name": "get-security-group-delete-impact",
+    "operation": "query_get_security_group_delete_impact",
+    "group": "api",
+    "kind": "query",
+    "summary": "Preview which members would retain or lose platform access if a security group were deleted.",
+    "risk": "read",
+    "return_type": "QueryGetSecurityGroupDeleteImpact",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
     "curated_alias": null
   },
   {
@@ -1252,6 +1550,24 @@
     "curated_alias": null
   },
   {
+    "name": "list-ac-rs",
+    "operation": "query_list_ac_rs",
+    "group": "api",
+    "kind": "query",
+    "summary": "List access control records for the organization, optionally filtered to a specific user.",
+    "risk": "read",
+    "return_type": "QueryListACRs",
+    "input_model": "Cursor",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "first",
+      "after",
+      "last",
+      "before"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "list-ai-providers",
     "operation": "query_list_ai_providers",
     "group": "api",
@@ -1313,6 +1629,60 @@
     "curated_alias": null
   },
   {
+    "name": "list-entity-assets",
+    "operation": "query_list_entity_assets",
+    "group": "api",
+    "kind": "query",
+    "summary": "List the assets accessible to a specific user or security group.",
+    "risk": "read",
+    "return_type": "QueryListEntityAssets",
+    "input_model": "Cursor",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "first",
+      "after",
+      "last",
+      "before"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "list-my-ac-rs",
+    "operation": "query_list_my_ac_rs",
+    "group": "api",
+    "kind": "query",
+    "summary": "List the access control records that apply to the calling user.",
+    "risk": "read",
+    "return_type": "QueryListMyACRs",
+    "input_model": "Cursor",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "first",
+      "after",
+      "last",
+      "before"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "list-my-security-groups",
+    "operation": "query_list_my_security_groups",
+    "group": "api",
+    "kind": "query",
+    "summary": "List the security groups the calling user belongs to.",
+    "risk": "read",
+    "return_type": "QueryListMySecurityGroups",
+    "input_model": "Cursor",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "first",
+      "after",
+      "last",
+      "before"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "list-notification-configurations",
     "operation": "query_list_notification_configurations",
     "group": "api",
@@ -1339,6 +1709,91 @@
     "curated_alias": null
   },
   {
+    "name": "list-org-users",
+    "operation": "query_list_org_users",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all users in the organization with their security groups and accessible asset counts.",
+    "risk": "read",
+    "return_type": "QueryListOrgUsers",
+    "input_model": "Cursor",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "first",
+      "after",
+      "last",
+      "before"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "list-permissions",
+    "operation": "query_list_permissions",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the full permission catalog available for building custom roles.",
+    "risk": "read",
+    "return_type": "QueryListPermissions",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "list-roles",
+    "operation": "query_list_roles",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all RBAC roles defined for the current organization.",
+    "risk": "read",
+    "return_type": "QueryListRoles",
+    "input_model": "Cursor",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "first",
+      "after",
+      "last",
+      "before"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "list-security-group-members",
+    "operation": "query_list_security_group_members",
+    "group": "api",
+    "kind": "query",
+    "summary": "List the users who are members of a specific security group.",
+    "risk": "read",
+    "return_type": "QueryListSecurityGroupMembers",
+    "input_model": "Cursor",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "first",
+      "after",
+      "last",
+      "before"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "list-security-groups",
+    "operation": "query_list_security_groups",
+    "group": "api",
+    "kind": "query",
+    "summary": "List all RBAC security groups defined for the current organization.",
+    "risk": "read",
+    "return_type": "QueryListSecurityGroups",
+    "input_model": "Cursor",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "first",
+      "after",
+      "last",
+      "before"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "match-vulnerabilities",
     "operation": "query_match_vulnerabilities",
     "group": "api",
@@ -1351,6 +1806,19 @@
     "promoted_flags": [
       "identifier"
     ],
+    "curated_alias": null
+  },
+  {
+    "name": "me",
+    "operation": "query_me",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the authenticated user's profile including their editable display name.",
+    "risk": "read",
+    "return_type": "QueryMe",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
     "curated_alias": null
   },
   {

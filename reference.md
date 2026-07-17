@@ -64,6 +64,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api add-assets-to-asset-group --schema`
 - **Flags:** --id
 
+### `api add-security-group-member`
+
+- **Operation:** `mutation_add_security_group_member`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Add a user as a member of an RBAC security group.
+- **Input model:** `AddSecurityGroupMemberInput`
+- **Schema:** `turbine api add-security-group-member --schema`
+- **Flags:** --security-group-id, --user-id
+
 ### `api asset-add-dependency`
 
 - **Operation:** `mutation_asset_add_dependency`
@@ -103,7 +113,7 @@ Prefer these noun-verb commands for everyday tasks:
 - **Prefer:** `turbine asset submit`
 - **Input model:** `SubmitAssetInput`
 - **Schema:** `turbine api asset-submit --schema`
-- **Flags:** --name, --manufacturer, --model, --version, --asset-cpe, --architecture, --kernel-version, --os, --bitness, --family, --type, --sbom-type, --sbom-version, --sbom-format, --license
+- **Flags:** --name, --manufacturer, --model, --version, --asset-cpe, --architecture, --kernel-version, --os, --bitness, --family, --type, --sbom-type, --cyclonedx-version, --spdx-version, --sbom-format, --license
 
 ### `api asset-update`
 
@@ -115,6 +125,24 @@ Prefer these noun-verb commands for everyday tasks:
 - **Input model:** `UpdateAssetInput`
 - **Schema:** `turbine api asset-update --schema`
 - **Flags:** --id, --vendor, --name, --version, --product
+
+### `api bulk-delete-ac-rs`
+
+- **Operation:** `mutation_bulk_delete_ac_rs`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Delete multiple access control records in one call; already-deleted records are treated as success.
+- **Input model:** `BulkDeleteAcrsInput`
+- **Schema:** `turbine api bulk-delete-ac-rs --schema`
+
+### `api create-acr`
+
+- **Operation:** `mutation_create_acr`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Create an access control record granting a user or security group a role on a resource.
+- **Input model:** `CreateAcrInput`
+- **Schema:** `turbine api create-acr --schema`
 
 ### `api create-asset-comparison-report`
 
@@ -137,6 +165,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api create-asset-group --schema`
 - **Flags:** --name, --description
 
+### `api create-custom-role`
+
+- **Operation:** `mutation_create_custom_role`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Create an org-scoped custom role with a chosen set of permissions.
+- **Input model:** `CreateCustomRoleInput`
+- **Schema:** `turbine api create-custom-role --schema`
+- **Flags:** --name, --description
+
 ### `api create-notification-configuration`
 
 - **Operation:** `mutation_create_notification_configuration`
@@ -145,6 +183,26 @@ Prefer these noun-verb commands for everyday tasks:
 - **Summary:** Create a notification configuration defining channel, scopes, and triggers for alerts.
 - **Input model:** `CreateNotificationConfigurationInput`
 - **Schema:** `turbine api create-notification-configuration --schema`
+
+### `api create-security-group`
+
+- **Operation:** `mutation_create_security_group`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Create a new RBAC security group in the current organization.
+- **Input model:** `CreateSecurityGroupInput`
+- **Schema:** `turbine api create-security-group --schema`
+- **Flags:** --name, --description
+
+### `api delete-acr`
+
+- **Operation:** `mutation_delete_acr`
+- **Kind:** mutation
+- **Risk:** destructive
+- **Summary:** Delete a single access control record, revoking the associated grant.
+- **Input model:** `DeleteAcrInput`
+- **Schema:** `turbine api delete-acr --schema`
+- **Flags:** --acr-id
 
 ### `api delete-asset-comparison-report`
 
@@ -167,6 +225,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api delete-asset-group --schema`
 - **Flags:** --id
 
+### `api delete-custom-role`
+
+- **Operation:** `mutation_delete_custom_role`
+- **Kind:** mutation
+- **Risk:** destructive
+- **Summary:** Permanently delete a custom role from the organization.
+- **Input model:** `DeleteCustomRoleInput`
+- **Schema:** `turbine api delete-custom-role --schema`
+- **Flags:** --role-id
+
 ### `api delete-notification-configuration`
 
 - **Operation:** `mutation_delete_notification_configuration`
@@ -176,6 +244,26 @@ Prefer these noun-verb commands for everyday tasks:
 - **Input model:** `DeleteNotificationConfigurationInput`
 - **Schema:** `turbine api delete-notification-configuration --schema`
 - **Flags:** --id
+
+### `api delete-security-group`
+
+- **Operation:** `mutation_delete_security_group`
+- **Kind:** mutation
+- **Risk:** destructive
+- **Summary:** Permanently delete a security group from the organization.
+- **Input model:** `DeleteSecurityGroupInput`
+- **Schema:** `turbine api delete-security-group --schema`
+- **Flags:** --security-group-id
+
+### `api invite-user`
+
+- **Operation:** `mutation_invite_user`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Invite a user to the organization with a role and optional security group memberships.
+- **Input model:** `InviteOrgUserInput`
+- **Schema:** `turbine api invite-user --schema`
+- **Flags:** --email, --display-name, --role-id
 
 ### `api notify-notification-configuration`
 
@@ -290,6 +378,36 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api remove-assets-from-asset-group --schema`
 - **Flags:** --id
 
+### `api remove-org-user`
+
+- **Operation:** `mutation_remove_org_user`
+- **Kind:** mutation
+- **Risk:** destructive
+- **Summary:** Permanently remove a user from the current organization.
+- **Input model:** `RemoveOrgUserInput`
+- **Schema:** `turbine api remove-org-user --schema`
+- **Flags:** --user-id
+
+### `api remove-security-group-member`
+
+- **Operation:** `mutation_remove_security_group_member`
+- **Kind:** mutation
+- **Risk:** destructive
+- **Summary:** Remove a user from an RBAC security group.
+- **Input model:** `RemoveSecurityGroupMemberInput`
+- **Schema:** `turbine api remove-security-group-member --schema`
+- **Flags:** --security-group-id, --user-id
+
+### `api replace-acr`
+
+- **Operation:** `mutation_replace_acr`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Replace an access control record with a new grant in one atomic delete-and-create operation.
+- **Input model:** `ReplaceAcrInput`
+- **Schema:** `turbine api replace-acr --schema`
+- **Flags:** --acr-id
+
 ### `api set-asset-groups-to-asset`
 
 - **Operation:** `mutation_set_asset_groups_to_asset`
@@ -309,6 +427,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Input model:** `SetAssetsToAssetGroupInput`
 - **Schema:** `turbine api set-assets-to-asset-group --schema`
 - **Flags:** --group-id
+
+### `api set-org-user-status`
+
+- **Operation:** `mutation_set_org_user_status`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Enable or disable a user account within the current organization.
+- **Input model:** `SetOrgUserStatusInput`
+- **Schema:** `turbine api set-org-user-status --schema`
+- **Flags:** --user-id, --status
 
 ### `api submit-rise-ai-analysis`
 
@@ -331,6 +459,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api update-asset-group --schema`
 - **Flags:** --id, --name, --description
 
+### `api update-custom-role`
+
+- **Operation:** `mutation_update_custom_role`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Update the name, description, or permissions of an existing custom role.
+- **Input model:** `UpdateCustomRoleInput`
+- **Schema:** `turbine api update-custom-role --schema`
+- **Flags:** --role-id, --name, --description
+
 ### `api update-notification-configuration`
 
 - **Operation:** `mutation_update_notification_configuration`
@@ -349,6 +487,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Input model:** `OrgLevelSettingsInput`
 - **Schema:** `turbine api update-org-level-settings --schema`
 - **Flags:** --symbol-index-enabled, --kernel-module-enabled, --curated-hash-enabled, --legacy-hash-enabled, --package-manifest-enabled, --signature-enabled, --pe-meta-data-enabled, --library-version-enabled, --library-name-enabled, --binary-fingerprint-enabled, --idle-timout-enabled, --idle-timeout-seconds, --rise-ai-conversational-gpt-enabled, --rise-ai-insights-report-enabled
+
+### `api update-security-group`
+
+- **Operation:** `mutation_update_security_group`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Update the name or description of an existing security group.
+- **Input model:** `UpdateSecurityGroupInput`
+- **Schema:** `turbine api update-security-group --schema`
+- **Flags:** --security-group-id, --name, --description
 
 ### `api user-action`
 
@@ -738,6 +886,34 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api get-dependency-reachability --schema`
 - **Flags:** --composed-asset-id, --component-id
 
+### `api get-my-permissions`
+
+- **Operation:** `query_get_my_permissions`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the flat union of permission IDs the calling user holds across all their access grants.
+
+### `api get-resource-permissions`
+
+- **Operation:** `query_get_resource_permissions`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the caller's effective permissions on a specific resource, defaulting to the organization level.
+
+### `api get-role`
+
+- **Operation:** `query_get_role`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve a single RBAC role by its ID.
+
+### `api get-role-delete-impact`
+
+- **Operation:** `query_get_role_delete_impact`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Preview which users would retain or lose platform access if a custom role were deleted.
+
 ### `api get-secret-reachability`
 
 - **Operation:** `query_get_secret_reachability`
@@ -747,6 +923,13 @@ Prefer these noun-verb commands for everyday tasks:
 - **Input model:** `GetSecretReachabilityInput`
 - **Schema:** `turbine api get-secret-reachability --schema`
 - **Flags:** --composed-asset-id, --secret-id
+
+### `api get-security-group-delete-impact`
+
+- **Operation:** `query_get_security_group_delete_impact`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Preview which members would retain or lose platform access if a security group were deleted.
 
 ### `api get-vuln-reachability`
 
@@ -835,6 +1018,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Risk:** read
 - **Summary:** List available SPDX license identifiers for filtering and reference.
 
+### `api list-ac-rs`
+
+- **Operation:** `query_list_ac_rs`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List access control records for the organization, optionally filtered to a specific user.
+- **Input model:** `Cursor`
+- **Schema:** `turbine api list-ac-rs --schema`
+- **Flags:** --first, --after, --last, --before
+
 ### `api list-ai-providers`
 
 - **Operation:** `query_list_ai_providers`
@@ -874,6 +1067,36 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api list-asset-crypto-libraries --schema`
 - **Flags:** --asset-id, --filter
 
+### `api list-entity-assets`
+
+- **Operation:** `query_list_entity_assets`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List the assets accessible to a specific user or security group.
+- **Input model:** `Cursor`
+- **Schema:** `turbine api list-entity-assets --schema`
+- **Flags:** --first, --after, --last, --before
+
+### `api list-my-ac-rs`
+
+- **Operation:** `query_list_my_ac_rs`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List the access control records that apply to the calling user.
+- **Input model:** `Cursor`
+- **Schema:** `turbine api list-my-ac-rs --schema`
+- **Flags:** --first, --after, --last, --before
+
+### `api list-my-security-groups`
+
+- **Operation:** `query_list_my_security_groups`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List the security groups the calling user belongs to.
+- **Input model:** `Cursor`
+- **Schema:** `turbine api list-my-security-groups --schema`
+- **Flags:** --first, --after, --last, --before
+
 ### `api list-notification-configurations`
 
 - **Operation:** `query_list_notification_configurations`
@@ -892,6 +1115,53 @@ Prefer these noun-verb commands for everyday tasks:
 - **Input model:** `ListNotificationLogsInput`
 - **Schema:** `turbine api list-notification-logs --schema`
 
+### `api list-org-users`
+
+- **Operation:** `query_list_org_users`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List all users in the organization with their security groups and accessible asset counts.
+- **Input model:** `Cursor`
+- **Schema:** `turbine api list-org-users --schema`
+- **Flags:** --first, --after, --last, --before
+
+### `api list-permissions`
+
+- **Operation:** `query_list_permissions`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the full permission catalog available for building custom roles.
+
+### `api list-roles`
+
+- **Operation:** `query_list_roles`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List all RBAC roles defined for the current organization.
+- **Input model:** `Cursor`
+- **Schema:** `turbine api list-roles --schema`
+- **Flags:** --first, --after, --last, --before
+
+### `api list-security-group-members`
+
+- **Operation:** `query_list_security_group_members`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List the users who are members of a specific security group.
+- **Input model:** `Cursor`
+- **Schema:** `turbine api list-security-group-members --schema`
+- **Flags:** --first, --after, --last, --before
+
+### `api list-security-groups`
+
+- **Operation:** `query_list_security_groups`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List all RBAC security groups defined for the current organization.
+- **Input model:** `Cursor`
+- **Schema:** `turbine api list-security-groups --schema`
+- **Flags:** --first, --after, --last, --before
+
 ### `api match-vulnerabilities`
 
 - **Operation:** `query_match_vulnerabilities`
@@ -901,6 +1171,13 @@ Prefer these noun-verb commands for everyday tasks:
 - **Input model:** `MatchVulnerabilitiesInput`
 - **Schema:** `turbine api match-vulnerabilities --schema`
 - **Flags:** --identifier
+
+### `api me`
+
+- **Operation:** `query_me`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the authenticated user's profile including their editable display name.
 
 ### `api metrics`
 
