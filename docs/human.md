@@ -645,6 +645,66 @@ Return organization-wide component counts filtered by enabled identification met
 turbine api identified-components-preview
 ```
 
+#### api jira-integration
+Retrieve the Jira integration summary and connection health details.
+```bash
+turbine api jira-integration
+```
+
+#### api jira-integration-setup
+Retrieve the current state of the Jira integration setup wizard.
+```bash
+turbine api jira-integration-setup
+```
+
+#### api jira-project-components
+List the Jira project components available for a connected space.
+```bash
+turbine api jira-project-components --space-id VALUE
+```
+
+#### api jira-project-labels
+Search the Jira labels available for a connected space; labels are instance-global.
+```bash
+turbine api jira-project-labels --space-id VALUE --query search_term
+```
+
+#### api jira-project-sprints
+Search the Jira sprints available for a connected space.
+```bash
+turbine api jira-project-sprints --space-id VALUE --query search_term
+```
+
+#### api jira-project-teams
+Search the Atlassian Teams available for a connected Jira space.
+```bash
+turbine api jira-project-teams --space-id VALUE --query search_term
+```
+
+#### api jira-project-users
+Search the assignable Jira users for a connected space.
+```bash
+turbine api jira-project-users --space-id VALUE --query search_term
+```
+
+#### api jira-project-versions
+List the Jira project versions available for a connected space.
+```bash
+turbine api jira-project-versions --space-id VALUE
+```
+
+#### api jira-space-issue-fields
+Retrieve the creatable fields, including priority options, for a Jira space and issue type.
+```bash
+turbine api jira-space-issue-fields --space-id VALUE --issue-type-id VALUE
+```
+
+#### api jira-space-issue-types
+Retrieve the issue types available for a connected Jira space.
+```bash
+turbine api jira-space-issue-types --space-id VALUE
+```
+
 #### api license
 Retrieve detailed information for a specific software license.
 ```bash
@@ -837,6 +897,12 @@ List public cryptographic keys found within the asset's file system.
 turbine api public-keys --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
+#### api remediated-vulnerabilities-by-asset
+List remediated vulnerabilities grouped by asset for a single remediation-status bucket, with pagination, filtering, and sorting.
+```bash
+turbine api remediated-vulnerabilities-by-asset --input '{"cursor":{"first":10},"status":"UNSPECIFIED"}'
+```
+
 #### api rise-ai-analysis-data
 Check for the contents of the RISE AI analysis report.
 ```bash
@@ -925,6 +991,18 @@ turbine api vulnerabilities-overview --input '{"cursor":{"first":10}}'
 Count vulnerabilities matching external threat feeds like CISA or botnets.
 ```bash
 turbine api vulnerability-external-filters --asset-id ASSET_ID
+```
+
+#### api vulnerability-jira-tickets
+Retrieve the Jira tickets linked to a vulnerability finding on an asset.
+```bash
+turbine api vulnerability-jira-tickets --asset-id ASSET_ID --advisory-id CVE_ID --component-id VALUE
+```
+
+#### api vulnerability-remediation-summary
+Get org-wide counts of applied VEX remediation statuses, grouped into the overview remediation-status buckets.
+```bash
+turbine api vulnerability-remediation-summary
 ```
 
 #### api add-asset-groups-to-assets
@@ -1027,6 +1105,48 @@ turbine api delete-security-group --security-group-id GROUP_ID --dry-run
 Invite a user to the organization with a role and optional security group memberships.
 ```bash
 turbine api invite-user --email user@example.com
+```
+
+#### api jira-integration-add-connected-space
+Add a Jira space to the integration's connected spaces list.
+```bash
+turbine api jira-integration-add-connected-space
+```
+
+#### api jira-integration-create-issue
+Create a Jira issue and optionally link it to a vulnerability finding.
+```bash
+turbine api jira-integration-create-issue --space-id VALUE --issue-type-id VALUE --summary VALUE --description VALUE
+```
+
+#### api jira-integration-delete-connected-space
+Remove a connected Jira space from the integration.
+```bash
+turbine api jira-integration-delete-connected-space --space-id VALUE
+```
+
+#### api jira-integration-disconnect
+Disconnect the Jira integration from the organization.
+```bash
+turbine api jira-integration-disconnect
+```
+
+#### api jira-integration-reconnect
+Re-enable a Jira installation when the OAuth and app install steps are already complete.
+```bash
+turbine api jira-integration-reconnect
+```
+
+#### api jira-integration-setup-action
+Perform an action in the Jira integration setup or reconnect flow.
+```bash
+turbine api jira-integration-setup-action --action START
+```
+
+#### api jira-integration-test-connection
+Verify that the Jira integration connection is healthy.
+```bash
+turbine api jira-integration-test-connection
 ```
 
 #### api notify-notification-configuration

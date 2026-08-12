@@ -166,6 +166,16 @@ type Query {
   vulnerabilitiesOverview(args: VulnerabilityOverviewInput!): VulnerabilityOverviewConnection
 
   """
+  Org-wide counts of applied VeX remediation statuses, grouped into the overview remediation-status buckets. Powers the "Vulnerability Remediations" dashboard widget.
+  """
+  vulnerabilityRemediationSummary(args: VulnerabilityRemediationSummaryInput): VulnerabilityRemediationSummary
+
+  """
+  Paginated, filtered and sorted list of remediated vulnerabilities grouped by asset for a single remediation-status bucket (overview drill-down "Grouped by Assets" card list).
+  """
+  remediatedVulnerabilitiesByAsset(args: RemediatedVulnerabilitiesByAssetInput!): RemediatedVulnerabilitiesByAssetConnection
+
+  """
   Finds and returns a list of all known vulnerabilities that match a given component identifier (PURL or CPE).
   """
   matchVulnerabilities(args: MatchVulnerabilitiesInput!): [Vulnerability]
@@ -356,6 +366,46 @@ type Query {
   Execution-path reachability evidence for a dependency component on the asset.
   """
   getDependencyReachability(args: GetDependencyReachabilityInput!): [ReachabilityEvidence!]
+
+  """Retrieves the Jira integration summary and connection health details."""
+  jiraIntegration: JiraIntegration!
+
+  """Retrieves Jira tickets linked to a vulnerability finding on an asset."""
+  vulnerabilityJiraTickets(args: VulnerabilityJiraTicketsInput!): [JiraLinkedTicket!]!
+
+  """Retrieves issue types available for a connected Jira space."""
+  jiraSpaceIssueTypes(args: JiraSpaceIssueTypesInput!): [JiraIssueType!]!
+
+  """
+  Retrieves creatable fields (including priority options) for a Jira space and issue type.
+  """
+  jiraSpaceIssueFields(args: JiraSpaceIssueFieldsInput!): [JiraField!]!
+
+  """Searches assignable Jira users for a connected space."""
+  jiraProjectUsers(args: JiraProjectUsersInput!): [JiraProjectUser!]!
+
+  """Lists Jira project versions for a connected space."""
+  jiraProjectVersions(args: JiraProjectVersionsInput!): [JiraProjectVersion!]!
+
+  """Lists Jira project components for a connected space."""
+  jiraProjectComponents(args: JiraProjectComponentsInput!): [JiraProjectComponent!]!
+
+  """
+  Searches Jira labels for a connected space (labels are instance-global).
+  """
+  jiraProjectLabels(args: JiraProjectLabelsInput!): [JiraProjectLabel!]!
+
+  """Searches Jira sprints for a connected space."""
+  jiraProjectSprints(args: JiraProjectSprintsInput!): [JiraProjectSprint!]!
+
+  """Searches Atlassian Teams for a connected Jira space."""
+  jiraProjectTeams(args: JiraProjectTeamsInput!): [JiraProjectTeam!]!
+
+  """
+  Retrieves the current Jira integration setup wizard state.
+  Pass initialize to begin a new setup session (replaces the START setup action).
+  """
+  jiraIntegrationSetup(args: JiraIntegrationSetupInput): JiraIntegrationSetup!
 
   """
   Retrieves a list of all RBAC security groups for the current organization.
@@ -935,6 +985,31 @@ type Mutation {
   Applies a remediation status to multiple secrets on a specific asset in a single operation.
   """
   remediateSecrets(args: CreateSecretsRemediationInput!): [SecretRemediation]
+
+  """Verifies the Jira integration connection is healthy."""
+  jiraIntegrationTestConnection: JiraTestConnectionResult!
+
+  """Removes a connected Jira space from the integration."""
+  jiraIntegrationDeleteConnectedSpace(args: JiraIntegrationDeleteConnectedSpaceInput!): JiraConnectedSpaceActionResult!
+
+  """Adds a Jira space to the connected spaces list."""
+  jiraIntegrationAddConnectedSpace(args: JiraIntegrationAddConnectedSpaceInput!): JiraConnectedSpaceActionResult!
+
+  """
+  Creates a Jira issue and optionally links it to a vulnerability finding.
+  """
+  jiraIntegrationCreateIssue(args: JiraIntegrationCreateIssueInput!): JiraCreateIssueResult!
+
+  """Performs an action in the Jira integration setup or reconnect flow."""
+  jiraIntegrationSetupAction(args: JiraIntegrationSetupActionInput!): JiraIntegrationSetup!
+
+  """Disconnects the Jira integration from the organization."""
+  jiraIntegrationDisconnect: JiraIntegration!
+
+  """
+  Re-enables a Jira installation when OAuth and app install steps are already complete.
+  """
+  jiraIntegrationReconnect: JiraIntegration!
 
   """
   Invites a user to the current organization via the RBAC service. The user receives an
@@ -1604,6 +1679,9 @@ type Analytics {
   """Get Known exploits"""
   knownExploits(args: AnalyticsAssetInput!): KnownExploitsCounts
 
+  """Get SSVC categorization counts for a specific asset"""
+  ssvcCategorization(args: AnalyticsAssetInput!): SsvcCategorizationCounts
+
   """Get misconfigurations by category"""
   misconfigurationByCategory(args: AnalyticsAssetInput!): [MisconfigurationsByCategory]
 
@@ -1626,6 +1704,9 @@ type Analytics {
   Get threat actors and known named attacks count CVEs involved and report's count involved
   """
   highProfileVulnerabilities(args: AnalyticsOrgInput): HighProfileVulnerabilitiesResponse!
+
+  """Get SSVC decision-point categorization summary counts"""
+  ssvcCategorizationSummary(args: AnalyticsOrgInput): SsvcCategorizationSummaryResponse!
 
   """CISA Known Exploited Vulnerabilities"""
   knownExploitedVulnerabilities(args: AnalyticsOrgInput): KnownExploitedVulnerabilitiesResponse!
@@ -4699,6 +4780,11 @@ type KnownExploitsCounts {
   weaponizedTotalExploitCode: Int!
 }
 
+type SsvcCategorizationCounts {
+  automatable: Int!
+  automatableTotal: Int!
+}
+
 type CryptographyCount {
   certificates: Int!
   invalidCertificates: Int!
@@ -4746,6 +4832,12 @@ type HighProfileVulnerabilitiesResponse {
   uniqueExploits: Int
   associatedCves: Int
   affectedAssets: Int
+}
+
+type SsvcCategorizationSummaryResponse {
+  kevActiveAutomatableTotal: Int
+  activeAutomatableTotal: Int
+  activeAutomatablePartial: Int
 }
 
 type KnownExploitedVulnerabilitiesResponse {
@@ -4826,6 +4918,18 @@ type Activity {
 
   """Timestamp of when the activity occurred."""
   createdAt: String!
+
+  """Organization id associated with the activity."""
+  orgId: String
+
+  """Organization name associated with the activity."""
+  orgName: String
+
+  """Asset id associated with the activity."""
+  assetId: String
+
+  """Asset name associated with the activity."""
+  assetName: String
 
   """The type of the entity (e.g., COMPONENT, VULNERABILITY)."""
   entityType: ActivityEntityType!
@@ -4942,6 +5046,7 @@ type IdentificationAddedPayload {
   name: String
   vendor: String
   version: String
+  remediationAction: String
 }
 
 type IdentificationRemovedPayload {
@@ -4949,16 +5054,45 @@ type IdentificationRemovedPayload {
   name: String
   vendor: String
   version: String
+  remediationAction: String
+}
+
+"""Vulnerability metadata attached to add/remove activity payloads."""
+type VulnerabilityEntity {
+  severity: String
+  epssScore: Float
+  cvssScore: Float
+  knownExploited: Boolean
+  exploitMaturity: String
 }
 
 type VulnerabilityAddedPayload {
   cve: String
   identificationId: String
-  vulnerabilityId: String
-  severity: String
-  componentName: String
-  componentVersion: String
-  componentVendor: String
+  entity: VulnerabilityEntity
+
+  """
+  Never populated from proto for add events. Retained for backwards compatibility.
+  """
+  vulnerabilityId: String @deprecated(reason: "Not present on vulnerability-added payloads. Prefer cve / identificationId.")
+
+  """Prefer entity.severity. Mirrored from entity when available."""
+  severity: String @deprecated(reason: "Use entity.severity instead.")
+
+  """
+  Never populated from proto for add events. Retained for backwards compatibility.
+  """
+  componentName: String @deprecated(reason: "Not present on vulnerability-added payloads. No replacement on this type.")
+
+  """
+  Never populated from proto for add events. Retained for backwards compatibility.
+  """
+  componentVersion: String @deprecated(reason: "Not present on vulnerability-added payloads. No replacement on this type.")
+
+  """
+  Never populated from proto for add events. Retained for backwards compatibility.
+  """
+  componentVendor: String @deprecated(reason: "Not present on vulnerability-added payloads. No replacement on this type.")
 }
 
 type VulnerabilityRemediatedPayload {
@@ -4969,17 +5103,34 @@ type VulnerabilityRemediatedPayload {
   componentVersion: String
   componentVendor: String
   vexJustification: VexJustification
+  vexStatus: VexStatus
   description: String
+}
+
+"""
+Represents an entity field update: field name with previous and current values.
+"""
+type EntityUpdate {
+  """Field name, or dot-delimited field path."""
+  field: String
+
+  """The value prior to update."""
+  previous: String
+
+  """The value after update."""
+  current: String
 }
 
 type VulnerabilityUpdatedPayload {
   identificationId: String
   cve: String
+  vulnerabilityUpdates: [EntityUpdate!]
 }
 
 type VulnerabilityRemovedPayload {
   identificationId: String
   cve: String
+  entity: VulnerabilityEntity
 }
 
 type MisconfigChangedPayload {
@@ -5034,6 +5185,37 @@ type LicenseIssueRemediatedPayload {
   entityUpdates: [LicenseIssueRemediatedEntityPayload!]
 }
 
+type GroupCreatedPayload {
+  groupId: String
+  name: String
+  description: String
+}
+
+type GroupUpdatedPayload {
+  groupId: String
+  name: String
+  description: String
+}
+
+type GroupDeletedPayload {
+  groupId: String
+  name: String
+}
+
+type GroupMembershipChangedPayload {
+  groupId: String
+  name: String
+  membersAdded: [String!]!
+  membersRemoved: [String!]!
+}
+
+"""
+Emitted when organization settings are updated. Proto payload has no fields.
+"""
+type OrgSettingsUpdatedPayload {
+  _empty: Boolean
+}
+
 type UnspecifiedPayload {
   """
   Fallback payload type for handling backend entities that haven't been added to the schema yet.
@@ -5043,7 +5225,7 @@ type UnspecifiedPayload {
   payloadType: String
 }
 
-union ActivityEntity = AssetCreatedPayload | AssetAnalysisCompletedPayload | AssetChangedPayload | AssetRiskChangedPayload | IdentificationAddedPayload | IdentificationRemovedPayload | VulnerabilityAddedPayload | VulnerabilityRemediatedPayload | VulnerabilityUpdatedPayload | VulnerabilityRemovedPayload | MisconfigChangedPayload | AssetGroupAddedPayload | AssetGroupRemovedPayload | SecretRemediatedPayload | LicenseIssueRemediatedPayload | UnspecifiedPayload
+union ActivityEntity = AssetCreatedPayload | AssetAnalysisCompletedPayload | AssetChangedPayload | AssetRiskChangedPayload | IdentificationAddedPayload | IdentificationRemovedPayload | VulnerabilityAddedPayload | VulnerabilityRemediatedPayload | VulnerabilityUpdatedPayload | VulnerabilityRemovedPayload | MisconfigChangedPayload | AssetGroupAddedPayload | AssetGroupRemovedPayload | SecretRemediatedPayload | LicenseIssueRemediatedPayload | GroupCreatedPayload | GroupUpdatedPayload | GroupDeletedPayload | GroupMembershipChangedPayload | OrgSettingsUpdatedPayload | UnspecifiedPayload
 
 """Count of vulnerabilities by severity in an asset"""
 type VulnerabilityCountBySeverityAnalytic {
@@ -6537,6 +6719,21 @@ type JiraIntegration {
   """
   apiConnectivityActive: Boolean!
 
+  """
+  Turbine Jira installation id when an installation record exists for the org.
+  """
+  jiraInstallationId: String
+
+  """
+  Whether the Atlassian OAuth authorize step completed for this installation.
+  """
+  oauthInstallStepComplete: Boolean!
+
+  """
+  Whether the NetRise Jira app install step completed for this installation.
+  """
+  jiraAppInstalledComplete: Boolean!
+
   """Connection and health details for the Jira integration detail view."""
   connectionHealth: JiraIntegrationConnectionHealth!
 }
@@ -6575,7 +6772,6 @@ type JiraConnectedSpace {
   projectKey: String!
   category: String!
   openTicketsCount: Int!
-  linkedTicketsCount: Int!
   iconColorIndex: Int!
   avatarUrl: String
 }
@@ -6593,24 +6789,107 @@ type JiraConnectedSpaceActionResult {
 type JiraLinkedTicket {
   id: ID!
   ticketKey: String!
-  projectName: String!
+  projectId: String!
   status: String!
   assignee: String
   updatedAt: String!
   url: String!
 }
 
+type JiraIssueType {
+  id: String!
+  name: String!
+  iconUrl: String
+  subtask: Boolean!
+}
+
+type JiraFieldAllowedValue {
+  id: String!
+  value: String!
+}
+
+type JiraField {
+  key: String!
+  name: String!
+  required: Boolean!
+  schemaType: String!
+
+  """Jira schema.custom URI for custom fields."""
+  schemaCustom: String
+
+  """
+  Jira schema.items for array fields (e.g. option, string, user, version, component).
+  Empty string for non-array fields.
+  """
+  itemType: String!
+  allowedValues: [JiraFieldAllowedValue!]!
+
+  """
+  True when create-issue can collect this field: static form fields, or fields backed by
+  Turbine option RPCs (users, versions, components, labels, teams; sprints when enabled).
+  Compare against jiraSpaceIssueFields to find gaps — use unsupportedRequired for warnings.
+  """
+  supported: Boolean!
+
+  """
+  True when the space requires this field for create but we cannot collect it
+  (not a static form field and not covered by a create RPC). API clients should surface these.
+  """
+  unsupportedRequired: Boolean!
+}
+
+type JiraProjectUser {
+  accountId: String!
+  displayName: String!
+  emailAddress: String
+  avatarUrl: String
+  active: Boolean!
+}
+
+type JiraProjectVersion {
+  id: String!
+  name: String!
+  description: String
+  released: Boolean!
+  archived: Boolean!
+  releaseDate: String
+}
+
+type JiraProjectComponent {
+  id: String!
+  name: String!
+  description: String
+}
+
+type JiraProjectLabel {
+  name: String!
+}
+
+type JiraProjectSprint {
+  id: String!
+  name: String!
+  state: String!
+  boardId: String
+  startDate: String
+  endDate: String
+}
+
+type JiraProjectTeam {
+  id: String!
+  displayName: String!
+  avatarUrl: String
+}
+
+type JiraCreateIssueResult {
+  success: Boolean!
+  error: String
+  ticket: JiraLinkedTicket
+}
+
 input VulnerabilityJiraTicketsInput {
   assetId: ID!
   advisoryId: ID!
-  identificationIds: [String!]
-}
-
-input JiraIntegrationUnlinkVulnerabilityTicketInput {
-  assetId: ID!
-  advisoryId: ID!
-  identificationIds: [String!]
-  ticketId: ID!
+  componentId: String!
 }
 
 input JiraIntegrationDeleteConnectedSpaceInput {
@@ -6619,6 +6898,81 @@ input JiraIntegrationDeleteConnectedSpaceInput {
 
 input JiraIntegrationAddConnectedSpaceInput {
   spaceId: String
+}
+
+input JiraSpaceIssueTypesInput {
+  spaceId: String!
+}
+
+input JiraSpaceIssueFieldsInput {
+  spaceId: String!
+  issueTypeId: String!
+}
+
+input JiraProjectUsersInput {
+  spaceId: String!
+  query: String!
+  maxResults: Int
+}
+
+input JiraProjectVersionsInput {
+  spaceId: String!
+  includeReleased: Boolean
+  includeArchived: Boolean
+  maxResults: Int
+}
+
+input JiraProjectComponentsInput {
+  spaceId: String!
+  maxResults: Int
+}
+
+input JiraProjectLabelsInput {
+  spaceId: String!
+  query: String!
+  maxResults: Int
+}
+
+input JiraProjectSprintsInput {
+  spaceId: String!
+  query: String!
+  includeClosed: Boolean
+  maxResults: Int
+}
+
+input JiraProjectTeamsInput {
+  spaceId: String!
+  query: String!
+  maxResults: Int
+}
+
+input JiraFieldValueInput {
+  key: String!
+  values: [String!]!
+  schemaType: String!
+
+  """Jira schema.custom URI for custom fields."""
+  schemaCustom: String
+
+  """
+  Jira schema.items for array fields. Empty/omitted for non-array fields.
+  """
+  itemType: String
+}
+
+input JiraVulnerabilityRefInput {
+  assetId: ID!
+  componentId: String!
+  vulnerabilityId: ID!
+}
+
+input JiraIntegrationCreateIssueInput {
+  spaceId: String!
+  issueTypeId: String!
+  summary: String!
+  description: String!
+  fields: [JiraFieldValueInput!]
+  vulnerability: JiraVulnerabilityRefInput
 }
 
 enum JiraSetupMode {
@@ -8219,6 +8573,108 @@ input CreateAllAssetVulnerabilitiesRemediationInput {
 }
 
 """
+Buckets the applied VeX status of a remediation for the overview widget.
+
+Resolved-type VeX statuses (FIXED, NOT_AFFECTED, RESOLVED_WITH_PEDIGREE, FALSE_POSITIVE)
+are split into NETRISE_AUTO_RESOLVED (applied by the NetRise system user) vs RESOLVED
+(applied by any other author). IN_TRIAGE maps to UNDER_INVESTIGATION and EXPLOITABLE maps
+to AFFECTED. UNSPECIFIED is intentionally omitted from the public surface and is rejected
+by `remediatedVulnerabilitiesByAsset`.
+"""
+enum VulnerabilityRemediationStatus {
+  UNSPECIFIED
+  NETRISE_AUTO_RESOLVED
+  RESOLVED
+  IN_TRIAGE
+  EXPLOITABLE
+}
+
+"""
+Org-wide counts of applied VeX remediation statuses, grouped into the overview
+remediation-status buckets. Powers the "Vulnerability Remediations" dashboard widget.
+"""
+type VulnerabilityRemediationSummary {
+  """Resolved-type VeX status applied by the NetRise system user."""
+  netriseAutoResolved: Int!
+
+  """Resolved-type VeX status applied by a non-NetRise author."""
+  resolved: Int!
+
+  """VeX status UNDER_INVESTIGATION."""
+  inTriage: Int!
+
+  """VeX status AFFECTED."""
+  exploitable: Int!
+
+  """Sum of the four buckets (widget center total)."""
+  total: Int!
+}
+
+input VulnerabilityRemediationSummaryInput {
+  """
+  Optionally limit the org-wide counts to the assets in these asset groups.
+  """
+  assetGroupIds: [ID!]
+}
+
+"""
+A single asset row in the "grouped by assets" overview drill-down. Represents how many
+remediated vulnerabilities in the selected remediation-status bucket belong to one asset.
+"""
+type RemediatedVulnerabilitiesByAsset {
+  assetId: String
+  assetName: String
+  assetVendor: String
+
+  """
+  The asset's risk category; drives the asset icon color on the card (same as the asset overview).
+  """
+  assetStatus: AssetOverviewRiskCategory
+  remediationStatus: VulnerabilityRemediationStatus
+
+  """
+  How many remediated vulnerabilities this asset has in the selected bucket.
+  """
+  remediationCount: Int!
+}
+
+type RemediatedVulnerabilitiesByAssetConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [RemediatedVulnerabilitiesByAssetEdge]
+}
+
+type RemediatedVulnerabilitiesByAssetEdge implements Edge {
+  cursor: String
+  node: RemediatedVulnerabilitiesByAsset
+}
+
+input RemediatedVulnerabilitiesByAssetSort {
+  field: RemediatedVulnerabilitiesByAssetSortField
+  order: SortOrder
+}
+
+enum RemediatedVulnerabilitiesByAssetSortField {
+  ASSETNAME
+  ASSETVENDOR
+  REMEDIATIONCOUNT
+}
+
+input RemediatedVulnerabilitiesByAssetInput {
+  cursor: Cursor!
+
+  """
+  Which remediation-status bucket to group by asset; UNSPECIFIED is rejected.
+  """
+  status: VulnerabilityRemediationStatus!
+
+  """Optional server-side sort for the grouped-by-asset list."""
+  sort: RemediatedVulnerabilitiesByAssetSort
+
+  """Optionally limit the listing to the assets in these asset groups."""
+  assetGroupIds: [ID!]
+}
+
+"""
 Risk Score is the weighted average of occurrences of
 CVSS severity categories.
 """
@@ -8270,7 +8726,20 @@ input VulnerabilityOverviewFilter {
   vulnerabilityId: String
   priorityScoreStr: String
   severity: Severity
+  ssvcCategorization: SsvcCategorizationFilter
   fields: [VulnerabilityOverviewFieldFilter]
+}
+
+"""
+Single field sent by the client to filter the vulnerabilities overview by SSVC
+categorization. Each value is transformed server-side into the corresponding
+combination of SsvcTechnicalImpact, SsvcExploitation, SsvcAutomatable and
+(optionally) InKnownExploitedVulnerabilities conditions.
+"""
+enum SsvcCategorizationFilter {
+  ACTIVE_AUTOMATABLE_PARTIAL
+  ACTIVE_AUTOMATABLE_TOTAL
+  KEV_ACTIVE_AUTOMATABLE_TOTAL
 }
 
 enum Severity {
@@ -8419,6 +8888,46 @@ type Vulnerability {
   The analysis status of the vulnerability as categorized by NVD (e.g., REJECTED, ANALYZED, AWAITING_ANALYSIS, MODIFIED, UNDERGOING_ANALYSIS, DEFERRED, RECEIVED).
   """
   nvdStatus: VulnerabilityNVDStatus
+
+  """
+  Stakeholder-Specific Vulnerability Categorization (SSVC) decision-point assessment.
+  """
+  ssvc: Ssvc
+}
+
+"""
+Stakeholder-Specific Vulnerability Categorization (SSVC) decision-point assessment.
+"""
+type Ssvc {
+  """Source of the SSVC assessment, e.g. "CISA-ADP", "VulnCheck"."""
+  source: String
+
+  """Exploitation level of the vulnerability."""
+  exploitation: SsvcExploitation
+
+  """Whether the vulnerability is automatable."""
+  automatable: Boolean
+
+  """Technical impact of the vulnerability."""
+  technicalImpact: SsvcTechnicalImpact
+
+  """Date the SSVC assessment was accessed."""
+  dateAccessed: String
+}
+
+"""Exploitation level of the vulnerability in SSVC."""
+enum SsvcExploitation {
+  UNSPECIFIED
+  NONE
+  POC
+  ACTIVE
+}
+
+"""Technical impact of the vulnerability in SSVC."""
+enum SsvcTechnicalImpact {
+  UNSPECIFIED
+  PARTIAL
+  TOTAL
 }
 
 enum VulnerabilityNVDStatus {
@@ -8460,6 +8969,7 @@ type DetectedVulnerability {
   cve: String
   name: String
   identificationIds: [String]
+  componentId: String
   version: String
   fixVersions: [String]
   vendor: String
@@ -8476,6 +8986,11 @@ type DetectedVulnerability {
   epssScore: Float
   epssPercentile: Float
   isReachable: Boolean
+
+  """
+  Stakeholder-Specific Vulnerability Categorization (SSVC) decision-point assessment.
+  """
+  ssvc: Ssvc
 }
 
 type VulnerabilityConnection implements Connection {
@@ -8521,6 +9036,11 @@ type DetailedVulnerability {
 
   """Exploit availability for the vulnerability. No longer mandatory"""
   exploit: Exploit
+
+  """
+  Stakeholder-Specific Vulnerability Categorization (SSVC) decision-point assessment.
+  """
+  ssvc: Ssvc
 }
 
 type VulnerabilityEdge implements Edge {
@@ -8585,6 +9105,8 @@ enum VulnerabilityField {
   VULNERABILITYREMEDIATIONSTATUS
   EPSSSCORE
   EPSSPERCENTILE
+  SSVCAUTOMATABLE
+  SSVCTECHNICALIMPACT
 }
 
 enum VulnerabilitySortField {
@@ -8601,6 +9123,8 @@ enum VulnerabilitySortField {
   VULNERABILITYREMEDIATIONSTATUS
   EPSSSCORE
   EPSSPERCENTILE
+  SSVCAUTOMATABLE
+  SSVCTECHNICALIMPACT
 }
 
 input VulnerabilityExternalFiltersInput {

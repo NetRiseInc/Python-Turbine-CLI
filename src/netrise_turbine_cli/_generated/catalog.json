@@ -349,6 +349,109 @@
     "curated_alias": null
   },
   {
+    "name": "jira-integration-add-connected-space",
+    "operation": "mutation_jira_integration_add_connected_space",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Add a Jira space to the integration's connected spaces list.",
+    "risk": "write",
+    "return_type": "MutationJiraIntegrationAddConnectedSpace",
+    "input_model": "JiraIntegrationAddConnectedSpaceInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-integration-create-issue",
+    "operation": "mutation_jira_integration_create_issue",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Create a Jira issue and optionally link it to a vulnerability finding.",
+    "risk": "write",
+    "return_type": "MutationJiraIntegrationCreateIssue",
+    "input_model": "JiraIntegrationCreateIssueInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "space-id",
+      "issue-type-id",
+      "summary",
+      "description"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-integration-delete-connected-space",
+    "operation": "mutation_jira_integration_delete_connected_space",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Remove a connected Jira space from the integration.",
+    "risk": "write",
+    "return_type": "MutationJiraIntegrationDeleteConnectedSpace",
+    "input_model": "JiraIntegrationDeleteConnectedSpaceInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-integration-disconnect",
+    "operation": "mutation_jira_integration_disconnect",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Disconnect the Jira integration from the organization.",
+    "risk": "write",
+    "return_type": "MutationJiraIntegrationDisconnect",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-integration-reconnect",
+    "operation": "mutation_jira_integration_reconnect",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Re-enable a Jira installation when the OAuth and app install steps are already complete.",
+    "risk": "write",
+    "return_type": "MutationJiraIntegrationReconnect",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-integration-setup-action",
+    "operation": "mutation_jira_integration_setup_action",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Perform an action in the Jira integration setup or reconnect flow.",
+    "risk": "write",
+    "return_type": "MutationJiraIntegrationSetupAction",
+    "input_model": "JiraIntegrationSetupActionInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "action",
+      "site-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-integration-test-connection",
+    "operation": "mutation_jira_integration_test_connection",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Verify that the Jira integration connection is healthy.",
+    "risk": "write",
+    "return_type": "MutationJiraIntegrationTestConnection",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
     "name": "notify-notification-configuration",
     "operation": "mutation_notify_notification_configuration",
     "group": "api",
@@ -1475,6 +1578,169 @@
     "curated_alias": null
   },
   {
+    "name": "jira-integration",
+    "operation": "query_jira_integration",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the Jira integration summary and connection health details.",
+    "risk": "read",
+    "return_type": "QueryJiraIntegration",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-integration-setup",
+    "operation": "query_jira_integration_setup",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the current state of the Jira integration setup wizard.",
+    "risk": "read",
+    "return_type": "QueryJiraIntegrationSetup",
+    "input_model": "JiraIntegrationSetupInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "mode",
+      "initialize"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-project-components",
+    "operation": "query_jira_project_components",
+    "group": "api",
+    "kind": "query",
+    "summary": "List the Jira project components available for a connected space.",
+    "risk": "read",
+    "return_type": "QueryJiraProjectComponents",
+    "input_model": "JiraProjectComponentsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id",
+      "max-results"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-project-labels",
+    "operation": "query_jira_project_labels",
+    "group": "api",
+    "kind": "query",
+    "summary": "Search the Jira labels available for a connected space; labels are instance-global.",
+    "risk": "read",
+    "return_type": "QueryJiraProjectLabels",
+    "input_model": "JiraProjectLabelsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id",
+      "query",
+      "max-results"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-project-sprints",
+    "operation": "query_jira_project_sprints",
+    "group": "api",
+    "kind": "query",
+    "summary": "Search the Jira sprints available for a connected space.",
+    "risk": "read",
+    "return_type": "QueryJiraProjectSprints",
+    "input_model": "JiraProjectSprintsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id",
+      "query",
+      "include-closed",
+      "max-results"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-project-teams",
+    "operation": "query_jira_project_teams",
+    "group": "api",
+    "kind": "query",
+    "summary": "Search the Atlassian Teams available for a connected Jira space.",
+    "risk": "read",
+    "return_type": "QueryJiraProjectTeams",
+    "input_model": "JiraProjectTeamsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id",
+      "query",
+      "max-results"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-project-users",
+    "operation": "query_jira_project_users",
+    "group": "api",
+    "kind": "query",
+    "summary": "Search the assignable Jira users for a connected space.",
+    "risk": "read",
+    "return_type": "QueryJiraProjectUsers",
+    "input_model": "JiraProjectUsersInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id",
+      "query",
+      "max-results"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-project-versions",
+    "operation": "query_jira_project_versions",
+    "group": "api",
+    "kind": "query",
+    "summary": "List the Jira project versions available for a connected space.",
+    "risk": "read",
+    "return_type": "QueryJiraProjectVersions",
+    "input_model": "JiraProjectVersionsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id",
+      "include-released",
+      "include-archived",
+      "max-results"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-space-issue-fields",
+    "operation": "query_jira_space_issue_fields",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the creatable fields, including priority options, for a Jira space and issue type.",
+    "risk": "read",
+    "return_type": "QueryJiraSpaceIssueFields",
+    "input_model": "JiraSpaceIssueFieldsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id",
+      "issue-type-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "jira-space-issue-types",
+    "operation": "query_jira_space_issue_types",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the issue types available for a connected Jira space.",
+    "risk": "read",
+    "return_type": "QueryJiraSpaceIssueTypes",
+    "input_model": "JiraSpaceIssueTypesInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "space-id"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "license",
     "operation": "query_license",
     "group": "api",
@@ -1966,6 +2232,21 @@
     "curated_alias": null
   },
   {
+    "name": "remediated-vulnerabilities-by-asset",
+    "operation": "query_remediated_vulnerabilities_by_asset",
+    "group": "api",
+    "kind": "query",
+    "summary": "List remediated vulnerabilities grouped by asset for a single remediation-status bucket, with pagination, filtering, and sorting.",
+    "risk": "read",
+    "return_type": "QueryRemediatedVulnerabilitiesByAsset",
+    "input_model": "RemediatedVulnerabilitiesByAssetInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "status"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "rise-ai-analysis-data",
     "operation": "query_rise_ai_analysis_data",
     "group": "api",
@@ -2215,6 +2496,23 @@
     "curated_alias": null
   },
   {
+    "name": "vulnerability-jira-tickets",
+    "operation": "query_vulnerability_jira_tickets",
+    "group": "api",
+    "kind": "query",
+    "summary": "Retrieve the Jira tickets linked to a vulnerability finding on an asset.",
+    "risk": "read",
+    "return_type": "QueryVulnerabilityJiraTickets",
+    "input_model": "VulnerabilityJiraTicketsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "asset-id",
+      "advisory-id",
+      "component-id"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "vulnerability-lite",
     "operation": "query_vulnerability_lite",
     "group": "api",
@@ -2228,5 +2526,18 @@
       "id"
     ],
     "curated_alias": "vuln get --detail lite"
+  },
+  {
+    "name": "vulnerability-remediation-summary",
+    "operation": "query_vulnerability_remediation_summary",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get org-wide counts of applied VEX remediation statuses, grouped into the overview remediation-status buckets.",
+    "risk": "read",
+    "return_type": "QueryVulnerabilityRemediationSummary",
+    "input_model": "VulnerabilityRemediationSummaryInput",
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
   }
 ]

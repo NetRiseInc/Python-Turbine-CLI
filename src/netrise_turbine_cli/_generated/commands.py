@@ -919,6 +919,257 @@ def _cmd_mutation_invite_user(
         yes=yes,
     )
 
+def _cmd_mutation_jira_integration_add_connected_space(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='Optional[str] (optional)'),
+) -> None:
+    """Add a Jira space to the integration's connected spaces list."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraIntegrationAddConnectedSpaceInput
+        runtime.emit_schema(JiraIntegrationAddConnectedSpaceInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraIntegrationAddConnectedSpaceInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    try:
+        model = JiraIntegrationAddConnectedSpaceInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'space-id'}))
+    kwargs = {'jira_integration_add_connected_space_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_jira_integration_add_connected_space',
+        method_name='mutation_jira_integration_add_connected_space',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_jira_integration_create_issue(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    issue_type_id: Optional[str] = typer.Option(None, '--issue-type-id', help='str (required) [required]'),
+    summary: Optional[str] = typer.Option(None, '--summary', help='str (required) [required]'),
+    description: Optional[str] = typer.Option(None, '--description', help='str (required) [required]'),
+) -> None:
+    """Create a Jira issue and optionally link it to a vulnerability finding."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraIntegrationCreateIssueInput
+        runtime.emit_schema(JiraIntegrationCreateIssueInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraIntegrationCreateIssueInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if issue_type_id is not None:
+        payload['issue_type_id'] = issue_type_id
+    if summary is not None:
+        payload['summary'] = summary
+    if description is not None:
+        payload['description'] = description
+    try:
+        model = JiraIntegrationCreateIssueInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'description', 'issue-type-id', 'space-id', 'summary'}))
+    kwargs = {'jira_integration_create_issue_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_jira_integration_create_issue',
+        method_name='mutation_jira_integration_create_issue',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_jira_integration_delete_connected_space(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+) -> None:
+    """Remove a connected Jira space from the integration."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraIntegrationDeleteConnectedSpaceInput
+        runtime.emit_schema(JiraIntegrationDeleteConnectedSpaceInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraIntegrationDeleteConnectedSpaceInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    try:
+        model = JiraIntegrationDeleteConnectedSpaceInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'space-id'}))
+    kwargs = {'jira_integration_delete_connected_space_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_jira_integration_delete_connected_space',
+        method_name='mutation_jira_integration_delete_connected_space',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_jira_integration_disconnect(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Disconnect the Jira integration from the organization."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='mutation_jira_integration_disconnect',
+        method_name='mutation_jira_integration_disconnect',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_jira_integration_reconnect(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Re-enable a Jira installation when the OAuth and app install steps are already complete."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='mutation_jira_integration_reconnect',
+        method_name='mutation_jira_integration_reconnect',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_jira_integration_setup_action(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    action: Optional[str] = typer.Option(None, '--action', help='JiraSetupAction (required) [required]'),
+    site_id: Optional[str] = typer.Option(None, '--site-id', help='Optional[str] (optional)'),
+) -> None:
+    """Perform an action in the Jira integration setup or reconnect flow."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraIntegrationSetupActionInput
+        runtime.emit_schema(JiraIntegrationSetupActionInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraIntegrationSetupActionInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if action is not None:
+        payload['action'] = action
+    if site_id is not None:
+        payload['site_id'] = site_id
+    try:
+        model = JiraIntegrationSetupActionInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'action', 'site-id'}))
+    kwargs = {'jira_integration_setup_action_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_jira_integration_setup_action',
+        method_name='mutation_jira_integration_setup_action',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_jira_integration_test_connection(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Verify that the Jira integration connection is healthy."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='mutation_jira_integration_test_connection',
+        method_name='mutation_jira_integration_test_connection',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_notify_notification_configuration(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -3835,6 +4086,422 @@ def _cmd_query_identified_components_preview(
         yes=yes,
     )
 
+def _cmd_query_jira_integration(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Retrieve the Jira integration summary and connection health details."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_jira_integration',
+        method_name='query_jira_integration',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_integration_setup(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    mode: Optional[str] = typer.Option(None, '--mode', help='Optional[JiraSetupMode] (optional)'),
+    initialize: Optional[bool] = typer.Option(None, '--initialize', help='Optional[bool] (optional)'),
+) -> None:
+    """Retrieve the current state of the Jira integration setup wizard."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraIntegrationSetupInput
+        runtime.emit_schema(JiraIntegrationSetupInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraIntegrationSetupInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if mode is not None:
+        payload['mode'] = mode
+    if initialize is not None:
+        payload['initialize'] = initialize
+    try:
+        model = JiraIntegrationSetupInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'initialize', 'mode'}))
+    kwargs = {'jira_integration_setup_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_integration_setup',
+        method_name='query_jira_integration_setup',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_project_components(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
+) -> None:
+    """List the Jira project components available for a connected space."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraProjectComponentsInput
+        runtime.emit_schema(JiraProjectComponentsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraProjectComponentsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if max_results is not None:
+        payload['max_results'] = max_results
+    try:
+        model = JiraProjectComponentsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'max-results', 'space-id'}))
+    kwargs = {'jira_project_components_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_project_components',
+        method_name='query_jira_project_components',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_project_labels(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    query: Optional[str] = typer.Option(None, '--query', help='str (required) [required]'),
+    max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
+) -> None:
+    """Search the Jira labels available for a connected space; labels are instance-global."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraProjectLabelsInput
+        runtime.emit_schema(JiraProjectLabelsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraProjectLabelsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if query is not None:
+        payload['query'] = query
+    if max_results is not None:
+        payload['max_results'] = max_results
+    try:
+        model = JiraProjectLabelsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'max-results', 'query', 'space-id'}))
+    kwargs = {'jira_project_labels_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_project_labels',
+        method_name='query_jira_project_labels',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_project_sprints(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    query: Optional[str] = typer.Option(None, '--query', help='str (required) [required]'),
+    include_closed: Optional[bool] = typer.Option(None, '--include-closed', help='Optional[bool] (optional)'),
+    max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
+) -> None:
+    """Search the Jira sprints available for a connected space."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraProjectSprintsInput
+        runtime.emit_schema(JiraProjectSprintsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraProjectSprintsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if query is not None:
+        payload['query'] = query
+    if include_closed is not None:
+        payload['include_closed'] = include_closed
+    if max_results is not None:
+        payload['max_results'] = max_results
+    try:
+        model = JiraProjectSprintsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'include-closed', 'max-results', 'query', 'space-id'}))
+    kwargs = {'jira_project_sprints_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_project_sprints',
+        method_name='query_jira_project_sprints',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_project_teams(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    query: Optional[str] = typer.Option(None, '--query', help='str (required) [required]'),
+    max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
+) -> None:
+    """Search the Atlassian Teams available for a connected Jira space."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraProjectTeamsInput
+        runtime.emit_schema(JiraProjectTeamsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraProjectTeamsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if query is not None:
+        payload['query'] = query
+    if max_results is not None:
+        payload['max_results'] = max_results
+    try:
+        model = JiraProjectTeamsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'max-results', 'query', 'space-id'}))
+    kwargs = {'jira_project_teams_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_project_teams',
+        method_name='query_jira_project_teams',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_project_users(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    query: Optional[str] = typer.Option(None, '--query', help='str (required) [required]'),
+    max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
+) -> None:
+    """Search the assignable Jira users for a connected space."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraProjectUsersInput
+        runtime.emit_schema(JiraProjectUsersInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraProjectUsersInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if query is not None:
+        payload['query'] = query
+    if max_results is not None:
+        payload['max_results'] = max_results
+    try:
+        model = JiraProjectUsersInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'max-results', 'query', 'space-id'}))
+    kwargs = {'jira_project_users_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_project_users',
+        method_name='query_jira_project_users',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_project_versions(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    include_released: Optional[bool] = typer.Option(None, '--include-released', help='Optional[bool] (optional)'),
+    include_archived: Optional[bool] = typer.Option(None, '--include-archived', help='Optional[bool] (optional)'),
+    max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
+) -> None:
+    """List the Jira project versions available for a connected space."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraProjectVersionsInput
+        runtime.emit_schema(JiraProjectVersionsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraProjectVersionsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if include_released is not None:
+        payload['include_released'] = include_released
+    if include_archived is not None:
+        payload['include_archived'] = include_archived
+    if max_results is not None:
+        payload['max_results'] = max_results
+    try:
+        model = JiraProjectVersionsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'include-archived', 'include-released', 'max-results', 'space-id'}))
+    kwargs = {'jira_project_versions_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_project_versions',
+        method_name='query_jira_project_versions',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_space_issue_fields(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    issue_type_id: Optional[str] = typer.Option(None, '--issue-type-id', help='str (required) [required]'),
+) -> None:
+    """Retrieve the creatable fields, including priority options, for a Jira space and issue type."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraSpaceIssueFieldsInput
+        runtime.emit_schema(JiraSpaceIssueFieldsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraSpaceIssueFieldsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if issue_type_id is not None:
+        payload['issue_type_id'] = issue_type_id
+    try:
+        model = JiraSpaceIssueFieldsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'issue-type-id', 'space-id'}))
+    kwargs = {'jira_space_issue_fields_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_space_issue_fields',
+        method_name='query_jira_space_issue_fields',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_space_issue_types(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+) -> None:
+    """Retrieve the issue types available for a connected Jira space."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraSpaceIssueTypesInput
+        runtime.emit_schema(JiraSpaceIssueTypesInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraSpaceIssueTypesInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    try:
+        model = JiraSpaceIssueTypesInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'space-id'}))
+    kwargs = {'jira_space_issue_types_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_space_issue_types',
+        method_name='query_jira_space_issue_types',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_license(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -5104,6 +5771,47 @@ def _cmd_query_public_keys(
         yes=yes,
     )
 
+def _cmd_query_remediated_vulnerabilities_by_asset(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    status: Optional[str] = typer.Option(None, '--status', help='VulnerabilityRemediationStatus (required) [required]'),
+) -> None:
+    """List remediated vulnerabilities grouped by asset for a single remediation-status bucket, with pagination, filtering, and sorting."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import RemediatedVulnerabilitiesByAssetInput
+        runtime.emit_schema(RemediatedVulnerabilitiesByAssetInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import RemediatedVulnerabilitiesByAssetInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if status is not None:
+        payload['status'] = status
+    if isinstance(payload, dict):
+        # The API requires a pagination cursor; default it so bare invocations work.
+        payload.setdefault('cursor', {'first': 100})
+    try:
+        model = RemediatedVulnerabilitiesByAssetInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'status'}))
+    kwargs = {'remediated_vulnerabilities_by_asset_args': model}
+    runtime.run_graphql_op(
+        op_name='query_remediated_vulnerabilities_by_asset',
+        method_name='query_remediated_vulnerabilities_by_asset',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_rise_ai_analysis_data(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -5745,6 +6453,50 @@ def _cmd_query_vulnerability_external_filters(
         yes=yes,
     )
 
+def _cmd_query_vulnerability_jira_tickets(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
+    advisory_id: Optional[str] = typer.Option(None, '--advisory-id', help='str (required) [required]'),
+    component_id: Optional[str] = typer.Option(None, '--component-id', help='str (required) [required]'),
+) -> None:
+    """Retrieve the Jira tickets linked to a vulnerability finding on an asset."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import VulnerabilityJiraTicketsInput
+        runtime.emit_schema(VulnerabilityJiraTicketsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import VulnerabilityJiraTicketsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if asset_id is not None:
+        payload['asset_id'] = asset_id
+    if advisory_id is not None:
+        payload['advisory_id'] = advisory_id
+    if component_id is not None:
+        payload['component_id'] = component_id
+    try:
+        model = VulnerabilityJiraTicketsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'advisory-id', 'asset-id', 'component-id'}))
+    kwargs = {'vulnerability_jira_tickets_args': model}
+    runtime.run_graphql_op(
+        op_name='query_vulnerability_jira_tickets',
+        method_name='query_vulnerability_jira_tickets',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_vulnerability_lite(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -5783,6 +6535,43 @@ def _cmd_query_vulnerability_lite(
         yes=yes,
     )
 
+def _cmd_query_vulnerability_remediation_summary(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Get org-wide counts of applied VEX remediation statuses, grouped into the overview remediation-status buckets."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import VulnerabilityRemediationSummaryInput
+        runtime.emit_schema(VulnerabilityRemediationSummaryInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import VulnerabilityRemediationSummaryInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+
+    try:
+        model = VulnerabilityRemediationSummaryInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags=set()))
+    kwargs = {'vulnerability_remediation_summary_args': model}
+    runtime.run_graphql_op(
+        op_name='query_vulnerability_remediation_summary',
+        method_name='query_vulnerability_remediation_summary',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 
 def register_api_commands(api_app) -> None:
     api_app.command(name='add-asset-groups-to-assets', help='Associate a list of existing asset groups with selected assets.')(_cmd_mutation_add_asset_groups_to_assets)
@@ -5807,6 +6596,13 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='delete-notification-configuration', help='Permanently delete a notification configuration by its ID.')(_cmd_mutation_delete_notification_configuration)
     api_app.command(name='delete-security-group', help='Permanently delete a security group from the organization.')(_cmd_mutation_delete_security_group)
     api_app.command(name='invite-user', help='Invite a user to the organization with a role and optional security group memberships.')(_cmd_mutation_invite_user)
+    api_app.command(name='jira-integration-add-connected-space', help="Add a Jira space to the integration's connected spaces list.")(_cmd_mutation_jira_integration_add_connected_space)
+    api_app.command(name='jira-integration-create-issue', help='Create a Jira issue and optionally link it to a vulnerability finding.')(_cmd_mutation_jira_integration_create_issue)
+    api_app.command(name='jira-integration-delete-connected-space', help='Remove a connected Jira space from the integration.')(_cmd_mutation_jira_integration_delete_connected_space)
+    api_app.command(name='jira-integration-disconnect', help='Disconnect the Jira integration from the organization.')(_cmd_mutation_jira_integration_disconnect)
+    api_app.command(name='jira-integration-reconnect', help='Re-enable a Jira installation when the OAuth and app install steps are already complete.')(_cmd_mutation_jira_integration_reconnect)
+    api_app.command(name='jira-integration-setup-action', help='Perform an action in the Jira integration setup or reconnect flow.')(_cmd_mutation_jira_integration_setup_action)
+    api_app.command(name='jira-integration-test-connection', help='Verify that the Jira integration connection is healthy.')(_cmd_mutation_jira_integration_test_connection)
     api_app.command(name='notify-notification-configuration', help='Send a test notification using an existing notification configuration.')(_cmd_mutation_notify_notification_configuration)
     api_app.command(name='remediate-all-asset-vulnerabilities', help='Apply a remediation status to all vulnerabilities matching specific filters.')(_cmd_mutation_remediate_all_asset_vulnerabilities)
     api_app.command(name='remediate-asset-vulnerabilities', help='Bulk apply VEX remediation status to multiple vulnerabilities on assets.')(_cmd_mutation_remediate_asset_vulnerabilities)
@@ -5879,6 +6675,16 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='grouped-dependencies', help='View dependencies aggregated by vendor, license, or specific component type.')(_cmd_query_grouped_dependencies)
     api_app.command(name='hashes', help='List cryptographic hashes for files identified within the asset filesystem.')(_cmd_query_hashes)
     api_app.command(name='identified-components-preview', help='Return organization-wide component counts filtered by enabled identification methods, with before/after deltas when verification settings change.')(_cmd_query_identified_components_preview)
+    api_app.command(name='jira-integration', help='Retrieve the Jira integration summary and connection health details.')(_cmd_query_jira_integration)
+    api_app.command(name='jira-integration-setup', help='Retrieve the current state of the Jira integration setup wizard.')(_cmd_query_jira_integration_setup)
+    api_app.command(name='jira-project-components', help='List the Jira project components available for a connected space.')(_cmd_query_jira_project_components)
+    api_app.command(name='jira-project-labels', help='Search the Jira labels available for a connected space; labels are instance-global.')(_cmd_query_jira_project_labels)
+    api_app.command(name='jira-project-sprints', help='Search the Jira sprints available for a connected space.')(_cmd_query_jira_project_sprints)
+    api_app.command(name='jira-project-teams', help='Search the Atlassian Teams available for a connected Jira space.')(_cmd_query_jira_project_teams)
+    api_app.command(name='jira-project-users', help='Search the assignable Jira users for a connected space.')(_cmd_query_jira_project_users)
+    api_app.command(name='jira-project-versions', help='List the Jira project versions available for a connected space.')(_cmd_query_jira_project_versions)
+    api_app.command(name='jira-space-issue-fields', help='Retrieve the creatable fields, including priority options, for a Jira space and issue type.')(_cmd_query_jira_space_issue_fields)
+    api_app.command(name='jira-space-issue-types', help='Retrieve the issue types available for a connected Jira space.')(_cmd_query_jira_space_issue_types)
     api_app.command(name='license', help='Retrieve detailed information for a specific software license.')(_cmd_query_license)
     api_app.command(name='license-issue', help='Get details about a specific license compliance issue.')(_cmd_query_license_issue)
     api_app.command(name='license-issues', help='List license compliance issues identified across asset components.')(_cmd_query_license_issues)
@@ -5911,6 +6717,7 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='private-keys', help='Detect private cryptographic keys stored insecurely on the asset filesystem.')(_cmd_query_private_keys)
     api_app.command(name='public-key-external-filters', help='Retrieve available filter options for public key queries.')(_cmd_query_public_key_external_filters)
     api_app.command(name='public-keys', help="List public cryptographic keys found within the asset's file system.")(_cmd_query_public_keys)
+    api_app.command(name='remediated-vulnerabilities-by-asset', help='List remediated vulnerabilities grouped by asset for a single remediation-status bucket, with pagination, filtering, and sorting.')(_cmd_query_remediated_vulnerabilities_by_asset)
     api_app.command(name='rise-ai-analysis-data', help='Check for the contents of the RISE AI analysis report.')(_cmd_query_rise_ai_analysis_data)
     api_app.command(name='rise-ai-availability', help='Check eligibility and status of RISE AI analysis for an asset.')(_cmd_query_rise_ai_availability)
     api_app.command(name='search', help='Execute keyword searches across all artifacts and files in organization.')(_cmd_query_search)
@@ -5928,4 +6735,6 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='vulnerabilities-overview', help='Get a summary of vulnerability counts and severity across assets.')(_cmd_query_vulnerabilities_overview)
     api_app.command(name='vulnerability', help='Retrieve detailed metadata, scores, and descriptions for a specific vulnerability.')(_cmd_query_vulnerability)
     api_app.command(name='vulnerability-external-filters', help='Count vulnerabilities matching external threat feeds like CISA or botnets.')(_cmd_query_vulnerability_external_filters)
+    api_app.command(name='vulnerability-jira-tickets', help='Retrieve the Jira tickets linked to a vulnerability finding on an asset.')(_cmd_query_vulnerability_jira_tickets)
     api_app.command(name='vulnerability-lite', help='Retrieve a single vulnerability with preferred CVSS v3.1 score only — drops full v2/v4 impact blocks, exploit references, and problem type details.')(_cmd_query_vulnerability_lite)
+    api_app.command(name='vulnerability-remediation-summary', help='Get org-wide counts of applied VEX remediation statuses, grouped into the overview remediation-status buckets.')(_cmd_query_vulnerability_remediation_summary)
