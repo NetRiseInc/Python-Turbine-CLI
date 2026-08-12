@@ -265,6 +265,67 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api invite-user --schema`
 - **Flags:** --email, --display-name, --role-id
 
+### `api jira-integration-add-connected-space`
+
+- **Operation:** `mutation_jira_integration_add_connected_space`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Add a Jira space to the integration's connected spaces list.
+- **Input model:** `JiraIntegrationAddConnectedSpaceInput`
+- **Schema:** `turbine api jira-integration-add-connected-space --schema`
+- **Flags:** --space-id
+
+### `api jira-integration-create-issue`
+
+- **Operation:** `mutation_jira_integration_create_issue`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Create a Jira issue and optionally link it to a vulnerability finding.
+- **Input model:** `JiraIntegrationCreateIssueInput`
+- **Schema:** `turbine api jira-integration-create-issue --schema`
+- **Flags:** --space-id, --issue-type-id, --summary, --description
+
+### `api jira-integration-delete-connected-space`
+
+- **Operation:** `mutation_jira_integration_delete_connected_space`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Remove a connected Jira space from the integration.
+- **Input model:** `JiraIntegrationDeleteConnectedSpaceInput`
+- **Schema:** `turbine api jira-integration-delete-connected-space --schema`
+- **Flags:** --space-id
+
+### `api jira-integration-disconnect`
+
+- **Operation:** `mutation_jira_integration_disconnect`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Disconnect the Jira integration from the organization.
+
+### `api jira-integration-reconnect`
+
+- **Operation:** `mutation_jira_integration_reconnect`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Re-enable a Jira installation when the OAuth and app install steps are already complete.
+
+### `api jira-integration-setup-action`
+
+- **Operation:** `mutation_jira_integration_setup_action`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Perform an action in the Jira integration setup or reconnect flow.
+- **Input model:** `JiraIntegrationSetupActionInput`
+- **Schema:** `turbine api jira-integration-setup-action --schema`
+- **Flags:** --action, --site-id
+
+### `api jira-integration-test-connection`
+
+- **Operation:** `mutation_jira_integration_test_connection`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Verify that the Jira integration connection is healthy.
+
 ### `api notify-notification-configuration`
 
 - **Operation:** `mutation_notify_notification_configuration`
@@ -971,6 +1032,103 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api identified-components-preview --schema`
 - **Flags:** --symbol-index-enabled, --kernel-module-enabled, --curated-hash-enabled, --legacy-hash-enabled, --package-manifest-enabled, --signature-enabled, --pe-meta-data-enabled, --library-version-enabled, --library-name-enabled, --binary-fingerprint-enabled
 
+### `api jira-integration`
+
+- **Operation:** `query_jira_integration`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the Jira integration summary and connection health details.
+
+### `api jira-integration-setup`
+
+- **Operation:** `query_jira_integration_setup`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the current state of the Jira integration setup wizard.
+- **Input model:** `JiraIntegrationSetupInput`
+- **Schema:** `turbine api jira-integration-setup --schema`
+- **Flags:** --mode, --initialize
+
+### `api jira-project-components`
+
+- **Operation:** `query_jira_project_components`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List the Jira project components available for a connected space.
+- **Input model:** `JiraProjectComponentsInput`
+- **Schema:** `turbine api jira-project-components --schema`
+- **Flags:** --space-id, --max-results
+
+### `api jira-project-labels`
+
+- **Operation:** `query_jira_project_labels`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Search the Jira labels available for a connected space; labels are instance-global.
+- **Input model:** `JiraProjectLabelsInput`
+- **Schema:** `turbine api jira-project-labels --schema`
+- **Flags:** --space-id, --query, --max-results
+
+### `api jira-project-sprints`
+
+- **Operation:** `query_jira_project_sprints`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Search the Jira sprints available for a connected space.
+- **Input model:** `JiraProjectSprintsInput`
+- **Schema:** `turbine api jira-project-sprints --schema`
+- **Flags:** --space-id, --query, --include-closed, --max-results
+
+### `api jira-project-teams`
+
+- **Operation:** `query_jira_project_teams`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Search the Atlassian Teams available for a connected Jira space.
+- **Input model:** `JiraProjectTeamsInput`
+- **Schema:** `turbine api jira-project-teams --schema`
+- **Flags:** --space-id, --query, --max-results
+
+### `api jira-project-users`
+
+- **Operation:** `query_jira_project_users`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Search the assignable Jira users for a connected space.
+- **Input model:** `JiraProjectUsersInput`
+- **Schema:** `turbine api jira-project-users --schema`
+- **Flags:** --space-id, --query, --max-results
+
+### `api jira-project-versions`
+
+- **Operation:** `query_jira_project_versions`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List the Jira project versions available for a connected space.
+- **Input model:** `JiraProjectVersionsInput`
+- **Schema:** `turbine api jira-project-versions --schema`
+- **Flags:** --space-id, --include-released, --include-archived, --max-results
+
+### `api jira-space-issue-fields`
+
+- **Operation:** `query_jira_space_issue_fields`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the creatable fields, including priority options, for a Jira space and issue type.
+- **Input model:** `JiraSpaceIssueFieldsInput`
+- **Schema:** `turbine api jira-space-issue-fields --schema`
+- **Flags:** --space-id, --issue-type-id
+
+### `api jira-space-issue-types`
+
+- **Operation:** `query_jira_space_issue_types`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the issue types available for a connected Jira space.
+- **Input model:** `JiraSpaceIssueTypesInput`
+- **Schema:** `turbine api jira-space-issue-types --schema`
+- **Flags:** --space-id
+
 ### `api license`
 
 - **Operation:** `query_license`
@@ -1272,6 +1430,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api public-keys --schema`
 - **Flags:** --asset-id
 
+### `api remediated-vulnerabilities-by-asset`
+
+- **Operation:** `query_remediated_vulnerabilities_by_asset`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List remediated vulnerabilities grouped by asset for a single remediation-status bucket, with pagination, filtering, and sorting.
+- **Input model:** `RemediatedVulnerabilitiesByAssetInput`
+- **Schema:** `turbine api remediated-vulnerabilities-by-asset --schema`
+- **Flags:** --status
+
 ### `api rise-ai-analysis-data`
 
 - **Operation:** `query_rise_ai_analysis_data`
@@ -1436,6 +1604,16 @@ Prefer these noun-verb commands for everyday tasks:
 - **Schema:** `turbine api vulnerability-external-filters --schema`
 - **Flags:** --asset-id
 
+### `api vulnerability-jira-tickets`
+
+- **Operation:** `query_vulnerability_jira_tickets`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Retrieve the Jira tickets linked to a vulnerability finding on an asset.
+- **Input model:** `VulnerabilityJiraTicketsInput`
+- **Schema:** `turbine api vulnerability-jira-tickets --schema`
+- **Flags:** --asset-id, --advisory-id, --component-id
+
 ### `api vulnerability-lite`
 
 - **Operation:** `query_vulnerability_lite`
@@ -1446,3 +1624,12 @@ Prefer these noun-verb commands for everyday tasks:
 - **Input model:** `VulnerabilityInput`
 - **Schema:** `turbine api vulnerability-lite --schema`
 - **Flags:** --id
+
+### `api vulnerability-remediation-summary`
+
+- **Operation:** `query_vulnerability_remediation_summary`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Get org-wide counts of applied VEX remediation statuses, grouped into the overview remediation-status buckets.
+- **Input model:** `VulnerabilityRemediationSummaryInput`
+- **Schema:** `turbine api vulnerability-remediation-summary --schema`

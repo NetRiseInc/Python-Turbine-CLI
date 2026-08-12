@@ -107,7 +107,7 @@ Some operations name their input `composedAssetId` — it is interchangeable wit
 
 ## Generated API index
 
-Total API operations: **144** (regenerated from SDK).
+Total API operations: **164** (regenerated from SDK).
 
 Use curated commands first (`turbine asset list`, `turbine vuln remediate`, …).
 Fall back to `turbine api <operation>` for full GraphQL coverage.
@@ -136,6 +136,13 @@ Fall back to `turbine api <operation>` for full GraphQL coverage.
 | `delete-notification-configuration` | destructive | — |
 | `delete-security-group` | destructive | — |
 | `invite-user` | write | — |
+| `jira-integration-add-connected-space` | write | — |
+| `jira-integration-create-issue` | write | — |
+| `jira-integration-delete-connected-space` | write | — |
+| `jira-integration-disconnect` | write | — |
+| `jira-integration-reconnect` | write | — |
+| `jira-integration-setup-action` | write | — |
+| `jira-integration-test-connection` | write | — |
 | `notify-notification-configuration` | write | — |
 | `remediate-all-asset-vulnerabilities` | destructive | vuln remediate --all |
 | `remediate-asset-vulnerabilities` | destructive | vuln remediate --bulk |
@@ -147,16 +154,9 @@ Fall back to `turbine api <operation>` for full GraphQL coverage.
 | `remediate-secrets` | destructive | — |
 | `remove-all-asset-groups-from-assets` | destructive | — |
 | `remove-assets-from-asset-group` | destructive | group remove-assets |
-| `remove-org-user` | destructive | — |
-| `remove-security-group-member` | destructive | — |
-| `replace-acr` | write | — |
-| `set-asset-groups-to-asset` | write | — |
-| `set-assets-to-asset-group` | write | — |
-| `set-org-user-status` | write | — |
-| `submit-rise-ai-analysis` | write | — |
 | … | … | … |
 
-See [references/reference.md](references/reference.md) for all 144 API operations.
+See [references/reference.md](references/reference.md) for all 164 API operations.
 
 <!-- AUTO-GENERATED-CLI-SECTION:END -->
 
