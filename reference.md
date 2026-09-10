@@ -124,7 +124,7 @@ Prefer these noun-verb commands for everyday tasks:
 - **Prefer:** `turbine asset update`
 - **Input model:** `UpdateAssetInput`
 - **Schema:** `turbine api asset-update --schema`
-- **Flags:** --id, --vendor, --name, --version, --product
+- **Flags:** --id, --vendor, --name, --version, --product, --license
 
 ### `api bulk-delete-ac-rs`
 

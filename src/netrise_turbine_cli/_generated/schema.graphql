@@ -157,6 +157,10 @@ type Query {
 
   """
   Retrieves a paginated list of vulnerabilities with extended details, such as full impact scores and problem types.
+  
+  Because each record carries the full advisory payload, the page size is capped at 250. A `first`/`last`
+  above that is rejected with a `BAD_USER_INPUT` error, so use the returned cursors to page through the
+  remaining results.
   """
   detailedVulnerabilities(args: PaginatedDetailedVulnerabilitiesInput!): DetailedVulnerabilitiesConnection
 
@@ -5314,7 +5318,9 @@ type Asset {
   vendor: String
   product: String
   version: String
-  assetCpe: String
+  assetCpe: String @deprecated(reason: "Use assetCpes. This is the first/primary CPE.")
+  assetCpes: [String!]
+  license: String
   status: ProcessingStatus
   createdAt: String
   updatedAt: String
@@ -5347,7 +5353,9 @@ type AssetListItem {
   vendor: String
   product: String
   version: String
-  assetCpe: String
+  assetCpe: String @deprecated(reason: "Use assetCpes. This is the first/primary CPE.")
+  assetCpes: [String!]
+  license: String
   status: ProcessingStatus
   createdAt: String
   updatedAt: String
@@ -5958,6 +5966,12 @@ type AssetMutations {
   update(args: UpdateAssetInput): Asset
   removeDependencies(args: IdentificationInput!): ErrResponse
   addDependency(args: AddDependencyInput!): ErrResponse
+
+  """
+  Updates an existing SBOM dependency. Requires a change to at least one of
+  name, vendor, version, type, license, cpes, or purls. Description and/or
+  reason alone are not sufficient for a valid modification.
+  """
   modifyDependency(args: ModifyDependencyInput!): ErrResponse
 }
 
@@ -6005,15 +6019,28 @@ input AddDependencyInput {
   dependencyFields: DependencyDetailsInput!
 }
 
-"""Request input for editing an existing dependency."""
+"""
+Request input for editing an existing dependency.
+
+At least one of name, vendor, version, type, license, cpes, or purls on
+`dependencyFields` must differ from the current component. Changing only
+`dependencyFields.description` and/or `reason` is not a valid modification.
+"""
 input ModifyDependencyInput {
   """Targeting existing dependency via composedAssetId + identificationIds"""
   identification: IdentificationInput!
 
-  """New dependency data to replace the existing one"""
+  """
+  New dependency data to replace the existing one.
+  Must include a change to name, vendor, version, type, license, cpes, or purls
+  (description-only updates are not valid for modify).
+  """
   dependencyFields: DependencyDetailsInput!
 
-  """Optional new reason for the edit"""
+  """
+  Optional reason for the edit. Updating reason alone (with or without description)
+  does not make the modification valid; a meaningful dependency field must also change.
+  """
   reason: String
 }
 
@@ -6031,6 +6058,10 @@ input UpdateAssetInput {
 
   """Component's model/product"""
   product: String
+
+  """Ordered CPE 2.3 strings. Empty list clears all CPEs."""
+  assetCpes: [String!]
+  license: String
 }
 
 input SubmitAssetInput {
@@ -6790,7 +6821,10 @@ type JiraLinkedTicket {
   id: ID!
   ticketKey: String!
   projectId: String!
+  spaceName: String!
   status: String!
+  statusCategory: String
+  statusCategoryColor: String
   assignee: String
   updatedAt: String!
   url: String!
@@ -7647,8 +7681,14 @@ type AccessControlRecord {
   on this field today.
   """
   directPermissions: [String!]!
-  lastModifiedTime: String
-  lastModifiedBy: String
+
+  """
+  Always null. ACR replace is delete+create, so createdTime is the change timestamp.
+  """
+  lastModifiedTime: String @deprecated(reason: "Never populated. ACR edits create a new record; use createdTime.")
+
+  """Always null. ACR replace is delete+create, so createdBy is the actor."""
+  lastModifiedBy: String @deprecated(reason: "Never populated. ACR edits create a new record; use createdBy.")
   entityMemberCount: Int
 
   """
@@ -8982,6 +9022,9 @@ type DetectedVulnerability {
   inKnownExploitedVulnerabilities: Boolean
   correlations: [AssetCorrelation] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
   correlationsCount: Int
+
+  """Number of linked Jira tickets for this detected vulnerability."""
+  jiraTicketCount: Int
   currentRemediation: AssetVulnerabilityRemediation
   epssScore: Float
   epssPercentile: Float
@@ -9057,6 +9100,10 @@ input PaginatedVulnerabilitiesInput {
 
 input PaginatedDetailedVulnerabilitiesInput {
   assetId: ID!
+
+  """
+  Page size is capped at 250. A `first`/`last` above that is rejected with a `BAD_USER_INPUT` error.
+  """
   cursor: Cursor
   filter: DetailedVulnerabilityFilter
 }
@@ -9125,6 +9172,7 @@ enum VulnerabilitySortField {
   EPSSPERCENTILE
   SSVCAUTOMATABLE
   SSVCTECHNICALIMPACT
+  JIRATICKETCOUNT
 }
 
 input VulnerabilityExternalFiltersInput {

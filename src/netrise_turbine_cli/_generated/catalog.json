@@ -134,7 +134,8 @@
       "vendor",
       "name",
       "version",
-      "product"
+      "product",
+      "license"
     ],
     "curated_alias": "asset update"
   },

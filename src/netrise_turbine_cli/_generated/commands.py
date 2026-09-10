@@ -334,6 +334,7 @@ def _cmd_mutation_asset_update(
     name: Optional[str] = typer.Option(None, '--name', help='Optional[str] (optional)'),
     version: Optional[str] = typer.Option(None, '--version', help='Optional[str] (optional)'),
     product: Optional[str] = typer.Option(None, '--product', help='Optional[str] (optional)'),
+    license: Optional[str] = typer.Option(None, '--license', help='Optional[str] (optional)'),
 ) -> None:
     """Modify metadata such as name, vendor, or version for assets."""
     from pydantic import ValidationError
@@ -358,10 +359,12 @@ def _cmd_mutation_asset_update(
         payload['version'] = version
     if product is not None:
         payload['product'] = product
+    if license is not None:
+        payload['license'] = license
     try:
         model = UpdateAssetInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id', 'name', 'product', 'vendor', 'version'}))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id', 'license', 'name', 'product', 'vendor', 'version'}))
     kwargs = {'asset_update_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_update',
