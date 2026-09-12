@@ -5,65 +5,39 @@ description: Query and mutate the NetRise Turbine platform (assets, vulnerabilit
 
 # Turbine CLI
 
+## When to use
+
+Use this skill when the user asks about Turbine assets, firmware analysis, vulnerabilities, SBOMs, secrets, remediation, or GraphQL automation against the Turbine API.
+
+Full I/O contract and workflows: [docs/agent.md](docs/agent.md).
+
 ## Setup
 
-Install the CLI if missing: `uv tool install netrise-turbine-cli` (or `pipx` / `pip`). This skill ships inside the CLI — `turbine skill install` places it in Cursor, Claude Code, Codex, and opencode; `turbine skill status` shows where.
+Install if missing: `uv tool install netrise-turbine-cli` (or `pipx` / `pip`). This skill ships inside the CLI — `turbine skill install` places it in Cursor, Claude Code, Codex, and opencode; `turbine skill status` shows where.
 
-**Finding the `turbine` command.** If a bare `turbine` isn't on `PATH` (common in sandboxed agents), it's installed in a project virtualenv — invoke it through the env manager instead of assuming a global binary:
+If bare `turbine` is not on `PATH` (common in sandboxes), invoke through the project env:
 
-- Poetry project: `poetry run turbine …`
-- uv project: `uv run turbine …`
-- Plain venv: activate first (`source .venv/bin/activate`) or call `./.venv/bin/turbine …`
-- Isolated install (`uv tool install` / `pipx`): `turbine` is global; no venv needed.
+- Poetry: `poetry run turbine …`
+- uv: `uv run turbine …`
+- Plain venv: `source .venv/bin/activate` or `./.venv/bin/turbine …`
+- Isolated install (`uv tool` / `pipx`): `turbine` is global
 
-Confirm with `turbine --version` (or `poetry run turbine --version`).
+Confirm with `turbine --version`.
 
-Requires env (or `.env`): prefer `TURBINE_ENDPOINT`, `TURBINE_AUDIENCE`, `TURBINE_DOMAIN`, `TURBINE_CLIENT_ID`, `TURBINE_CLIENT_SECRET`, `TURBINE_ORGANIZATION_ID`.
+Env (or `.env`): prefer `TURBINE_ENDPOINT`, `TURBINE_AUDIENCE`, `TURBINE_DOMAIN`, `TURBINE_CLIENT_ID`, `TURBINE_CLIENT_SECRET`, `TURBINE_ORGANIZATION_ID`.
 
 Verify: `turbine auth status`
 
-Full agent playbook: [docs/agent.md](docs/agent.md)
-
-## Core loop (agents)
+## Core loop
 
 1. `turbine api catalog --json -o json` — API index with curated aliases.
-2. Prefer curated: `turbine asset list --limit 20 --fields id,name -o json`
+2. Curated first: `turbine asset list --limit 20 --fields id,name -o json`
 3. Escape hatch: `turbine api <operation> --schema -o json` then `--input '<json>'`
 4. Raw GraphQL: `turbine api graphql -q '<graphql>' --variables '<json>'`
 
 `--output` / `-o` may appear before or after the subcommand.
 
-## Common workflows
-
-**Upload and analyze (most common).** Analysis takes several minutes; `--wait` blocks and prints heartbeats to stderr:
-
-```bash
-# One command: upload, wait for analysis, get the asset ID
-turbine asset upload fw.bin --yes --wait -o json
-# → {"uploadId":"…","name":"fw.bin","assetId":"…","hasRunningJob":false,…}
-```
-
-Or split (upload now, check later): `asset upload` returns an `uploadId` (`assetId` may be null at first — the asset registers asynchronously), then:
-
-```bash
-turbine asset status --upload-id UPLOAD_ID --wait -o json   # blocks until done
-turbine asset status --upload-id UPLOAD_ID -o json          # single non-blocking check
-```
-
-When done, fetch results: `turbine asset get ASSET_ID`, `turbine vuln list ASSET_ID --detail lite -o json`. Do not poll `asset list` to find the upload — `asset status --upload-id` is the direct path.
-
-## Vague asks — route, summarize, then offer drill-downs
-
-"Risk" in Turbine spans several finding categories: vulnerabilities (CVEs), exploit exposure, misconfigurations, secrets and credentials, certificates and keys, and license issues. When the user asks broadly — "what risk does this asset have?", "how bad is it?", "any security issues?", "what did the scan find?" — do NOT fan out across every list command. Run the one-call summary:
-
-```bash
-turbine asset risk ASSET_ID -o json     # risk score + counts per category
-turbine asset risk --latest -o json     # most recently created asset ("the asset I just uploaded")
-```
-
-Each category in the output includes its `drillDown` command. Present the score and the non-zero counts, then ask which category to explore, e.g.: "Which type of risk are you interested in — CVEs, misconfigurations, certificate issues, detected secrets, license issues?" Only drill down immediately when the request names a category or one category obviously dominates.
-
-Routing for specific phrases:
+## Routing
 
 | User says | Run |
 | --- | --- |
@@ -75,42 +49,25 @@ Routing for specific phrases:
 | "certificates", "keys", "crypto" | `turbine cert list ASSET_ID` / `turbine key list ASSET_ID` |
 | "licenses", "legal" | `turbine license list ASSET_ID` |
 | "components", "SBOM", "dependencies" | `turbine component list ASSET_ID` |
+| upload / analyze | `turbine asset upload fw.bin --yes --wait -o json` |
 
-## Asset IDs
+For broad "risk" questions, run `turbine asset risk` once, present counts, then ask which category to open — do not fan out across every list command. Details in [docs/agent.md](docs/agent.md).
 
-Some operations name their input `composedAssetId` — it is interchangeable with the plain asset ID. Always pass the bare `ASSET_ID` (never an `id|revision` value); the CLI strips any `|<revision>` suffix from output, so IDs you read back are always safe to reuse.
+## Quick rules
 
-## Token discipline
-
-- Prefer curated list commands with `--detail summary|lite` and `--limit` / `--fields`.
-- List output is NDJSON in agent mode (one JSON object per line).
-- Use `api graphql` only when necessary.
-
-## Sort and filter
-
-- `--sort FIELD[:asc|desc]`, e.g. `--sort createdAt:desc`. Case-insensitive field names; no `--sort-by`/`--sort-order` flags exist. Invalid fields error with the valid field list.
-- `--filter` takes resource-specific JSON, e.g. `--filter '{"fields":[{"fieldName":"NAME","value":["router"],"operation":"CONTAINS"}]}'`. Exact shape: `turbine api <operation> --schema -o json`.
-
-## Safety
-
-- Destructive commands require `--yes` in agent mode.
-- Dry-run first: `--dry-run`.
-
-## Output contract
-
-- stdout = data only (compact JSON; NDJSON for lists).
-- stderr = logs, spinners, human hints.
-- Exit codes: 0 ok, 2 usage, 3 GraphQL, 4 auth, 5 network.
-- Errors: `{"error":"…","code":N}` on stderr — no tracebacks.
+- Pass bare `ASSET_ID` (never `id|revision`); the CLI strips revision suffixes from output.
+- Prefer curated lists with `--detail summary|lite` and `--limit` / `--fields`.
+- Destructive commands need `--yes` in agent mode; dry-run first with `--dry-run`.
+- stdout = data (NDJSON for lists); stderr = logs; errors are JSON on stderr.
 
 <!-- AUTO-GENERATED-CLI-SECTION:START -->
 
 ## Generated API index
 
-Total API operations: **164** (regenerated from SDK).
+**168** API operations (regenerated from the SDK).
 
-Use curated commands first (`turbine asset list`, `turbine vuln remediate`, …).
-Fall back to `turbine api <operation>` for full GraphQL coverage.
+Start with curated commands (`turbine asset list`, `turbine vuln remediate`, …).
+Use `turbine api <operation>` when you need an op the curated surface misses.
 
 | API command | Risk | Curated alias |
 | --- | --- | --- |
@@ -141,6 +98,7 @@ Fall back to `turbine api <operation>` for full GraphQL coverage.
 | `jira-integration-delete-connected-space` | write | — |
 | `jira-integration-disconnect` | write | — |
 | `jira-integration-reconnect` | write | — |
+| `jira-integration-set-status-mapping-auto-sync` | write | — |
 | `jira-integration-setup-action` | write | — |
 | `jira-integration-test-connection` | write | — |
 | `notify-notification-configuration` | write | — |
@@ -153,10 +111,9 @@ Fall back to `turbine api <operation>` for full GraphQL coverage.
 | `remediate-public-keys` | destructive | — |
 | `remediate-secrets` | destructive | — |
 | `remove-all-asset-groups-from-assets` | destructive | — |
-| `remove-assets-from-asset-group` | destructive | group remove-assets |
 | … | … | … |
 
-See [reference.md](reference.md) for all 164 API operations.
+See [reference.md](reference.md) for all 168 API operations.
 
 <!-- AUTO-GENERATED-CLI-SECTION:END -->
 
