@@ -23,15 +23,13 @@ Same auth and output modes for both tiers; only rendering changes:
 
 ## Install
 
-Three tiers — pick how much you want:
-
 | Tier | Command | You get |
 | --- | --- | --- |
 | SDK only | `pip install netrise-turbine-sdk` | Python SDK |
 | SDK + CLI | `uv tool install netrise-turbine-cli` (or `pipx` / `pip`) | `turbine` command, SDK included |
 | Everything | `turbine skill install` | Agent skill in Cursor, Claude Code, Codex, and opencode |
 
-`turbine skill install` detects which agent tools you have (`~/.cursor`, `~/.claude`, `~/.agents`/`~/.codex`, `~/.config/opencode`) and installs the bundled skill to each; use `--agent` / `--scope project` for explicit control, `turbine skill status` to inspect, and `turbine skill uninstall` to remove. Developing in this repo? `make turbine-cli-dev` sets up the poetry env with the local editable SDK — run it instead of (or after) any bare `poetry install`, which resets the env to the locked PyPI SDK.
+`turbine skill install` detects which agent tools you have and installs the bundled skill to each; use `--agent` / `--scope project` for explicit control, `turbine skill status` to inspect, and `turbine skill uninstall` to remove. Developing in this repo? `make turbine-cli-dev` sets up the poetry env with the local editable SDK — run it instead of (or after) any bare `poetry install`, which resets the env to the locked PyPI SDK.
 
 ## Auth
 
@@ -48,7 +46,7 @@ turbine auth login --save   # verify + persist non-secrets to ~/.config/turbine/
 
 | Resource | Commands |
 | --- | --- |
-| `asset` | `list`, `get`, `upload`, `files`, `status`, `activity`, `hashes` |
+| `asset` | `list`, `get`, `upload`, `files`, `status`, `activity`, `hashes`, `risk` |
 | `vuln` | `list`, `get`, `overview`, `remediate` |
 | `group` | `list`, `members`, `create`, `update`, `delete`, `add-assets`, `remove-assets` |
 | `component` | `list`, `grouped`, `crypto` |
@@ -56,7 +54,7 @@ turbine auth login --save   # verify + persist non-secrets to ~/.config/turbine/
 | `user` | `list`, `invite`, `delete`, `remove` |
 | `org` | `info`, `settings` |
 | `search` | full-text search |
-| `api` | all 114 GraphQL ops + `catalog`, `graphql`, `schema` |
+| `api` | all GraphQL ops + `catalog`, `graphql`, `schema` |
 
 ## Quick start
 
@@ -84,6 +82,7 @@ turbine api assets-relay --schema -o json
 | [docs/agent.md](docs/agent.md) | Agent playbook |
 | [reference.md](reference.md) | Generated API index + curated mapping |
 | [SKILL.md](SKILL.md) | Cursor agent skill |
+| [docs-style.md](../docs-style.md) | Shared voice for SDK + CLI docs |
 
 ## Regenerate
 

@@ -15,7 +15,7 @@ def _cmd_mutation_add_asset_groups_to_assets(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Associate a list of existing asset groups with selected assets."""
+    """Attach asset groups to one or more assets."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -52,7 +52,7 @@ def _cmd_mutation_add_assets_to_asset_group(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Add specified assets to an existing asset group for organization."""
+    """Add assets to an existing asset group."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -91,7 +91,7 @@ def _cmd_mutation_add_security_group_member(
     security_group_id: Optional[str] = typer.Option(None, '--security-group-id', help='str (required) [required]'),
     user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
 ) -> None:
-    """Add a user as a member of an RBAC security group."""
+    """Add a user to an RBAC security group."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -132,7 +132,7 @@ def _cmd_mutation_asset_add_dependency(
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
     reason: Optional[str] = typer.Option(None, '--reason', help='Optional[str] (optional)'),
 ) -> None:
-    """Manually inject a missing dependency component into an asset's inventory."""
+    """Add a manual dependency component to an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -172,7 +172,7 @@ def _cmd_mutation_asset_modify_dependency(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     reason: Optional[str] = typer.Option(None, '--reason', help='Optional[str] (optional)'),
 ) -> None:
-    """Update metadata or details for a manually added asset dependency."""
+    """Update a manually added asset dependency."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -210,7 +210,7 @@ def _cmd_mutation_asset_remove_dependencies(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
 ) -> None:
-    """Remove specific dependencies from the component list of an asset."""
+    """Remove selected dependencies from an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -263,7 +263,7 @@ def _cmd_mutation_asset_submit(
     sbom_format: Optional[str] = typer.Option(None, '--sbom-format', help='Optional[SbomFormat] (optional)'),
     license: Optional[str] = typer.Option(None, '--license', help='Optional[str] (optional)'),
 ) -> None:
-    """Upload firmware or SBOMs with metadata, group assignments, and CPEs."""
+    """Submit firmware or an SBOM for analysis."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -336,7 +336,7 @@ def _cmd_mutation_asset_update(
     product: Optional[str] = typer.Option(None, '--product', help='Optional[str] (optional)'),
     license: Optional[str] = typer.Option(None, '--license', help='Optional[str] (optional)'),
 ) -> None:
-    """Modify metadata such as name, vendor, or version for assets."""
+    """Update asset metadata such as name, vendor, or version."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -384,7 +384,7 @@ def _cmd_mutation_bulk_delete_ac_rs(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Delete multiple access control records in one call; already-deleted records are treated as success."""
+    """Delete many access control records; missing ones count as success."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -421,7 +421,7 @@ def _cmd_mutation_create_acr(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Create an access control record granting a user or security group a role on a resource."""
+    """Grant a user or security group a role on a resource."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -459,7 +459,7 @@ def _cmd_mutation_create_asset_comparison_report(
     asset_a: Optional[str] = typer.Option(None, '--asset-a', help='str (required) [required]'),
     asset_b: Optional[str] = typer.Option(None, '--asset-b', help='str (required) [required]'),
 ) -> None:
-    """Create a new comparison report to diff vulnerabilities and components between two assets."""
+    """Start a comparison report between two assets."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -500,7 +500,7 @@ def _cmd_mutation_create_asset_group(
     name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
 ) -> None:
-    """Create a new named group to organize and track assets."""
+    """Create a named asset group."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -541,7 +541,7 @@ def _cmd_mutation_create_custom_role(
     name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
 ) -> None:
-    """Create an org-scoped custom role with a chosen set of permissions."""
+    """Create an org-scoped custom role with chosen permissions."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -581,7 +581,7 @@ def _cmd_mutation_create_notification_configuration(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Create a notification configuration defining channel, scopes, and triggers for alerts."""
+    """Create a notification channel, scopes, and triggers."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -619,7 +619,7 @@ def _cmd_mutation_create_security_group(
     name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
 ) -> None:
-    """Create a new RBAC security group in the current organization."""
+    """Create an RBAC security group in the current org."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -659,7 +659,7 @@ def _cmd_mutation_delete_acr(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     acr_id: Optional[str] = typer.Option(None, '--acr-id', help='str (required) [required]'),
 ) -> None:
-    """Delete a single access control record, revoking the associated grant."""
+    """Delete one access control record."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -697,7 +697,7 @@ def _cmd_mutation_delete_asset_comparison_report(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     report_id: Optional[str] = typer.Option(None, '--report-id', help='str (required) [required]'),
 ) -> None:
-    """Permanently delete an asset comparison report by its ID."""
+    """Delete an asset comparison report by ID."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -735,7 +735,7 @@ def _cmd_mutation_delete_asset_group(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Permanently remove an asset group while keeping contained assets intact."""
+    """Delete an asset group; assets stay in the org."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -773,7 +773,7 @@ def _cmd_mutation_delete_custom_role(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     role_id: Optional[str] = typer.Option(None, '--role-id', help='str (required) [required]'),
 ) -> None:
-    """Permanently delete a custom role from the organization."""
+    """Delete a custom role from the organization."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -811,7 +811,7 @@ def _cmd_mutation_delete_notification_configuration(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Permanently delete a notification configuration by its ID."""
+    """Delete a notification configuration by ID."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -849,7 +849,7 @@ def _cmd_mutation_delete_security_group(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     security_group_id: Optional[str] = typer.Option(None, '--security-group-id', help='str (required) [required]'),
 ) -> None:
-    """Permanently delete a security group from the organization."""
+    """Delete a security group from the organization."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -889,7 +889,7 @@ def _cmd_mutation_invite_user(
     display_name: Optional[str] = typer.Option(None, '--display-name', help='Optional[str] (optional)'),
     role_id: Optional[str] = typer.Option(None, '--role-id', help='Optional[str] (optional)'),
 ) -> None:
-    """Invite a user to the organization with a role and optional security group memberships."""
+    """Invite a user with a role and optional security groups."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -931,7 +931,7 @@ def _cmd_mutation_jira_integration_add_connected_space(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     space_id: Optional[str] = typer.Option(None, '--space-id', help='Optional[str] (optional)'),
 ) -> None:
-    """Add a Jira space to the integration's connected spaces list."""
+    """Connect a Jira space to the integration."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -972,7 +972,7 @@ def _cmd_mutation_jira_integration_create_issue(
     summary: Optional[str] = typer.Option(None, '--summary', help='str (required) [required]'),
     description: Optional[str] = typer.Option(None, '--description', help='str (required) [required]'),
 ) -> None:
-    """Create a Jira issue and optionally link it to a vulnerability finding."""
+    """Create a Jira issue, optionally linked to a finding."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1016,7 +1016,7 @@ def _cmd_mutation_jira_integration_delete_connected_space(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
 ) -> None:
-    """Remove a connected Jira space from the integration."""
+    """Disconnect a Jira space from the integration."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1054,7 +1054,7 @@ def _cmd_mutation_jira_integration_disconnect(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Disconnect the Jira integration from the organization."""
+    """Disconnect the Jira integration from the org."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1083,7 +1083,7 @@ def _cmd_mutation_jira_integration_reconnect(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Re-enable a Jira installation when the OAuth and app install steps are already complete."""
+    """Re-enable Jira when OAuth and app install are already done."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1103,6 +1103,44 @@ def _cmd_mutation_jira_integration_reconnect(
         yes=yes,
     )
 
+def _cmd_mutation_jira_integration_set_status_mapping_auto_sync(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    enabled: Optional[bool] = typer.Option(None, '--enabled', help='bool (required) [required]'),
+) -> None:
+    """Enable or disable auto-sync for Jira status mappings."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraIntegrationSetStatusMappingAutoSyncInput
+        runtime.emit_schema(JiraIntegrationSetStatusMappingAutoSyncInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraIntegrationSetStatusMappingAutoSyncInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if enabled is not None:
+        payload['enabled'] = enabled
+    try:
+        model = JiraIntegrationSetStatusMappingAutoSyncInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'enabled'}))
+    kwargs = {'jira_integration_set_status_mapping_auto_sync_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_jira_integration_set_status_mapping_auto_sync',
+        method_name='mutation_jira_integration_set_status_mapping_auto_sync',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_jira_integration_setup_action(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -1113,7 +1151,7 @@ def _cmd_mutation_jira_integration_setup_action(
     action: Optional[str] = typer.Option(None, '--action', help='JiraSetupAction (required) [required]'),
     site_id: Optional[str] = typer.Option(None, '--site-id', help='Optional[str] (optional)'),
 ) -> None:
-    """Perform an action in the Jira integration setup or reconnect flow."""
+    """Run a step in the Jira setup or reconnect flow."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1153,7 +1191,7 @@ def _cmd_mutation_jira_integration_test_connection(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Verify that the Jira integration connection is healthy."""
+    """Check that the Jira integration connection is healthy."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1182,7 +1220,7 @@ def _cmd_mutation_notify_notification_configuration(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Send a test notification using an existing notification configuration."""
+    """Send a test notification for a configuration."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1224,7 +1262,7 @@ def _cmd_mutation_remediate_all_asset_vulnerabilities(
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
     status: Optional[str] = typer.Option(None, '--status', help='VexStatus (required) [required]'),
 ) -> None:
-    """Apply a remediation status to all vulnerabilities matching specific filters."""
+    """Apply a VEX status to every vuln matching a filter."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1274,7 +1312,7 @@ def _cmd_mutation_remediate_asset_vulnerabilities(
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
     status: Optional[str] = typer.Option(None, '--status', help='VexStatus (required) [required]'),
 ) -> None:
-    """Bulk apply VEX remediation status to multiple vulnerabilities on assets."""
+    """Bulk-apply VEX status to selected asset vulns."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1324,7 +1362,7 @@ def _cmd_mutation_remediate_asset_vulnerability(
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
     status: Optional[str] = typer.Option(None, '--status', help='VexStatus (required) [required]'),
 ) -> None:
-    """Update remediation status and justification for a single asset vulnerability."""
+    """Set VEX status and justification for one asset vuln."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1372,7 +1410,7 @@ def _cmd_mutation_remediate_certificates(
     status: Optional[str] = typer.Option(None, '--status', help='CryptoRemediationStatus (required) [required]'),
     details: Optional[str] = typer.Option(None, '--details', help='Optional[str] (optional)'),
 ) -> None:
-    """Update remediation status and notes for certificate issues found in assets."""
+    """Set remediation status and notes on certificate findings."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1416,7 +1454,7 @@ def _cmd_mutation_remediate_license_issues(
     status: Optional[str] = typer.Option(None, '--status', help='LicenseIssueStatus (required) [required]'),
     details: Optional[str] = typer.Option(None, '--details', help='Optional[str] (optional)'),
 ) -> None:
-    """Update status and add notes to resolve identified license issues."""
+    """Set status and notes on license compliance issues."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1460,7 +1498,7 @@ def _cmd_mutation_remediate_private_keys(
     status: Optional[str] = typer.Option(None, '--status', help='CryptoRemediationStatus (required) [required]'),
     details: Optional[str] = typer.Option(None, '--details', help='Optional[str] (optional)'),
 ) -> None:
-    """Apply remediation status to private key exposures discovered in assets."""
+    """Set remediation status on private key findings."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1504,7 +1542,7 @@ def _cmd_mutation_remediate_public_keys(
     status: Optional[str] = typer.Option(None, '--status', help='CryptoRemediationStatus (required) [required]'),
     details: Optional[str] = typer.Option(None, '--details', help='Optional[str] (optional)'),
 ) -> None:
-    """Update remediation status for public key issues identified in assets."""
+    """Set remediation status on public key findings."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1548,7 +1586,7 @@ def _cmd_mutation_remediate_secrets(
     status: Optional[str] = typer.Option(None, '--status', help='SecretRemediationStatus (required) [required]'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
 ) -> None:
-    """Apply remediation status and justification to exposed secrets in assets."""
+    """Set remediation status and justification on secrets."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1590,7 +1628,7 @@ def _cmd_mutation_remove_all_asset_groups_from_assets(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Disassociate all asset groups from a specified list of assets."""
+    """Detach every asset group from the given assets."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1627,7 +1665,7 @@ def _cmd_mutation_remove_assets_from_asset_group(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Remove selected assets from a specific asset group container configuration."""
+    """Remove selected assets from an asset group."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1665,7 +1703,7 @@ def _cmd_mutation_remove_org_user(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
 ) -> None:
-    """Permanently remove a user from the current organization."""
+    """Remove a user from the current organization."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1744,7 +1782,7 @@ def _cmd_mutation_replace_acr(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     acr_id: Optional[str] = typer.Option(None, '--acr-id', help='str (required) [required]'),
 ) -> None:
-    """Replace an access control record with a new grant in one atomic delete-and-create operation."""
+    """Replace an access control record in one delete-and-create."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1773,6 +1811,47 @@ def _cmd_mutation_replace_acr(
         yes=yes,
     )
 
+def _cmd_mutation_save_jira_space_workflow_config(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    issue_type_id: Optional[str] = typer.Option(None, '--issue-type-id', help='str (required) [required]'),
+) -> None:
+    """Save status mappings and workflow config for a Jira space."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import SaveJiraSpaceWorkflowConfigInput
+        runtime.emit_schema(SaveJiraSpaceWorkflowConfigInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import SaveJiraSpaceWorkflowConfigInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if issue_type_id is not None:
+        payload['issue_type_id'] = issue_type_id
+    try:
+        model = SaveJiraSpaceWorkflowConfigInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'issue-type-id', 'space-id'}))
+    kwargs = {'save_jira_space_workflow_config_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_save_jira_space_workflow_config',
+        method_name='mutation_save_jira_space_workflow_config',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_set_asset_groups_to_asset(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -1782,7 +1861,7 @@ def _cmd_mutation_set_asset_groups_to_asset(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Replace all current group associations for an asset with new ones."""
+    """Replace an asset's group memberships."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1820,7 +1899,7 @@ def _cmd_mutation_set_assets_to_asset_group(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     group_id: Optional[str] = typer.Option(None, '--group-id', help='str (required) [required]'),
 ) -> None:
-    """Overwrite the member list of an asset group with new assets."""
+    """Replace an asset group's member list."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1859,7 +1938,7 @@ def _cmd_mutation_set_org_user_status(
     user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
     status: Optional[str] = typer.Option(None, '--status', help='OrgUserStatus (required) [required]'),
 ) -> None:
-    """Enable or disable a user account within the current organization."""
+    """Enable or disable a user in the current org."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1899,7 +1978,7 @@ def _cmd_mutation_submit_rise_ai_analysis(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Request a RISE AI analysis for an eligible asset to generate insights."""
+    """Request a RiseAI analysis for an eligible asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1939,7 +2018,7 @@ def _cmd_mutation_update_asset_group(
     name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
 ) -> None:
-    """Rename or update the description of an existing asset group."""
+    """Rename or update an asset group's description."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -1983,7 +2062,7 @@ def _cmd_mutation_update_custom_role(
     name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
 ) -> None:
-    """Update the name, description, or permissions of an existing custom role."""
+    """Update a custom role's name, description, or permissions."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2025,7 +2104,7 @@ def _cmd_mutation_update_notification_configuration(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Update channel, scopes, triggers, or status for an existing notification configuration."""
+    """Update a notification configuration's channel or triggers."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2075,7 +2154,7 @@ def _cmd_mutation_update_org_level_settings(
     rise_ai_conversational_gpt_enabled: Optional[bool] = typer.Option(None, '--rise-ai-conversational-gpt-enabled', help='Optional[bool] (optional)'),
     rise_ai_insights_report_enabled: Optional[bool] = typer.Option(None, '--rise-ai-insights-report-enabled', help='Optional[bool] (optional)'),
 ) -> None:
-    """Configure global organization settings such as idle session timeout duration."""
+    """Update org settings such as idle session timeout."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2141,7 +2220,7 @@ def _cmd_mutation_update_security_group(
     name: Optional[str] = typer.Option(None, '--name', help='str (required) [required]'),
     description: Optional[str] = typer.Option(None, '--description', help='Optional[str] (optional)'),
 ) -> None:
-    """Update the name or description of an existing security group."""
+    """Update a security group's name or description."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2184,7 +2263,7 @@ def _cmd_mutation_user_action(
     type: Optional[str] = typer.Option(None, '--type', help='UserActionEnum (required) [required]'),
     user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
 ) -> None:
-    """Perform administrative actions like enabling or disabling specific user accounts."""
+    """Enable or disable a user account."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2224,7 +2303,7 @@ def _cmd_mutation_user_delete(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Permanently delete a user account and remove their access rights."""
+    """Delete a user account and revoke access."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2263,7 +2342,7 @@ def _cmd_mutation_user_invite(
     email: Optional[str] = typer.Option(None, '--email', help='str (required) [required]'),
     role: Optional[str] = typer.Option(None, '--role', help='str (required) [required]'),
 ) -> None:
-    """Invite a new user to the organization with a specific role."""
+    """Invite a user to the organization with a role."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2303,7 +2382,7 @@ def _cmd_mutation_user_remove(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Remove a user from the organization without deleting their account."""
+    """Remove a user from the org without deleting the account."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2341,7 +2420,7 @@ def _cmd_mutation_user_reset_password(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Trigger a password reset email for a specific user account."""
+    """Send a password-reset email to a user."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2380,7 +2459,7 @@ def _cmd_mutation_user_set_user_role(
     next_role: Optional[str] = typer.Option(None, '--next-role', help='str (required) [required]'),
     user_id: Optional[str] = typer.Option(None, '--user-id', help='str (required) [required]'),
 ) -> None:
-    """Assign a new permission role like Owner or Operator to users."""
+    """Assign a role such as Owner or Operator."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2423,7 +2502,7 @@ def _cmd_mutation_user_update_user(
     confirm: Optional[str] = typer.Option(None, '--confirm', help='Optional[str] (optional)'),
     password: Optional[str] = typer.Option(None, '--password', help='Optional[str] (optional)'),
 ) -> None:
-    """Modify user profile information including name and contact email details."""
+    """Update a user's name or email."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2467,7 +2546,7 @@ def _cmd_query_activity(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve a comprehensive log of actions and events for assets."""
+    """List activity-log events for an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2505,7 +2584,7 @@ def _cmd_query_analytics(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Access high-level risk data and charts for organization dashboards."""
+    """Get org dashboard risk metrics and chart data."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2534,7 +2613,7 @@ def _cmd_query_asset(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='Optional[str] (optional)'),
 ) -> None:
-    """Retrieve detailed metadata and risk information for a single asset."""
+    """Get metadata and risk for one asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2572,7 +2651,7 @@ def _cmd_query_asset_group_analytics(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     group_id: Optional[str] = typer.Option(None, '--group-id', help='str (required) [required]'),
 ) -> None:
-    """View risk metrics and exploit counts for a specific group."""
+    """Get risk metrics for one asset group."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2610,7 +2689,7 @@ def _cmd_query_asset_group_members(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     group_id: Optional[str] = typer.Option(None, '--group-id', help='str (required) [required]'),
 ) -> None:
-    """List all assets associated with a specific asset group container."""
+    """List assets in an asset group."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2651,7 +2730,7 @@ def _cmd_query_asset_groups(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     filter: Optional[str] = typer.Option(None, '--filter', help='Optional[str] (optional)'),
 ) -> None:
-    """Retrieve a detailed paginated list of all asset groups available."""
+    """List asset groups with pagination and filters."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2692,7 +2771,7 @@ def _cmd_query_asset_status(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Check if an asset is currently processing or has finished."""
+    """Check whether an asset is still processing."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2730,7 +2809,7 @@ def _cmd_query_asset_upload(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     upload_id: Optional[str] = typer.Option(None, '--upload-id', help='Optional[str] (optional)'),
 ) -> None:
-    """Obtain a secure pre-signed URL to upload files for analysis."""
+    """Get a pre-signed URL to upload a file for analysis."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2770,7 +2849,7 @@ def _cmd_query_asset_vulnerability_remediation(
     remediation_id: Optional[str] = typer.Option(None, '--remediation-id', help='str (required) [required]'),
     vulnerability_id: Optional[str] = typer.Option(None, '--vulnerability-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve current VEX status and justification for a specific vulnerability."""
+    """Get VEX status and justification for one vuln on an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2812,7 +2891,7 @@ def _cmd_query_assets_overview(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """View high-level risk and threat exposure metrics for multiple assets."""
+    """Get risk and threat rollups across assets."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2852,7 +2931,7 @@ def _cmd_query_assets_relay(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve a paginated, sortable list of assets with filtering options."""
+    """List assets with full nested fields (paginated)."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2892,7 +2971,7 @@ def _cmd_query_assets_relay_lite(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve assets with trimmed fields — keeps identity, status, risk score, and analytic rollups; drops filesystems, SHA-256, exploit trees, and credential counts."""
+    """List assets with identity, status, risk, and analytic rollups."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2932,7 +3011,7 @@ def _cmd_query_assets_relay_summary(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve minimal asset data — ID, name, and analytic counts only — for fast org-wide sweeps to decide which assets need deeper queries."""
+    """List assets as id, name, and analytic counts only."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -2972,7 +3051,7 @@ def _cmd_query_binary_protections(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List security hardening details for binaries found within the asset."""
+    """List binary hardening details for an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3013,7 +3092,7 @@ def _cmd_query_binary_protections_summary(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
 ) -> None:
-    """Get aggregated counts of binary hardening features like NX or PIE."""
+    """Get counts of hardening features such as NX or PIE."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3051,7 +3130,7 @@ def _cmd_query_caas_availability(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Check for the availability of the RISE AI analysis report."""
+    """Check whether a RiseAI analysis report is available."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3089,7 +3168,7 @@ def _cmd_query_certificate_external_filters(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve available filter options for certificate queries."""
+    """List filter options for certificate queries."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3127,7 +3206,7 @@ def _cmd_query_certificates(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List X.509 certificates and validity status found in the asset."""
+    """List X.509 certificates found in an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3168,7 +3247,7 @@ def _cmd_query_credentials(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Identify user accounts and password hashes discovered within the filesystem."""
+    """List accounts and password hashes found in an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3209,7 +3288,7 @@ def _cmd_query_dependencies(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
 ) -> None:
-    """List all software components and libraries identified in the asset."""
+    """List software components identified in an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3247,7 +3326,7 @@ def _cmd_query_dependencies_lite(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
 ) -> None:
-    """List dependencies with trimmed fields — keeps identity, version, license, purls, and analytic rollups; drops file metadata, digests, and nested correlation details."""
+    """List components with identity, version, license, and rollups."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3285,7 +3364,7 @@ def _cmd_query_dependency_known_exploits(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
 ) -> None:
-    """Check if specific dependencies are linked to known public exploits."""
+    """Check whether dependencies link to known public exploits."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3323,7 +3402,7 @@ def _cmd_query_detailed_vulnerabilities(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve in-depth vulnerability data including descriptions and CVSS vector strings."""
+    """List vulns with descriptions and full CVSS vectors."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3361,7 +3440,7 @@ def _cmd_query_detailed_vulnerabilities_lite(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve vulnerability descriptions with preferred CVSS v3.1 scores only — drops full v2/v4 impact blocks, exploit timelines, references, and problem type details."""
+    """List vulns with description and preferred CVSS v3.1 only."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3400,7 +3479,7 @@ def _cmd_query_download_extracted_firmware(
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
     filesystem_id: Optional[str] = typer.Option(None, '--filesystem-id', help='Optional[str] (optional)'),
 ) -> None:
-    """Generate a URL to download the full unpacked file system."""
+    """Get a URL to download the unpacked filesystem."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3442,7 +3521,7 @@ def _cmd_query_download_file(
     filesystem_id: Optional[str] = typer.Option(None, '--filesystem-id', help='Optional[str] (optional)'),
     file_id: Optional[str] = typer.Option(None, '--file-id', help='Optional[str] (optional)'),
 ) -> None:
-    """Create a secure link to download a specific individual file."""
+    """Get a URL to download one extracted file."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3484,7 +3563,7 @@ def _cmd_query_download_file_list(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Generate a URL to download a list of all files."""
+    """Get a URL to download the asset file listing."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3522,7 +3601,7 @@ def _cmd_query_download_firmware(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Generate a link to download the original uploaded firmware image."""
+    """Get a URL to download the original uploaded image."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3561,7 +3640,7 @@ def _cmd_query_get_ai_model_data(
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
     component_id: Optional[str] = typer.Option(None, '--component-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve configuration and metadata for a specific AI model integration."""
+    """Get config and metadata for an AI model integration."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3601,7 +3680,7 @@ def _cmd_query_get_asset_comparison_report(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     report_id: Optional[str] = typer.Option(None, '--report-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve a completed asset comparison report including vulnerability, component, and summary diffs."""
+    """Get a finished asset comparison report."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3641,7 +3720,7 @@ def _cmd_query_get_certificate_reachability(
     file_path: Optional[str] = typer.Option(None, '--file-path', help='str (required) [required]'),
     sha_256: Optional[str] = typer.Option(None, '--sha256', help='str (required) [required]'),
 ) -> None:
-    """Determine whether discovered certificates are reachable via executable scripts or system paths."""
+    """Check whether certificates are reachable via paths or scripts."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3684,7 +3763,7 @@ def _cmd_query_get_dependency_reachability(
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
     component_id: Optional[str] = typer.Option(None, '--component-id', help='str (required) [required]'),
 ) -> None:
-    """Determine whether a dependency is reachable via executable scripts or system paths."""
+    """Check whether a dependency is reachable via paths or scripts."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3724,7 +3803,7 @@ def _cmd_query_get_my_permissions(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve the flat union of permission IDs the calling user holds across all their access grants."""
+    """List permission IDs held by the calling user."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3753,7 +3832,7 @@ def _cmd_query_get_resource_permissions(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve the caller's effective permissions on a specific resource, defaulting to the organization level."""
+    """List the caller's effective permissions on a resource."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3782,7 +3861,7 @@ def _cmd_query_get_role(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve a single RBAC role by its ID."""
+    """Get one RBAC role by ID."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3811,7 +3890,7 @@ def _cmd_query_get_role_delete_impact(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Preview which users would retain or lose platform access if a custom role were deleted."""
+    """Preview who loses access if a custom role is deleted."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3841,7 +3920,7 @@ def _cmd_query_get_secret_reachability(
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
     secret_id: Optional[str] = typer.Option(None, '--secret-id', help='str (required) [required]'),
 ) -> None:
-    """Determine whether discovered secrets are reachable via executable scripts or system paths."""
+    """Check whether secrets are reachable via paths or scripts."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3881,7 +3960,7 @@ def _cmd_query_get_security_group_delete_impact(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Preview which members would retain or lose platform access if a security group were deleted."""
+    """Preview who loses access if a security group is deleted."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3911,7 +3990,7 @@ def _cmd_query_get_vuln_reachability(
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
     advisory_id: Optional[str] = typer.Option(None, '--advisory-id', help='str (required) [required]'),
 ) -> None:
-    """Determine if a vulnerability can be executed via system paths."""
+    """Check whether a vulnerability is reachable via system paths."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3952,7 +4031,7 @@ def _cmd_query_grouped_dependencies(
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
     grouped_by: Optional[str] = typer.Option(None, '--grouped-by', help='Optional[DependencyGroupByField] (optional)'),
 ) -> None:
-    """View dependencies aggregated by vendor, license, or specific component type."""
+    """List dependencies grouped by vendor, license, or type."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -3992,7 +4071,7 @@ def _cmd_query_hashes(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List cryptographic hashes for files identified within the asset filesystem."""
+    """List file hashes from an asset filesystem."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4042,7 +4121,7 @@ def _cmd_query_identified_components_preview(
     library_name_enabled: Optional[bool] = typer.Option(None, '--library-name-enabled', help='Optional[bool] (optional)'),
     binary_fingerprint_enabled: Optional[bool] = typer.Option(None, '--binary-fingerprint-enabled', help='Optional[bool] (optional)'),
 ) -> None:
-    """Return organization-wide component counts filtered by enabled identification methods, with before/after deltas when verification settings change."""
+    """Preview org-wide component counts under identification settings."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4098,7 +4177,7 @@ def _cmd_query_jira_integration(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve the Jira integration summary and connection health details."""
+    """Get Jira integration summary and connection health."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4128,7 +4207,7 @@ def _cmd_query_jira_integration_setup(
     mode: Optional[str] = typer.Option(None, '--mode', help='Optional[JiraSetupMode] (optional)'),
     initialize: Optional[bool] = typer.Option(None, '--initialize', help='Optional[bool] (optional)'),
 ) -> None:
-    """Retrieve the current state of the Jira integration setup wizard."""
+    """Get the current Jira setup-wizard state."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4169,7 +4248,7 @@ def _cmd_query_jira_project_components(
     space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
     max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
 ) -> None:
-    """List the Jira project components available for a connected space."""
+    """List Jira project components for a connected space."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4211,7 +4290,7 @@ def _cmd_query_jira_project_labels(
     query: Optional[str] = typer.Option(None, '--query', help='str (required) [required]'),
     max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
 ) -> None:
-    """Search the Jira labels available for a connected space; labels are instance-global."""
+    """Search Jira labels for a connected space."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4256,7 +4335,7 @@ def _cmd_query_jira_project_sprints(
     include_closed: Optional[bool] = typer.Option(None, '--include-closed', help='Optional[bool] (optional)'),
     max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
 ) -> None:
-    """Search the Jira sprints available for a connected space."""
+    """Search Jira sprints for a connected space."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4302,7 +4381,7 @@ def _cmd_query_jira_project_teams(
     query: Optional[str] = typer.Option(None, '--query', help='str (required) [required]'),
     max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
 ) -> None:
-    """Search the Atlassian Teams available for a connected Jira space."""
+    """Search Atlassian Teams for a connected Jira space."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4346,7 +4425,7 @@ def _cmd_query_jira_project_users(
     query: Optional[str] = typer.Option(None, '--query', help='str (required) [required]'),
     max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
 ) -> None:
-    """Search the assignable Jira users for a connected space."""
+    """Search assignable Jira users for a connected space."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4391,7 +4470,7 @@ def _cmd_query_jira_project_versions(
     include_archived: Optional[bool] = typer.Option(None, '--include-archived', help='Optional[bool] (optional)'),
     max_results: Optional[int] = typer.Option(None, '--max-results', help='Optional[int] (optional)'),
 ) -> None:
-    """List the Jira project versions available for a connected space."""
+    """List Jira project versions for a connected space."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4436,7 +4515,7 @@ def _cmd_query_jira_space_issue_fields(
     space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
     issue_type_id: Optional[str] = typer.Option(None, '--issue-type-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve the creatable fields, including priority options, for a Jira space and issue type."""
+    """List creatable fields for a Jira space and issue type."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4476,7 +4555,7 @@ def _cmd_query_jira_space_issue_types(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve the issue types available for a connected Jira space."""
+    """List issue types for a connected Jira space."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4505,6 +4584,85 @@ def _cmd_query_jira_space_issue_types(
         yes=yes,
     )
 
+def _cmd_query_jira_space_workflow_config(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='str (required) [required]'),
+    issue_type_id: Optional[str] = typer.Option(None, '--issue-type-id', help='str (required) [required]'),
+) -> None:
+    """Get status mappings and workflow config for a Jira space."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraSpaceWorkflowConfigInput
+        runtime.emit_schema(JiraSpaceWorkflowConfigInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraSpaceWorkflowConfigInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    if issue_type_id is not None:
+        payload['issue_type_id'] = issue_type_id
+    try:
+        model = JiraSpaceWorkflowConfigInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'issue-type-id', 'space-id'}))
+    kwargs = {'jira_space_workflow_config_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_space_workflow_config',
+        method_name='query_jira_space_workflow_config',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_jira_status_mapping_problems(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    space_id: Optional[str] = typer.Option(None, '--space-id', help='Optional[str] (optional)'),
+) -> None:
+    """List status-mapping problems across connected Jira spaces."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import JiraStatusMappingProblemsInput
+        runtime.emit_schema(JiraStatusMappingProblemsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import JiraStatusMappingProblemsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if space_id is not None:
+        payload['space_id'] = space_id
+    try:
+        model = JiraStatusMappingProblemsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'space-id'}))
+    kwargs = {'jira_status_mapping_problems_args': model}
+    runtime.run_graphql_op(
+        op_name='query_jira_status_mapping_problems',
+        method_name='query_jira_status_mapping_problems',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_license(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -4515,7 +4673,7 @@ def _cmd_query_license(
     spdx_id: Optional[str] = typer.Option(None, '--spdx-id', help='str (required) [required]'),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve detailed information for a specific software license."""
+    """Get details for one software license."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4556,7 +4714,7 @@ def _cmd_query_license_issue(
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
     issue_id: Optional[str] = typer.Option(None, '--issue-id', help='str (required) [required]'),
 ) -> None:
-    """Get details about a specific license compliance issue."""
+    """Get details for one license compliance issue."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4596,7 +4754,7 @@ def _cmd_query_license_issues(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List license compliance issues identified across asset components."""
+    """List license compliance issues on an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4634,7 +4792,7 @@ def _cmd_query_license_issues_external_filters(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve available filter options for license issue queries."""
+    """List filter options for license-issue queries."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4672,7 +4830,7 @@ def _cmd_query_licenses_spdx_ids(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """List available SPDX license identifiers for filtering and reference."""
+    """List SPDX license identifiers."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4704,7 +4862,7 @@ def _cmd_query_list_ac_rs(
     last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
     before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
 ) -> None:
-    """List access control records for the organization, optionally filtered to a specific user."""
+    """List access control records, optionally for one user."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4748,7 +4906,7 @@ def _cmd_query_list_ai_providers(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='Optional[str] (optional)'),
 ) -> None:
-    """List available AI provider integrations and their current status."""
+    """List AI provider integrations and their status."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4786,7 +4944,7 @@ def _cmd_query_list_asset_comparison_reports(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """List all asset comparison reports with pagination, filtering, and sorting."""
+    """List asset comparison reports with filters and sorting."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4825,7 +4983,7 @@ def _cmd_query_list_asset_correlations(
     identifier: Optional[str] = typer.Option(None, '--identifier', help='str (required) [required]'),
     correlation_type: Optional[str] = typer.Option(None, '--correlation-type', help='AssetCorrelationType (required) [required]'),
 ) -> None:
-    """Retrieve cross-asset correlation data linking shared components and vulnerabilities."""
+    """List cross-asset correlations for shared components or vulns."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4868,7 +5026,7 @@ def _cmd_query_list_asset_crypto_libraries(
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
     filter: Optional[str] = typer.Option(None, '--filter', help='Optional[str] (optional)'),
 ) -> None:
-    """List cryptographic libraries and algorithms detected within an asset."""
+    """List crypto libraries detected in an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4914,7 +5072,7 @@ def _cmd_query_list_entity_assets(
     last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
     before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
 ) -> None:
-    """List the assets accessible to a specific user or security group."""
+    """List assets a user or security group can access."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -4961,7 +5119,7 @@ def _cmd_query_list_my_ac_rs(
     last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
     before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
 ) -> None:
-    """List the access control records that apply to the calling user."""
+    """List access control records that apply to you."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5008,7 +5166,7 @@ def _cmd_query_list_my_security_groups(
     last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
     before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
 ) -> None:
-    """List the security groups the calling user belongs to."""
+    """List security groups you belong to."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5052,7 +5210,7 @@ def _cmd_query_list_notification_configurations(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """List all notification configurations with their channels, scopes, and triggers."""
+    """List notification configurations and their triggers."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5089,7 +5247,7 @@ def _cmd_query_list_notification_logs(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve a paginated log of notification delivery events and their statuses."""
+    """List notification delivery events and statuses."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5129,7 +5287,7 @@ def _cmd_query_list_org_users(
     last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
     before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
 ) -> None:
-    """List all users in the organization with their security groups and accessible asset counts."""
+    """List org users with groups and accessible asset counts."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5173,7 +5331,7 @@ def _cmd_query_list_permissions(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve the full permission catalog available for building custom roles."""
+    """List the permission catalog for custom roles."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5205,7 +5363,7 @@ def _cmd_query_list_roles(
     last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
     before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
 ) -> None:
-    """List all RBAC roles defined for the current organization."""
+    """List RBAC roles for the current organization."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5252,7 +5410,7 @@ def _cmd_query_list_security_group_members(
     last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
     before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
 ) -> None:
-    """List the users who are members of a specific security group."""
+    """List members of a security group."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5299,7 +5457,7 @@ def _cmd_query_list_security_groups(
     last: Optional[int] = typer.Option(None, '--last', help='Optional[int] (optional)'),
     before: Optional[str] = typer.Option(None, '--before', help='Optional[str] (optional)'),
 ) -> None:
-    """List all RBAC security groups defined for the current organization."""
+    """List RBAC security groups for the current org."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5343,7 +5501,7 @@ def _cmd_query_match_vulnerabilities(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     identifier: Optional[str] = typer.Option(None, '--identifier', help='str (required) [required]'),
 ) -> None:
-    """Find specific vulnerabilities matching a provided component identifier or package."""
+    """Find vulnerabilities matching a component or package."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5381,7 +5539,7 @@ def _cmd_query_me(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve the authenticated user's profile including their editable display name."""
+    """Get the authenticated user's profile."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5410,7 +5568,7 @@ def _cmd_query_metrics(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """View organization-wide statistics on asset counts, processing, and risk."""
+    """Get org-wide counts for assets, processing, and risk."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5439,7 +5597,7 @@ def _cmd_query_misconfigurations(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List failed security checks and configuration risks found in assets."""
+    """List failed security checks on an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5480,7 +5638,7 @@ def _cmd_query_misconfigurations_lite(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List misconfigurations with trimmed fields — keeps check ID, name, severity, result, and correlation count; drops nested correlation objects."""
+    """List misconfigs with check ID, severity, result, and counts."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5521,7 +5679,7 @@ def _cmd_query_org_level_information(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve organization-level metadata such as last-updated time, optionally scoped by asset groups."""
+    """Get org metadata such as last-updated time."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5558,7 +5716,7 @@ def _cmd_query_org_level_settings(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Check how the tenant organization is configured."""
+    """Get the tenant organization's settings."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5587,7 +5745,7 @@ def _cmd_query_package_dependencies_by_id(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     composed_asset_id: Optional[str] = typer.Option(None, '--composed-asset-id', help='str (required) [required]'),
 ) -> None:
-    """View the dependency tree hierarchy for a specific software package."""
+    """Get the dependency tree for one package."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5625,7 +5783,7 @@ def _cmd_query_private_key_external_filters(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve available filter options for private key queries."""
+    """List filter options for private-key queries."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5663,7 +5821,7 @@ def _cmd_query_private_keys(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Detect private cryptographic keys stored insecurely on the asset filesystem."""
+    """List private keys found in an asset filesystem."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5704,7 +5862,7 @@ def _cmd_query_public_key_external_filters(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve available filter options for public key queries."""
+    """List filter options for public-key queries."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5742,7 +5900,7 @@ def _cmd_query_public_keys(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List public cryptographic keys found within the asset's file system."""
+    """List public keys found in an asset filesystem."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5783,7 +5941,7 @@ def _cmd_query_remediated_vulnerabilities_by_asset(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     status: Optional[str] = typer.Option(None, '--status', help='VulnerabilityRemediationStatus (required) [required]'),
 ) -> None:
-    """List remediated vulnerabilities grouped by asset for a single remediation-status bucket, with pagination, filtering, and sorting."""
+    """List remediated vulns for one status bucket, by asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5824,7 +5982,7 @@ def _cmd_query_rise_ai_analysis_data(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Check for the contents of the RISE AI analysis report."""
+    """Get the contents of a RiseAI analysis report."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5862,7 +6020,7 @@ def _cmd_query_rise_ai_availability(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Check eligibility and status of RISE AI analysis for an asset."""
+    """Check RiseAI eligibility and status for an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5901,7 +6059,7 @@ def _cmd_query_search(
     query: Optional[str] = typer.Option(None, '--query', help='str (required) [required]'),
     artifacts: Optional[str] = typer.Option(None, '--artifacts', help='list[ArtifactName] (required) [required]'),
 ) -> None:
-    """Execute keyword searches across all artifacts and files in organization."""
+    """Keyword-search artifacts and files across the org."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5942,7 +6100,7 @@ def _cmd_query_secret(
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
     reveal_secret: Optional[bool] = typer.Option(None, '--reveal-secret', help='Optional[bool] (optional)'),
 ) -> None:
-    """Retrieve detailed information about a specific discovered secret."""
+    """Get details for one discovered secret."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -5982,7 +6140,7 @@ def _cmd_query_secret_categories_summary(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Get aggregated counts of secrets grouped by category type."""
+    """Get secret counts grouped by category."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6020,7 +6178,7 @@ def _cmd_query_secret_status_count(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve counts of secrets grouped by remediation status."""
+    """Get secret counts grouped by remediation status."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6058,7 +6216,7 @@ def _cmd_query_secret_types_and_count(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List secret types discovered with their occurrence counts."""
+    """List secret types with occurrence counts."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6096,7 +6254,7 @@ def _cmd_query_secrets(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List all secrets and sensitive data discovered within an asset."""
+    """List secrets discovered in an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6137,7 +6295,7 @@ def _cmd_query_secrets_summary(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Get a high-level overview of secret findings and exposure metrics."""
+    """Get a summary of secret findings on an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6175,7 +6333,7 @@ def _cmd_query_sift(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Perform fuzzy hash matching to find similar code or files."""
+    """Fuzzy-hash match to find similar code or files."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6204,7 +6362,7 @@ def _cmd_query_user_orgs(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """List all organizations the current user is authorized to access."""
+    """List organizations the current user can access."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6233,7 +6391,7 @@ def _cmd_query_users(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Retrieve a detailed list of all users and their assigned roles."""
+    """List users and their assigned roles."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6273,7 +6431,7 @@ def _cmd_query_vulnerabilities(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List CVEs and associated risks for components in an asset."""
+    """List CVEs on an asset with scores and fix versions."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6311,7 +6469,7 @@ def _cmd_query_vulnerabilities_lite(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """List vulnerabilities with trimmed fields — keeps CVE, severity, CVSS/EPSS scores, fix versions, and correlation count; drops nested correlations and remediation details."""
+    """List vulns with CVE, severity, scores, and counts."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6349,7 +6507,7 @@ def _cmd_query_vulnerabilities_overview(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Get a summary of vulnerability counts and severity across assets."""
+    """Get vulnerability counts and severity across assets."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6389,7 +6547,7 @@ def _cmd_query_vulnerability(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve detailed metadata, scores, and descriptions for a specific vulnerability."""
+    """Get scores and metadata for one vulnerability."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6427,7 +6585,7 @@ def _cmd_query_vulnerability_external_filters(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     asset_id: Optional[str] = typer.Option(None, '--asset-id', help='str (required) [required]'),
 ) -> None:
-    """Count vulnerabilities matching external threat feeds like CISA or botnets."""
+    """Count vulns matching threat feeds such as CISA KEV."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6467,7 +6625,7 @@ def _cmd_query_vulnerability_jira_tickets(
     advisory_id: Optional[str] = typer.Option(None, '--advisory-id', help='str (required) [required]'),
     component_id: Optional[str] = typer.Option(None, '--component-id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve the Jira tickets linked to a vulnerability finding on an asset."""
+    """List Jira tickets linked to a vuln on an asset."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6509,7 +6667,7 @@ def _cmd_query_vulnerability_lite(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
     id: Optional[str] = typer.Option(None, '--id', help='str (required) [required]'),
 ) -> None:
-    """Retrieve a single vulnerability with preferred CVSS v3.1 score only — drops full v2/v4 impact blocks, exploit references, and problem type details."""
+    """Get one vuln with preferred CVSS v3.1 only."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6547,7 +6705,7 @@ def _cmd_query_vulnerability_remediation_summary(
     yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
 
 ) -> None:
-    """Get org-wide counts of applied VEX remediation statuses, grouped into the overview remediation-status buckets."""
+    """Get org-wide counts of applied VEX statuses."""
     from pydantic import ValidationError
     from ..errors import format_validation_error
     from ..runtime import ExitCode
@@ -6577,167 +6735,171 @@ def _cmd_query_vulnerability_remediation_summary(
 
 
 def register_api_commands(api_app) -> None:
-    api_app.command(name='add-asset-groups-to-assets', help='Associate a list of existing asset groups with selected assets.')(_cmd_mutation_add_asset_groups_to_assets)
-    api_app.command(name='add-assets-to-asset-group', help='Add specified assets to an existing asset group for organization.')(_cmd_mutation_add_assets_to_asset_group)
-    api_app.command(name='add-security-group-member', help='Add a user as a member of an RBAC security group.')(_cmd_mutation_add_security_group_member)
-    api_app.command(name='asset-add-dependency', help="Manually inject a missing dependency component into an asset's inventory.")(_cmd_mutation_asset_add_dependency)
-    api_app.command(name='asset-modify-dependency', help='Update metadata or details for a manually added asset dependency.')(_cmd_mutation_asset_modify_dependency)
-    api_app.command(name='asset-remove-dependencies', help='Remove specific dependencies from the component list of an asset.')(_cmd_mutation_asset_remove_dependencies)
-    api_app.command(name='asset-submit', help='Upload firmware or SBOMs with metadata, group assignments, and CPEs.')(_cmd_mutation_asset_submit)
-    api_app.command(name='asset-update', help='Modify metadata such as name, vendor, or version for assets.')(_cmd_mutation_asset_update)
-    api_app.command(name='bulk-delete-ac-rs', help='Delete multiple access control records in one call; already-deleted records are treated as success.')(_cmd_mutation_bulk_delete_ac_rs)
-    api_app.command(name='create-acr', help='Create an access control record granting a user or security group a role on a resource.')(_cmd_mutation_create_acr)
-    api_app.command(name='create-asset-comparison-report', help='Create a new comparison report to diff vulnerabilities and components between two assets.')(_cmd_mutation_create_asset_comparison_report)
-    api_app.command(name='create-asset-group', help='Create a new named group to organize and track assets.')(_cmd_mutation_create_asset_group)
-    api_app.command(name='create-custom-role', help='Create an org-scoped custom role with a chosen set of permissions.')(_cmd_mutation_create_custom_role)
-    api_app.command(name='create-notification-configuration', help='Create a notification configuration defining channel, scopes, and triggers for alerts.')(_cmd_mutation_create_notification_configuration)
-    api_app.command(name='create-security-group', help='Create a new RBAC security group in the current organization.')(_cmd_mutation_create_security_group)
-    api_app.command(name='delete-acr', help='Delete a single access control record, revoking the associated grant.')(_cmd_mutation_delete_acr)
-    api_app.command(name='delete-asset-comparison-report', help='Permanently delete an asset comparison report by its ID.')(_cmd_mutation_delete_asset_comparison_report)
-    api_app.command(name='delete-asset-group', help='Permanently remove an asset group while keeping contained assets intact.')(_cmd_mutation_delete_asset_group)
-    api_app.command(name='delete-custom-role', help='Permanently delete a custom role from the organization.')(_cmd_mutation_delete_custom_role)
-    api_app.command(name='delete-notification-configuration', help='Permanently delete a notification configuration by its ID.')(_cmd_mutation_delete_notification_configuration)
-    api_app.command(name='delete-security-group', help='Permanently delete a security group from the organization.')(_cmd_mutation_delete_security_group)
-    api_app.command(name='invite-user', help='Invite a user to the organization with a role and optional security group memberships.')(_cmd_mutation_invite_user)
-    api_app.command(name='jira-integration-add-connected-space', help="Add a Jira space to the integration's connected spaces list.")(_cmd_mutation_jira_integration_add_connected_space)
-    api_app.command(name='jira-integration-create-issue', help='Create a Jira issue and optionally link it to a vulnerability finding.')(_cmd_mutation_jira_integration_create_issue)
-    api_app.command(name='jira-integration-delete-connected-space', help='Remove a connected Jira space from the integration.')(_cmd_mutation_jira_integration_delete_connected_space)
-    api_app.command(name='jira-integration-disconnect', help='Disconnect the Jira integration from the organization.')(_cmd_mutation_jira_integration_disconnect)
-    api_app.command(name='jira-integration-reconnect', help='Re-enable a Jira installation when the OAuth and app install steps are already complete.')(_cmd_mutation_jira_integration_reconnect)
-    api_app.command(name='jira-integration-setup-action', help='Perform an action in the Jira integration setup or reconnect flow.')(_cmd_mutation_jira_integration_setup_action)
-    api_app.command(name='jira-integration-test-connection', help='Verify that the Jira integration connection is healthy.')(_cmd_mutation_jira_integration_test_connection)
-    api_app.command(name='notify-notification-configuration', help='Send a test notification using an existing notification configuration.')(_cmd_mutation_notify_notification_configuration)
-    api_app.command(name='remediate-all-asset-vulnerabilities', help='Apply a remediation status to all vulnerabilities matching specific filters.')(_cmd_mutation_remediate_all_asset_vulnerabilities)
-    api_app.command(name='remediate-asset-vulnerabilities', help='Bulk apply VEX remediation status to multiple vulnerabilities on assets.')(_cmd_mutation_remediate_asset_vulnerabilities)
-    api_app.command(name='remediate-asset-vulnerability', help='Update remediation status and justification for a single asset vulnerability.')(_cmd_mutation_remediate_asset_vulnerability)
-    api_app.command(name='remediate-certificates', help='Update remediation status and notes for certificate issues found in assets.')(_cmd_mutation_remediate_certificates)
-    api_app.command(name='remediate-license-issues', help='Update status and add notes to resolve identified license issues.')(_cmd_mutation_remediate_license_issues)
-    api_app.command(name='remediate-private-keys', help='Apply remediation status to private key exposures discovered in assets.')(_cmd_mutation_remediate_private_keys)
-    api_app.command(name='remediate-public-keys', help='Update remediation status for public key issues identified in assets.')(_cmd_mutation_remediate_public_keys)
-    api_app.command(name='remediate-secrets', help='Apply remediation status and justification to exposed secrets in assets.')(_cmd_mutation_remediate_secrets)
-    api_app.command(name='remove-all-asset-groups-from-assets', help='Disassociate all asset groups from a specified list of assets.')(_cmd_mutation_remove_all_asset_groups_from_assets)
-    api_app.command(name='remove-assets-from-asset-group', help='Remove selected assets from a specific asset group container configuration.')(_cmd_mutation_remove_assets_from_asset_group)
-    api_app.command(name='remove-org-user', help='Permanently remove a user from the current organization.')(_cmd_mutation_remove_org_user)
+    api_app.command(name='add-asset-groups-to-assets', help='Attach asset groups to one or more assets.')(_cmd_mutation_add_asset_groups_to_assets)
+    api_app.command(name='add-assets-to-asset-group', help='Add assets to an existing asset group.')(_cmd_mutation_add_assets_to_asset_group)
+    api_app.command(name='add-security-group-member', help='Add a user to an RBAC security group.')(_cmd_mutation_add_security_group_member)
+    api_app.command(name='asset-add-dependency', help='Add a manual dependency component to an asset.')(_cmd_mutation_asset_add_dependency)
+    api_app.command(name='asset-modify-dependency', help='Update a manually added asset dependency.')(_cmd_mutation_asset_modify_dependency)
+    api_app.command(name='asset-remove-dependencies', help='Remove selected dependencies from an asset.')(_cmd_mutation_asset_remove_dependencies)
+    api_app.command(name='asset-submit', help='Submit firmware or an SBOM for analysis.')(_cmd_mutation_asset_submit)
+    api_app.command(name='asset-update', help='Update asset metadata such as name, vendor, or version.')(_cmd_mutation_asset_update)
+    api_app.command(name='bulk-delete-ac-rs', help='Delete many access control records; missing ones count as success.')(_cmd_mutation_bulk_delete_ac_rs)
+    api_app.command(name='create-acr', help='Grant a user or security group a role on a resource.')(_cmd_mutation_create_acr)
+    api_app.command(name='create-asset-comparison-report', help='Start a comparison report between two assets.')(_cmd_mutation_create_asset_comparison_report)
+    api_app.command(name='create-asset-group', help='Create a named asset group.')(_cmd_mutation_create_asset_group)
+    api_app.command(name='create-custom-role', help='Create an org-scoped custom role with chosen permissions.')(_cmd_mutation_create_custom_role)
+    api_app.command(name='create-notification-configuration', help='Create a notification channel, scopes, and triggers.')(_cmd_mutation_create_notification_configuration)
+    api_app.command(name='create-security-group', help='Create an RBAC security group in the current org.')(_cmd_mutation_create_security_group)
+    api_app.command(name='delete-acr', help='Delete one access control record.')(_cmd_mutation_delete_acr)
+    api_app.command(name='delete-asset-comparison-report', help='Delete an asset comparison report by ID.')(_cmd_mutation_delete_asset_comparison_report)
+    api_app.command(name='delete-asset-group', help='Delete an asset group; assets stay in the org.')(_cmd_mutation_delete_asset_group)
+    api_app.command(name='delete-custom-role', help='Delete a custom role from the organization.')(_cmd_mutation_delete_custom_role)
+    api_app.command(name='delete-notification-configuration', help='Delete a notification configuration by ID.')(_cmd_mutation_delete_notification_configuration)
+    api_app.command(name='delete-security-group', help='Delete a security group from the organization.')(_cmd_mutation_delete_security_group)
+    api_app.command(name='invite-user', help='Invite a user with a role and optional security groups.')(_cmd_mutation_invite_user)
+    api_app.command(name='jira-integration-add-connected-space', help='Connect a Jira space to the integration.')(_cmd_mutation_jira_integration_add_connected_space)
+    api_app.command(name='jira-integration-create-issue', help='Create a Jira issue, optionally linked to a finding.')(_cmd_mutation_jira_integration_create_issue)
+    api_app.command(name='jira-integration-delete-connected-space', help='Disconnect a Jira space from the integration.')(_cmd_mutation_jira_integration_delete_connected_space)
+    api_app.command(name='jira-integration-disconnect', help='Disconnect the Jira integration from the org.')(_cmd_mutation_jira_integration_disconnect)
+    api_app.command(name='jira-integration-reconnect', help='Re-enable Jira when OAuth and app install are already done.')(_cmd_mutation_jira_integration_reconnect)
+    api_app.command(name='jira-integration-set-status-mapping-auto-sync', help='Enable or disable auto-sync for Jira status mappings.')(_cmd_mutation_jira_integration_set_status_mapping_auto_sync)
+    api_app.command(name='jira-integration-setup-action', help='Run a step in the Jira setup or reconnect flow.')(_cmd_mutation_jira_integration_setup_action)
+    api_app.command(name='jira-integration-test-connection', help='Check that the Jira integration connection is healthy.')(_cmd_mutation_jira_integration_test_connection)
+    api_app.command(name='notify-notification-configuration', help='Send a test notification for a configuration.')(_cmd_mutation_notify_notification_configuration)
+    api_app.command(name='remediate-all-asset-vulnerabilities', help='Apply a VEX status to every vuln matching a filter.')(_cmd_mutation_remediate_all_asset_vulnerabilities)
+    api_app.command(name='remediate-asset-vulnerabilities', help='Bulk-apply VEX status to selected asset vulns.')(_cmd_mutation_remediate_asset_vulnerabilities)
+    api_app.command(name='remediate-asset-vulnerability', help='Set VEX status and justification for one asset vuln.')(_cmd_mutation_remediate_asset_vulnerability)
+    api_app.command(name='remediate-certificates', help='Set remediation status and notes on certificate findings.')(_cmd_mutation_remediate_certificates)
+    api_app.command(name='remediate-license-issues', help='Set status and notes on license compliance issues.')(_cmd_mutation_remediate_license_issues)
+    api_app.command(name='remediate-private-keys', help='Set remediation status on private key findings.')(_cmd_mutation_remediate_private_keys)
+    api_app.command(name='remediate-public-keys', help='Set remediation status on public key findings.')(_cmd_mutation_remediate_public_keys)
+    api_app.command(name='remediate-secrets', help='Set remediation status and justification on secrets.')(_cmd_mutation_remediate_secrets)
+    api_app.command(name='remove-all-asset-groups-from-assets', help='Detach every asset group from the given assets.')(_cmd_mutation_remove_all_asset_groups_from_assets)
+    api_app.command(name='remove-assets-from-asset-group', help='Remove selected assets from an asset group.')(_cmd_mutation_remove_assets_from_asset_group)
+    api_app.command(name='remove-org-user', help='Remove a user from the current organization.')(_cmd_mutation_remove_org_user)
     api_app.command(name='remove-security-group-member', help='Remove a user from an RBAC security group.')(_cmd_mutation_remove_security_group_member)
-    api_app.command(name='replace-acr', help='Replace an access control record with a new grant in one atomic delete-and-create operation.')(_cmd_mutation_replace_acr)
-    api_app.command(name='set-asset-groups-to-asset', help='Replace all current group associations for an asset with new ones.')(_cmd_mutation_set_asset_groups_to_asset)
-    api_app.command(name='set-assets-to-asset-group', help='Overwrite the member list of an asset group with new assets.')(_cmd_mutation_set_assets_to_asset_group)
-    api_app.command(name='set-org-user-status', help='Enable or disable a user account within the current organization.')(_cmd_mutation_set_org_user_status)
-    api_app.command(name='submit-rise-ai-analysis', help='Request a RISE AI analysis for an eligible asset to generate insights.')(_cmd_mutation_submit_rise_ai_analysis)
-    api_app.command(name='update-asset-group', help='Rename or update the description of an existing asset group.')(_cmd_mutation_update_asset_group)
-    api_app.command(name='update-custom-role', help='Update the name, description, or permissions of an existing custom role.')(_cmd_mutation_update_custom_role)
-    api_app.command(name='update-notification-configuration', help='Update channel, scopes, triggers, or status for an existing notification configuration.')(_cmd_mutation_update_notification_configuration)
-    api_app.command(name='update-org-level-settings', help='Configure global organization settings such as idle session timeout duration.')(_cmd_mutation_update_org_level_settings)
-    api_app.command(name='update-security-group', help='Update the name or description of an existing security group.')(_cmd_mutation_update_security_group)
-    api_app.command(name='user-action', help='Perform administrative actions like enabling or disabling specific user accounts.')(_cmd_mutation_user_action)
-    api_app.command(name='user-delete', help='Permanently delete a user account and remove their access rights.')(_cmd_mutation_user_delete)
-    api_app.command(name='user-invite', help='Invite a new user to the organization with a specific role.')(_cmd_mutation_user_invite)
-    api_app.command(name='user-remove', help='Remove a user from the organization without deleting their account.')(_cmd_mutation_user_remove)
-    api_app.command(name='user-reset-password', help='Trigger a password reset email for a specific user account.')(_cmd_mutation_user_reset_password)
-    api_app.command(name='user-set-user-role', help='Assign a new permission role like Owner or Operator to users.')(_cmd_mutation_user_set_user_role)
-    api_app.command(name='user-update-user', help='Modify user profile information including name and contact email details.')(_cmd_mutation_user_update_user)
-    api_app.command(name='activity', help='Retrieve a comprehensive log of actions and events for assets.')(_cmd_query_activity)
-    api_app.command(name='analytics', help='Access high-level risk data and charts for organization dashboards.')(_cmd_query_analytics)
-    api_app.command(name='asset', help='Retrieve detailed metadata and risk information for a single asset.')(_cmd_query_asset)
-    api_app.command(name='asset-group-analytics', help='View risk metrics and exploit counts for a specific group.')(_cmd_query_asset_group_analytics)
-    api_app.command(name='asset-group-members', help='List all assets associated with a specific asset group container.')(_cmd_query_asset_group_members)
-    api_app.command(name='asset-groups', help='Retrieve a detailed paginated list of all asset groups available.')(_cmd_query_asset_groups)
-    api_app.command(name='asset-status', help='Check if an asset is currently processing or has finished.')(_cmd_query_asset_status)
-    api_app.command(name='asset-upload', help='Obtain a secure pre-signed URL to upload files for analysis.')(_cmd_query_asset_upload)
-    api_app.command(name='asset-vulnerability-remediation', help='Retrieve current VEX status and justification for a specific vulnerability.')(_cmd_query_asset_vulnerability_remediation)
-    api_app.command(name='assets-overview', help='View high-level risk and threat exposure metrics for multiple assets.')(_cmd_query_assets_overview)
-    api_app.command(name='assets-relay', help='Retrieve a paginated, sortable list of assets with filtering options.')(_cmd_query_assets_relay)
-    api_app.command(name='assets-relay-lite', help='Retrieve assets with trimmed fields — keeps identity, status, risk score, and analytic rollups; drops filesystems, SHA-256, exploit trees, and credential counts.')(_cmd_query_assets_relay_lite)
-    api_app.command(name='assets-relay-summary', help='Retrieve minimal asset data — ID, name, and analytic counts only — for fast org-wide sweeps to decide which assets need deeper queries.')(_cmd_query_assets_relay_summary)
-    api_app.command(name='binary-protections', help='List security hardening details for binaries found within the asset.')(_cmd_query_binary_protections)
-    api_app.command(name='binary-protections-summary', help='Get aggregated counts of binary hardening features like NX or PIE.')(_cmd_query_binary_protections_summary)
-    api_app.command(name='caas-availability', help='Check for the availability of the RISE AI analysis report.')(_cmd_query_caas_availability)
-    api_app.command(name='certificate-external-filters', help='Retrieve available filter options for certificate queries.')(_cmd_query_certificate_external_filters)
-    api_app.command(name='certificates', help='List X.509 certificates and validity status found in the asset.')(_cmd_query_certificates)
-    api_app.command(name='credentials', help='Identify user accounts and password hashes discovered within the filesystem.')(_cmd_query_credentials)
-    api_app.command(name='dependencies', help='List all software components and libraries identified in the asset.')(_cmd_query_dependencies)
-    api_app.command(name='dependencies-lite', help='List dependencies with trimmed fields — keeps identity, version, license, purls, and analytic rollups; drops file metadata, digests, and nested correlation details.')(_cmd_query_dependencies_lite)
-    api_app.command(name='dependency-known-exploits', help='Check if specific dependencies are linked to known public exploits.')(_cmd_query_dependency_known_exploits)
-    api_app.command(name='detailed-vulnerabilities', help='Retrieve in-depth vulnerability data including descriptions and CVSS vector strings.')(_cmd_query_detailed_vulnerabilities)
-    api_app.command(name='detailed-vulnerabilities-lite', help='Retrieve vulnerability descriptions with preferred CVSS v3.1 scores only — drops full v2/v4 impact blocks, exploit timelines, references, and problem type details.')(_cmd_query_detailed_vulnerabilities_lite)
-    api_app.command(name='download-extracted-firmware', help='Generate a URL to download the full unpacked file system.')(_cmd_query_download_extracted_firmware)
-    api_app.command(name='download-file', help='Create a secure link to download a specific individual file.')(_cmd_query_download_file)
-    api_app.command(name='download-file-list', help='Generate a URL to download a list of all files.')(_cmd_query_download_file_list)
-    api_app.command(name='download-firmware', help='Generate a link to download the original uploaded firmware image.')(_cmd_query_download_firmware)
-    api_app.command(name='get-ai-model-data', help='Retrieve configuration and metadata for a specific AI model integration.')(_cmd_query_get_ai_model_data)
-    api_app.command(name='get-asset-comparison-report', help='Retrieve a completed asset comparison report including vulnerability, component, and summary diffs.')(_cmd_query_get_asset_comparison_report)
-    api_app.command(name='get-certificate-reachability', help='Determine whether discovered certificates are reachable via executable scripts or system paths.')(_cmd_query_get_certificate_reachability)
-    api_app.command(name='get-dependency-reachability', help='Determine whether a dependency is reachable via executable scripts or system paths.')(_cmd_query_get_dependency_reachability)
-    api_app.command(name='get-my-permissions', help='Retrieve the flat union of permission IDs the calling user holds across all their access grants.')(_cmd_query_get_my_permissions)
-    api_app.command(name='get-resource-permissions', help="Retrieve the caller's effective permissions on a specific resource, defaulting to the organization level.")(_cmd_query_get_resource_permissions)
-    api_app.command(name='get-role', help='Retrieve a single RBAC role by its ID.')(_cmd_query_get_role)
-    api_app.command(name='get-role-delete-impact', help='Preview which users would retain or lose platform access if a custom role were deleted.')(_cmd_query_get_role_delete_impact)
-    api_app.command(name='get-secret-reachability', help='Determine whether discovered secrets are reachable via executable scripts or system paths.')(_cmd_query_get_secret_reachability)
-    api_app.command(name='get-security-group-delete-impact', help='Preview which members would retain or lose platform access if a security group were deleted.')(_cmd_query_get_security_group_delete_impact)
-    api_app.command(name='get-vuln-reachability', help='Determine if a vulnerability can be executed via system paths.')(_cmd_query_get_vuln_reachability)
-    api_app.command(name='grouped-dependencies', help='View dependencies aggregated by vendor, license, or specific component type.')(_cmd_query_grouped_dependencies)
-    api_app.command(name='hashes', help='List cryptographic hashes for files identified within the asset filesystem.')(_cmd_query_hashes)
-    api_app.command(name='identified-components-preview', help='Return organization-wide component counts filtered by enabled identification methods, with before/after deltas when verification settings change.')(_cmd_query_identified_components_preview)
-    api_app.command(name='jira-integration', help='Retrieve the Jira integration summary and connection health details.')(_cmd_query_jira_integration)
-    api_app.command(name='jira-integration-setup', help='Retrieve the current state of the Jira integration setup wizard.')(_cmd_query_jira_integration_setup)
-    api_app.command(name='jira-project-components', help='List the Jira project components available for a connected space.')(_cmd_query_jira_project_components)
-    api_app.command(name='jira-project-labels', help='Search the Jira labels available for a connected space; labels are instance-global.')(_cmd_query_jira_project_labels)
-    api_app.command(name='jira-project-sprints', help='Search the Jira sprints available for a connected space.')(_cmd_query_jira_project_sprints)
-    api_app.command(name='jira-project-teams', help='Search the Atlassian Teams available for a connected Jira space.')(_cmd_query_jira_project_teams)
-    api_app.command(name='jira-project-users', help='Search the assignable Jira users for a connected space.')(_cmd_query_jira_project_users)
-    api_app.command(name='jira-project-versions', help='List the Jira project versions available for a connected space.')(_cmd_query_jira_project_versions)
-    api_app.command(name='jira-space-issue-fields', help='Retrieve the creatable fields, including priority options, for a Jira space and issue type.')(_cmd_query_jira_space_issue_fields)
-    api_app.command(name='jira-space-issue-types', help='Retrieve the issue types available for a connected Jira space.')(_cmd_query_jira_space_issue_types)
-    api_app.command(name='license', help='Retrieve detailed information for a specific software license.')(_cmd_query_license)
-    api_app.command(name='license-issue', help='Get details about a specific license compliance issue.')(_cmd_query_license_issue)
-    api_app.command(name='license-issues', help='List license compliance issues identified across asset components.')(_cmd_query_license_issues)
-    api_app.command(name='license-issues-external-filters', help='Retrieve available filter options for license issue queries.')(_cmd_query_license_issues_external_filters)
-    api_app.command(name='licenses-spdx-ids', help='List available SPDX license identifiers for filtering and reference.')(_cmd_query_licenses_spdx_ids)
-    api_app.command(name='list-ac-rs', help='List access control records for the organization, optionally filtered to a specific user.')(_cmd_query_list_ac_rs)
-    api_app.command(name='list-ai-providers', help='List available AI provider integrations and their current status.')(_cmd_query_list_ai_providers)
-    api_app.command(name='list-asset-comparison-reports', help='List all asset comparison reports with pagination, filtering, and sorting.')(_cmd_query_list_asset_comparison_reports)
-    api_app.command(name='list-asset-correlations', help='Retrieve cross-asset correlation data linking shared components and vulnerabilities.')(_cmd_query_list_asset_correlations)
-    api_app.command(name='list-asset-crypto-libraries', help='List cryptographic libraries and algorithms detected within an asset.')(_cmd_query_list_asset_crypto_libraries)
-    api_app.command(name='list-entity-assets', help='List the assets accessible to a specific user or security group.')(_cmd_query_list_entity_assets)
-    api_app.command(name='list-my-ac-rs', help='List the access control records that apply to the calling user.')(_cmd_query_list_my_ac_rs)
-    api_app.command(name='list-my-security-groups', help='List the security groups the calling user belongs to.')(_cmd_query_list_my_security_groups)
-    api_app.command(name='list-notification-configurations', help='List all notification configurations with their channels, scopes, and triggers.')(_cmd_query_list_notification_configurations)
-    api_app.command(name='list-notification-logs', help='Retrieve a paginated log of notification delivery events and their statuses.')(_cmd_query_list_notification_logs)
-    api_app.command(name='list-org-users', help='List all users in the organization with their security groups and accessible asset counts.')(_cmd_query_list_org_users)
-    api_app.command(name='list-permissions', help='Retrieve the full permission catalog available for building custom roles.')(_cmd_query_list_permissions)
-    api_app.command(name='list-roles', help='List all RBAC roles defined for the current organization.')(_cmd_query_list_roles)
-    api_app.command(name='list-security-group-members', help='List the users who are members of a specific security group.')(_cmd_query_list_security_group_members)
-    api_app.command(name='list-security-groups', help='List all RBAC security groups defined for the current organization.')(_cmd_query_list_security_groups)
-    api_app.command(name='match-vulnerabilities', help='Find specific vulnerabilities matching a provided component identifier or package.')(_cmd_query_match_vulnerabilities)
-    api_app.command(name='me', help="Retrieve the authenticated user's profile including their editable display name.")(_cmd_query_me)
-    api_app.command(name='metrics', help='View organization-wide statistics on asset counts, processing, and risk.')(_cmd_query_metrics)
-    api_app.command(name='misconfigurations', help='List failed security checks and configuration risks found in assets.')(_cmd_query_misconfigurations)
-    api_app.command(name='misconfigurations-lite', help='List misconfigurations with trimmed fields — keeps check ID, name, severity, result, and correlation count; drops nested correlation objects.')(_cmd_query_misconfigurations_lite)
-    api_app.command(name='org-level-information', help='Retrieve organization-level metadata such as last-updated time, optionally scoped by asset groups.')(_cmd_query_org_level_information)
-    api_app.command(name='org-level-settings', help='Check how the tenant organization is configured.')(_cmd_query_org_level_settings)
-    api_app.command(name='package-dependencies-by-id', help='View the dependency tree hierarchy for a specific software package.')(_cmd_query_package_dependencies_by_id)
-    api_app.command(name='private-key-external-filters', help='Retrieve available filter options for private key queries.')(_cmd_query_private_key_external_filters)
-    api_app.command(name='private-keys', help='Detect private cryptographic keys stored insecurely on the asset filesystem.')(_cmd_query_private_keys)
-    api_app.command(name='public-key-external-filters', help='Retrieve available filter options for public key queries.')(_cmd_query_public_key_external_filters)
-    api_app.command(name='public-keys', help="List public cryptographic keys found within the asset's file system.")(_cmd_query_public_keys)
-    api_app.command(name='remediated-vulnerabilities-by-asset', help='List remediated vulnerabilities grouped by asset for a single remediation-status bucket, with pagination, filtering, and sorting.')(_cmd_query_remediated_vulnerabilities_by_asset)
-    api_app.command(name='rise-ai-analysis-data', help='Check for the contents of the RISE AI analysis report.')(_cmd_query_rise_ai_analysis_data)
-    api_app.command(name='rise-ai-availability', help='Check eligibility and status of RISE AI analysis for an asset.')(_cmd_query_rise_ai_availability)
-    api_app.command(name='search', help='Execute keyword searches across all artifacts and files in organization.')(_cmd_query_search)
-    api_app.command(name='secret', help='Retrieve detailed information about a specific discovered secret.')(_cmd_query_secret)
-    api_app.command(name='secret-categories-summary', help='Get aggregated counts of secrets grouped by category type.')(_cmd_query_secret_categories_summary)
-    api_app.command(name='secret-status-count', help='Retrieve counts of secrets grouped by remediation status.')(_cmd_query_secret_status_count)
-    api_app.command(name='secret-types-and-count', help='List secret types discovered with their occurrence counts.')(_cmd_query_secret_types_and_count)
-    api_app.command(name='secrets', help='List all secrets and sensitive data discovered within an asset.')(_cmd_query_secrets)
-    api_app.command(name='secrets-summary', help='Get a high-level overview of secret findings and exposure metrics.')(_cmd_query_secrets_summary)
-    api_app.command(name='sift', help='Perform fuzzy hash matching to find similar code or files.')(_cmd_query_sift)
-    api_app.command(name='user-orgs', help='List all organizations the current user is authorized to access.')(_cmd_query_user_orgs)
-    api_app.command(name='users', help='Retrieve a detailed list of all users and their assigned roles.')(_cmd_query_users)
-    api_app.command(name='vulnerabilities', help='List CVEs and associated risks for components in an asset.')(_cmd_query_vulnerabilities)
-    api_app.command(name='vulnerabilities-lite', help='List vulnerabilities with trimmed fields — keeps CVE, severity, CVSS/EPSS scores, fix versions, and correlation count; drops nested correlations and remediation details.')(_cmd_query_vulnerabilities_lite)
-    api_app.command(name='vulnerabilities-overview', help='Get a summary of vulnerability counts and severity across assets.')(_cmd_query_vulnerabilities_overview)
-    api_app.command(name='vulnerability', help='Retrieve detailed metadata, scores, and descriptions for a specific vulnerability.')(_cmd_query_vulnerability)
-    api_app.command(name='vulnerability-external-filters', help='Count vulnerabilities matching external threat feeds like CISA or botnets.')(_cmd_query_vulnerability_external_filters)
-    api_app.command(name='vulnerability-jira-tickets', help='Retrieve the Jira tickets linked to a vulnerability finding on an asset.')(_cmd_query_vulnerability_jira_tickets)
-    api_app.command(name='vulnerability-lite', help='Retrieve a single vulnerability with preferred CVSS v3.1 score only — drops full v2/v4 impact blocks, exploit references, and problem type details.')(_cmd_query_vulnerability_lite)
-    api_app.command(name='vulnerability-remediation-summary', help='Get org-wide counts of applied VEX remediation statuses, grouped into the overview remediation-status buckets.')(_cmd_query_vulnerability_remediation_summary)
+    api_app.command(name='replace-acr', help='Replace an access control record in one delete-and-create.')(_cmd_mutation_replace_acr)
+    api_app.command(name='save-jira-space-workflow-config', help='Save status mappings and workflow config for a Jira space.')(_cmd_mutation_save_jira_space_workflow_config)
+    api_app.command(name='set-asset-groups-to-asset', help="Replace an asset's group memberships.")(_cmd_mutation_set_asset_groups_to_asset)
+    api_app.command(name='set-assets-to-asset-group', help="Replace an asset group's member list.")(_cmd_mutation_set_assets_to_asset_group)
+    api_app.command(name='set-org-user-status', help='Enable or disable a user in the current org.')(_cmd_mutation_set_org_user_status)
+    api_app.command(name='submit-rise-ai-analysis', help='Request a RiseAI analysis for an eligible asset.')(_cmd_mutation_submit_rise_ai_analysis)
+    api_app.command(name='update-asset-group', help="Rename or update an asset group's description.")(_cmd_mutation_update_asset_group)
+    api_app.command(name='update-custom-role', help="Update a custom role's name, description, or permissions.")(_cmd_mutation_update_custom_role)
+    api_app.command(name='update-notification-configuration', help="Update a notification configuration's channel or triggers.")(_cmd_mutation_update_notification_configuration)
+    api_app.command(name='update-org-level-settings', help='Update org settings such as idle session timeout.')(_cmd_mutation_update_org_level_settings)
+    api_app.command(name='update-security-group', help="Update a security group's name or description.")(_cmd_mutation_update_security_group)
+    api_app.command(name='user-action', help='Enable or disable a user account.')(_cmd_mutation_user_action)
+    api_app.command(name='user-delete', help='Delete a user account and revoke access.')(_cmd_mutation_user_delete)
+    api_app.command(name='user-invite', help='Invite a user to the organization with a role.')(_cmd_mutation_user_invite)
+    api_app.command(name='user-remove', help='Remove a user from the org without deleting the account.')(_cmd_mutation_user_remove)
+    api_app.command(name='user-reset-password', help='Send a password-reset email to a user.')(_cmd_mutation_user_reset_password)
+    api_app.command(name='user-set-user-role', help='Assign a role such as Owner or Operator.')(_cmd_mutation_user_set_user_role)
+    api_app.command(name='user-update-user', help="Update a user's name or email.")(_cmd_mutation_user_update_user)
+    api_app.command(name='activity', help='List activity-log events for an asset.')(_cmd_query_activity)
+    api_app.command(name='analytics', help='Get org dashboard risk metrics and chart data.')(_cmd_query_analytics)
+    api_app.command(name='asset', help='Get metadata and risk for one asset.')(_cmd_query_asset)
+    api_app.command(name='asset-group-analytics', help='Get risk metrics for one asset group.')(_cmd_query_asset_group_analytics)
+    api_app.command(name='asset-group-members', help='List assets in an asset group.')(_cmd_query_asset_group_members)
+    api_app.command(name='asset-groups', help='List asset groups with pagination and filters.')(_cmd_query_asset_groups)
+    api_app.command(name='asset-status', help='Check whether an asset is still processing.')(_cmd_query_asset_status)
+    api_app.command(name='asset-upload', help='Get a pre-signed URL to upload a file for analysis.')(_cmd_query_asset_upload)
+    api_app.command(name='asset-vulnerability-remediation', help='Get VEX status and justification for one vuln on an asset.')(_cmd_query_asset_vulnerability_remediation)
+    api_app.command(name='assets-overview', help='Get risk and threat rollups across assets.')(_cmd_query_assets_overview)
+    api_app.command(name='assets-relay', help='List assets with full nested fields (paginated).')(_cmd_query_assets_relay)
+    api_app.command(name='assets-relay-lite', help='List assets with identity, status, risk, and analytic rollups.')(_cmd_query_assets_relay_lite)
+    api_app.command(name='assets-relay-summary', help='List assets as id, name, and analytic counts only.')(_cmd_query_assets_relay_summary)
+    api_app.command(name='binary-protections', help='List binary hardening details for an asset.')(_cmd_query_binary_protections)
+    api_app.command(name='binary-protections-summary', help='Get counts of hardening features such as NX or PIE.')(_cmd_query_binary_protections_summary)
+    api_app.command(name='caas-availability', help='Check whether a RiseAI analysis report is available.')(_cmd_query_caas_availability)
+    api_app.command(name='certificate-external-filters', help='List filter options for certificate queries.')(_cmd_query_certificate_external_filters)
+    api_app.command(name='certificates', help='List X.509 certificates found in an asset.')(_cmd_query_certificates)
+    api_app.command(name='credentials', help='List accounts and password hashes found in an asset.')(_cmd_query_credentials)
+    api_app.command(name='dependencies', help='List software components identified in an asset.')(_cmd_query_dependencies)
+    api_app.command(name='dependencies-lite', help='List components with identity, version, license, and rollups.')(_cmd_query_dependencies_lite)
+    api_app.command(name='dependency-known-exploits', help='Check whether dependencies link to known public exploits.')(_cmd_query_dependency_known_exploits)
+    api_app.command(name='detailed-vulnerabilities', help='List vulns with descriptions and full CVSS vectors.')(_cmd_query_detailed_vulnerabilities)
+    api_app.command(name='detailed-vulnerabilities-lite', help='List vulns with description and preferred CVSS v3.1 only.')(_cmd_query_detailed_vulnerabilities_lite)
+    api_app.command(name='download-extracted-firmware', help='Get a URL to download the unpacked filesystem.')(_cmd_query_download_extracted_firmware)
+    api_app.command(name='download-file', help='Get a URL to download one extracted file.')(_cmd_query_download_file)
+    api_app.command(name='download-file-list', help='Get a URL to download the asset file listing.')(_cmd_query_download_file_list)
+    api_app.command(name='download-firmware', help='Get a URL to download the original uploaded image.')(_cmd_query_download_firmware)
+    api_app.command(name='get-ai-model-data', help='Get config and metadata for an AI model integration.')(_cmd_query_get_ai_model_data)
+    api_app.command(name='get-asset-comparison-report', help='Get a finished asset comparison report.')(_cmd_query_get_asset_comparison_report)
+    api_app.command(name='get-certificate-reachability', help='Check whether certificates are reachable via paths or scripts.')(_cmd_query_get_certificate_reachability)
+    api_app.command(name='get-dependency-reachability', help='Check whether a dependency is reachable via paths or scripts.')(_cmd_query_get_dependency_reachability)
+    api_app.command(name='get-my-permissions', help='List permission IDs held by the calling user.')(_cmd_query_get_my_permissions)
+    api_app.command(name='get-resource-permissions', help="List the caller's effective permissions on a resource.")(_cmd_query_get_resource_permissions)
+    api_app.command(name='get-role', help='Get one RBAC role by ID.')(_cmd_query_get_role)
+    api_app.command(name='get-role-delete-impact', help='Preview who loses access if a custom role is deleted.')(_cmd_query_get_role_delete_impact)
+    api_app.command(name='get-secret-reachability', help='Check whether secrets are reachable via paths or scripts.')(_cmd_query_get_secret_reachability)
+    api_app.command(name='get-security-group-delete-impact', help='Preview who loses access if a security group is deleted.')(_cmd_query_get_security_group_delete_impact)
+    api_app.command(name='get-vuln-reachability', help='Check whether a vulnerability is reachable via system paths.')(_cmd_query_get_vuln_reachability)
+    api_app.command(name='grouped-dependencies', help='List dependencies grouped by vendor, license, or type.')(_cmd_query_grouped_dependencies)
+    api_app.command(name='hashes', help='List file hashes from an asset filesystem.')(_cmd_query_hashes)
+    api_app.command(name='identified-components-preview', help='Preview org-wide component counts under identification settings.')(_cmd_query_identified_components_preview)
+    api_app.command(name='jira-integration', help='Get Jira integration summary and connection health.')(_cmd_query_jira_integration)
+    api_app.command(name='jira-integration-setup', help='Get the current Jira setup-wizard state.')(_cmd_query_jira_integration_setup)
+    api_app.command(name='jira-project-components', help='List Jira project components for a connected space.')(_cmd_query_jira_project_components)
+    api_app.command(name='jira-project-labels', help='Search Jira labels for a connected space.')(_cmd_query_jira_project_labels)
+    api_app.command(name='jira-project-sprints', help='Search Jira sprints for a connected space.')(_cmd_query_jira_project_sprints)
+    api_app.command(name='jira-project-teams', help='Search Atlassian Teams for a connected Jira space.')(_cmd_query_jira_project_teams)
+    api_app.command(name='jira-project-users', help='Search assignable Jira users for a connected space.')(_cmd_query_jira_project_users)
+    api_app.command(name='jira-project-versions', help='List Jira project versions for a connected space.')(_cmd_query_jira_project_versions)
+    api_app.command(name='jira-space-issue-fields', help='List creatable fields for a Jira space and issue type.')(_cmd_query_jira_space_issue_fields)
+    api_app.command(name='jira-space-issue-types', help='List issue types for a connected Jira space.')(_cmd_query_jira_space_issue_types)
+    api_app.command(name='jira-space-workflow-config', help='Get status mappings and workflow config for a Jira space.')(_cmd_query_jira_space_workflow_config)
+    api_app.command(name='jira-status-mapping-problems', help='List status-mapping problems across connected Jira spaces.')(_cmd_query_jira_status_mapping_problems)
+    api_app.command(name='license', help='Get details for one software license.')(_cmd_query_license)
+    api_app.command(name='license-issue', help='Get details for one license compliance issue.')(_cmd_query_license_issue)
+    api_app.command(name='license-issues', help='List license compliance issues on an asset.')(_cmd_query_license_issues)
+    api_app.command(name='license-issues-external-filters', help='List filter options for license-issue queries.')(_cmd_query_license_issues_external_filters)
+    api_app.command(name='licenses-spdx-ids', help='List SPDX license identifiers.')(_cmd_query_licenses_spdx_ids)
+    api_app.command(name='list-ac-rs', help='List access control records, optionally for one user.')(_cmd_query_list_ac_rs)
+    api_app.command(name='list-ai-providers', help='List AI provider integrations and their status.')(_cmd_query_list_ai_providers)
+    api_app.command(name='list-asset-comparison-reports', help='List asset comparison reports with filters and sorting.')(_cmd_query_list_asset_comparison_reports)
+    api_app.command(name='list-asset-correlations', help='List cross-asset correlations for shared components or vulns.')(_cmd_query_list_asset_correlations)
+    api_app.command(name='list-asset-crypto-libraries', help='List crypto libraries detected in an asset.')(_cmd_query_list_asset_crypto_libraries)
+    api_app.command(name='list-entity-assets', help='List assets a user or security group can access.')(_cmd_query_list_entity_assets)
+    api_app.command(name='list-my-ac-rs', help='List access control records that apply to you.')(_cmd_query_list_my_ac_rs)
+    api_app.command(name='list-my-security-groups', help='List security groups you belong to.')(_cmd_query_list_my_security_groups)
+    api_app.command(name='list-notification-configurations', help='List notification configurations and their triggers.')(_cmd_query_list_notification_configurations)
+    api_app.command(name='list-notification-logs', help='List notification delivery events and statuses.')(_cmd_query_list_notification_logs)
+    api_app.command(name='list-org-users', help='List org users with groups and accessible asset counts.')(_cmd_query_list_org_users)
+    api_app.command(name='list-permissions', help='List the permission catalog for custom roles.')(_cmd_query_list_permissions)
+    api_app.command(name='list-roles', help='List RBAC roles for the current organization.')(_cmd_query_list_roles)
+    api_app.command(name='list-security-group-members', help='List members of a security group.')(_cmd_query_list_security_group_members)
+    api_app.command(name='list-security-groups', help='List RBAC security groups for the current org.')(_cmd_query_list_security_groups)
+    api_app.command(name='match-vulnerabilities', help='Find vulnerabilities matching a component or package.')(_cmd_query_match_vulnerabilities)
+    api_app.command(name='me', help="Get the authenticated user's profile.")(_cmd_query_me)
+    api_app.command(name='metrics', help='Get org-wide counts for assets, processing, and risk.')(_cmd_query_metrics)
+    api_app.command(name='misconfigurations', help='List failed security checks on an asset.')(_cmd_query_misconfigurations)
+    api_app.command(name='misconfigurations-lite', help='List misconfigs with check ID, severity, result, and counts.')(_cmd_query_misconfigurations_lite)
+    api_app.command(name='org-level-information', help='Get org metadata such as last-updated time.')(_cmd_query_org_level_information)
+    api_app.command(name='org-level-settings', help="Get the tenant organization's settings.")(_cmd_query_org_level_settings)
+    api_app.command(name='package-dependencies-by-id', help='Get the dependency tree for one package.')(_cmd_query_package_dependencies_by_id)
+    api_app.command(name='private-key-external-filters', help='List filter options for private-key queries.')(_cmd_query_private_key_external_filters)
+    api_app.command(name='private-keys', help='List private keys found in an asset filesystem.')(_cmd_query_private_keys)
+    api_app.command(name='public-key-external-filters', help='List filter options for public-key queries.')(_cmd_query_public_key_external_filters)
+    api_app.command(name='public-keys', help='List public keys found in an asset filesystem.')(_cmd_query_public_keys)
+    api_app.command(name='remediated-vulnerabilities-by-asset', help='List remediated vulns for one status bucket, by asset.')(_cmd_query_remediated_vulnerabilities_by_asset)
+    api_app.command(name='rise-ai-analysis-data', help='Get the contents of a RiseAI analysis report.')(_cmd_query_rise_ai_analysis_data)
+    api_app.command(name='rise-ai-availability', help='Check RiseAI eligibility and status for an asset.')(_cmd_query_rise_ai_availability)
+    api_app.command(name='search', help='Keyword-search artifacts and files across the org.')(_cmd_query_search)
+    api_app.command(name='secret', help='Get details for one discovered secret.')(_cmd_query_secret)
+    api_app.command(name='secret-categories-summary', help='Get secret counts grouped by category.')(_cmd_query_secret_categories_summary)
+    api_app.command(name='secret-status-count', help='Get secret counts grouped by remediation status.')(_cmd_query_secret_status_count)
+    api_app.command(name='secret-types-and-count', help='List secret types with occurrence counts.')(_cmd_query_secret_types_and_count)
+    api_app.command(name='secrets', help='List secrets discovered in an asset.')(_cmd_query_secrets)
+    api_app.command(name='secrets-summary', help='Get a summary of secret findings on an asset.')(_cmd_query_secrets_summary)
+    api_app.command(name='sift', help='Fuzzy-hash match to find similar code or files.')(_cmd_query_sift)
+    api_app.command(name='user-orgs', help='List organizations the current user can access.')(_cmd_query_user_orgs)
+    api_app.command(name='users', help='List users and their assigned roles.')(_cmd_query_users)
+    api_app.command(name='vulnerabilities', help='List CVEs on an asset with scores and fix versions.')(_cmd_query_vulnerabilities)
+    api_app.command(name='vulnerabilities-lite', help='List vulns with CVE, severity, scores, and counts.')(_cmd_query_vulnerabilities_lite)
+    api_app.command(name='vulnerabilities-overview', help='Get vulnerability counts and severity across assets.')(_cmd_query_vulnerabilities_overview)
+    api_app.command(name='vulnerability', help='Get scores and metadata for one vulnerability.')(_cmd_query_vulnerability)
+    api_app.command(name='vulnerability-external-filters', help='Count vulns matching threat feeds such as CISA KEV.')(_cmd_query_vulnerability_external_filters)
+    api_app.command(name='vulnerability-jira-tickets', help='List Jira tickets linked to a vuln on an asset.')(_cmd_query_vulnerability_jira_tickets)
+    api_app.command(name='vulnerability-lite', help='Get one vuln with preferred CVSS v3.1 only.')(_cmd_query_vulnerability_lite)
+    api_app.command(name='vulnerability-remediation-summary', help='Get org-wide counts of applied VEX statuses.')(_cmd_query_vulnerability_remediation_summary)

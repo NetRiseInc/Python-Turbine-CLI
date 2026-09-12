@@ -374,11 +374,28 @@ type Query {
   """Retrieves the Jira integration summary and connection health details."""
   jiraIntegration: JiraIntegration!
 
-  """Retrieves Jira tickets linked to a vulnerability finding on an asset."""
+  """
+  Retrieves Jira tickets linked to a vulnerability finding on an asset.
+  At most one ticket is created per finding; the list may still contain
+  older multi-ticket links until they are cleaned up.
+  """
   vulnerabilityJiraTickets(args: VulnerabilityJiraTicketsInput!): [JiraLinkedTicket!]!
 
-  """Retrieves issue types available for a connected Jira space."""
+  """
+  Retrieves issue types available for a connected Jira space.
+  Subtask issue types are omitted, since Jira cannot create one without a parent issue.
+  """
   jiraSpaceIssueTypes(args: JiraSpaceIssueTypesInput!): [JiraIssueType!]!
+
+  """
+  Retrieves workflow status mapping config for a connected Jira space and issue type.
+  """
+  jiraSpaceWorkflowConfig(args: JiraSpaceWorkflowConfigInput!): JiraSpaceWorkflowConfig!
+
+  """
+  Retrieves status-mapping and space configuration problems for connected Jira spaces.
+  """
+  jiraStatusMappingProblems(args: JiraStatusMappingProblemsInput): [JiraSpaceConfigProblems!]!
 
   """
   Retrieves creatable fields (including priority options) for a Jira space and issue type.
@@ -1001,8 +1018,19 @@ type Mutation {
 
   """
   Creates a Jira issue and optionally links it to a vulnerability finding.
+  When vulnerability is provided, fails if a ticket already exists for that finding
+  (assetId + componentId + vulnerabilityId). The existence check is best-effort in
+  public-api;
   """
   jiraIntegrationCreateIssue(args: JiraIntegrationCreateIssueInput!): JiraCreateIssueResult!
+
+  """
+  Saves workflow status mapping config for a connected Jira space and issue type.
+  """
+  saveJiraSpaceWorkflowConfig(args: SaveJiraSpaceWorkflowConfigInput!): JiraConnectedSpaceActionResult!
+
+  """Enables or disables automatic Jira-to-NetRise issue status sync."""
+  jiraIntegrationSetStatusMappingAutoSync(args: JiraIntegrationSetStatusMappingAutoSyncInput!): JiraConnectedSpaceActionResult!
 
   """Performs an action in the Jira integration setup or reconnect flow."""
   jiraIntegrationSetupAction(args: JiraIntegrationSetupActionInput!): JiraIntegrationSetup!
@@ -6783,6 +6811,9 @@ type JiraIntegrationConnectionHealth {
   Jira spaces available to connect that are not already in connectedSpaces.
   """
   addableSpaces: [JiraSetupSpace!]!
+
+  """Whether automatic Jira-to-NetRise issue status sync is enabled."""
+  statusMappingAutoSyncEnabled: Boolean!
 }
 
 type JiraConnectionMetrics {
@@ -6805,6 +6836,102 @@ type JiraConnectedSpace {
   openTicketsCount: Int!
   iconColorIndex: Int!
   avatarUrl: String
+
+  """ISO timestamp of the last workflow/config update for this space."""
+  lastUpdated: String
+}
+
+enum JiraStatusCategory {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+type JiraWorkflowStatus {
+  id: String!
+  name: String!
+  category: JiraStatusCategory!
+}
+
+type JiraStatusMapping {
+  jiraStatusId: String!
+  netriseStatusId: String!
+}
+
+type JiraSpaceWorkflowConfig {
+  spaceId: String!
+  issueTypeId: String!
+  jiraStatuses: [JiraWorkflowStatus!]!
+  netriseStatuses: [VexStatus!]!
+  mappings: [JiraStatusMapping!]!
+  resolutionStatusIds: [String!]!
+}
+
+input JiraSpaceWorkflowConfigInput {
+  spaceId: String!
+  issueTypeId: String!
+}
+
+input JiraStatusMappingInput {
+  jiraStatusId: String!
+  netriseStatusId: String
+}
+
+input SaveJiraSpaceWorkflowConfigInput {
+  spaceId: String!
+  issueTypeId: String!
+  mappings: [JiraStatusMappingInput!]!
+  resolutionStatusIds: [String!]!
+}
+
+input JiraStatusMappingProblemsInput {
+  spaceId: String
+}
+
+"""
+Space-level configuration problem. code is a stable string the frontend switches on
+(proto: JIRA_API_ERROR).
+"""
+type JiraConfigProblem {
+  code: String!
+  detail: String
+
+  """ISO timestamp when the problem was first seen."""
+  detectedAt: String
+}
+
+"""
+Mapping-level configuration problem. code is a stable string (proto field is string, not an enum).
+Known Turbine values: STATUS_NOT_MAPPED, STATUS_NOT_FOUND, ILLEGAL_TRANSITION.
+"""
+type JiraMappingProblem {
+  jiraStatusMappingId: String
+  jiraIssueTypeId: String
+  jiraIssueTypeName: String
+
+  """
+  True when the problem belongs to a Jira subtask issue type. public-api omits these from
+  mappingProblems; the field is still exposed for clients that need to defend against stale caches.
+  """
+  jiraIssueTypeSubtask: Boolean!
+  jiraStatusId: String
+  jiraStatusName: String
+  code: String!
+  detail: String
+
+  """ISO timestamp when the problem was first seen."""
+  detectedAt: String
+}
+
+"""
+Configuration problems for one connected Jira space. Empty lists mean the space is healthy.
+"""
+type JiraSpaceConfigProblems {
+  jiraSpaceId: String!
+  projectKey: String!
+  projectName: String!
+  spaceProblems: [JiraConfigProblem!]!
+  mappingProblems: [JiraMappingProblem!]!
 }
 
 type JiraTestConnectionResult {
@@ -6826,6 +6953,9 @@ type JiraLinkedTicket {
   statusCategory: String
   statusCategoryColor: String
   assignee: String
+  assigneeAvatarUrl: String
+  issueType: String
+  issueTypeIconUrl: String
   updatedAt: String!
   url: String!
 }
@@ -6932,6 +7062,10 @@ input JiraIntegrationDeleteConnectedSpaceInput {
 
 input JiraIntegrationAddConnectedSpaceInput {
   spaceId: String
+}
+
+input JiraIntegrationSetStatusMappingAutoSyncInput {
+  enabled: Boolean!
 }
 
 input JiraSpaceIssueTypesInput {
@@ -9004,6 +9138,14 @@ type VulnerabilityReference {
   refsource: String!
 }
 
+"""
+Jira ticket summary embedded on a detected vulnerability (issue key + browse URL).
+"""
+type VulnerabilityJiraTicket {
+  issueKey: String!
+  issueUrl: String!
+}
+
 type DetectedVulnerability {
   id: ID!
   cve: String
@@ -9023,8 +9165,8 @@ type DetectedVulnerability {
   correlations: [AssetCorrelation] @deprecated(reason: "Use `listAssetCorrelations` for paginated correlations. This embedded list is deprecated as NetRise decouples pagination; `correlationsCount` remains on this type.")
   correlationsCount: Int
 
-  """Number of linked Jira tickets for this detected vulnerability."""
-  jiraTicketCount: Int
+  """Linked Jira ticket for this detected vulnerability, when one exists."""
+  jiraTicket: VulnerabilityJiraTicket
   currentRemediation: AssetVulnerabilityRemediation
   epssScore: Float
   epssPercentile: Float

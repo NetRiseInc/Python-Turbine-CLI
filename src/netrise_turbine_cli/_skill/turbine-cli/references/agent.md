@@ -1,10 +1,10 @@
 # Turbine CLI — Agent guide
 
-Ultra-concise playbook for automation and LLM agents.
+Ultra-concise playbook for automation and LLM agents. The Cursor skill ([SKILL.md](../SKILL.md)) is the short entry point; this page is the full I/O contract and workflow detail.
 
 ## Setup
 
-CLI missing? `uv tool install netrise-turbine-cli` (or `pipx` / `pip`). `turbine skill install` places this skill in Cursor, Claude Code, Codex, and opencode skill directories.
+CLI missing? `uv tool install netrise-turbine-cli` (or `pipx` / `pip`). `turbine skill install` places the skill in Cursor, Claude Code, Codex, and opencode skill directories.
 
 If `turbine` isn't on `PATH` (common in sandboxes), it's in a project venv: use `poetry run turbine`, `uv run turbine`, `source .venv/bin/activate` first, or `./.venv/bin/turbine`. Isolated installs (`uv tool` / `pipx`) put `turbine` on `PATH` globally.
 
@@ -52,6 +52,17 @@ turbine asset risk --latest -o json    # most recently created asset
 ```
 
 Present the counts, then ask which category to drill into (CVEs, misconfigurations, certificate issues, secrets, licenses) unless the request already names one.
+
+| User says | Run |
+| --- | --- |
+| "last/latest asset I uploaded" | `turbine asset risk --latest` or `turbine asset list --sort createdAt:desc --limit 1` |
+| "risk", "posture", "findings", "issues" | `turbine asset risk ASSET_ID` |
+| "CVEs", "vulnerabilities", "exploits" | `turbine vuln list ASSET_ID --detail lite` |
+| "misconfigurations", "hardening" | `turbine misconfig list ASSET_ID` |
+| "secrets", "passwords", "credentials" | `turbine secret list ASSET_ID` / `turbine credential list ASSET_ID` |
+| "certificates", "keys", "crypto" | `turbine cert list ASSET_ID` / `turbine key list ASSET_ID` |
+| "licenses", "legal" | `turbine license list ASSET_ID` |
+| "components", "SBOM", "dependencies" | `turbine component list ASSET_ID` |
 
 ## Input
 

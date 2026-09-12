@@ -1,6 +1,6 @@
 # Turbine CLI — Human guide
 
-Resource-oriented commands for everyday Turbine operations. Use `turbine api` when you need the full GraphQL surface.
+Resource-oriented commands for everyday Turbine work. Use `turbine api` when you need the full GraphQL surface.
 
 ## Install
 
@@ -74,331 +74,331 @@ See [reference.md](../reference.md) for all API operations.
 ## Curated commands
 
 #### asset activity
-Curated: asset activity
+List activity-log events for an asset.
 ```bash
 turbine asset activity ASSET_ID
 ```
 
 #### asset files
-Curated: asset files
+List every file extracted from an asset.
 ```bash
 turbine asset files ASSET_ID
 ```
 
 #### asset get
-Curated: asset get
+Show one asset by ID.
 ```bash
 turbine asset get ASSET_ID
 ```
 
 #### asset hashes
-Curated: asset hashes
+List file hashes for an asset.
 ```bash
 turbine asset hashes ASSET_ID
 ```
 
 #### asset list --detail full
-Curated: asset list --detail full
+List assets with the full nested payload.
 ```bash
 turbine asset list --detail full --limit 20
 ```
 
 #### asset list --detail lite
-Curated: asset list --detail lite
+List assets with identity, status, and risk (default).
 ```bash
 turbine asset list --detail lite --limit 20 --fields id,name,status
 ```
 
 #### asset list --detail overview
-Curated: asset list --detail overview
+List assets with overview risk rollups.
 ```bash
 turbine asset list --detail overview --limit 20
 ```
 
 #### asset list --detail summary
-Curated: asset list --detail summary
+List assets as id, name, and analytic counts only.
 ```bash
 turbine asset list --detail summary --limit 20
 ```
 
 #### asset risk
-Curated: asset risk
+Summarize every finding category for one asset.
 ```bash
 turbine asset risk ASSET_ID
 ```
 
 #### asset status
-Curated: asset status
+Check whether an asset is still processing.
 ```bash
 turbine asset status ASSET_ID
 ```
 
 #### asset submit
-Curated: asset submit
+Submit metadata for an upload already in progress.
 ```bash
 turbine asset submit --name my-example
 ```
 
 #### asset update
-Curated: asset update
+Update an asset's name or other metadata.
 ```bash
 turbine asset update --id ASSET_ID
 ```
 
 #### asset upload
-Curated: asset upload
+Upload a firmware or SBOM file for analysis.
 ```bash
 turbine asset upload firmware.bin --name my-firmware
 ```
 
 #### asset upload-dir
-Curated: asset upload-dir
+Upload every file in a directory as assets.
 ```bash
 turbine asset upload-dir ./firmware-dir
 ```
 
 #### auth login
-Curated: auth login
+Verify credentials and save non-secrets to the config file.
 ```bash
 turbine auth login --save
 ```
 
 #### auth status
-Curated: auth status
+Show whether the current credentials can reach the API.
 ```bash
 turbine auth status
 ```
 
 #### cert list
-Curated: cert list
+List X.509 certificates found in an asset.
 ```bash
 turbine cert list ASSET_ID --limit 50
 ```
 
 #### component crypto
-Curated: component crypto
+List crypto libraries detected in an asset.
 ```bash
 turbine component crypto ASSET_ID
 ```
 
 #### component grouped
-Curated: component grouped
+List dependencies grouped by vendor, license, or type.
 ```bash
 turbine component grouped ASSET_ID
 ```
 
 #### component list --detail full
-Curated: component list --detail full
+List components with the full nested payload.
 ```bash
 turbine component list ASSET_ID --detail full
 ```
 
 #### component list --detail lite
-Curated: component list --detail lite
+List components with identity, version, and license.
 ```bash
 turbine component list ASSET_ID --detail lite
 ```
 
 #### credential list
-Curated: credential list
+List accounts and password hashes found in an asset.
 ```bash
 turbine credential list ASSET_ID
 ```
 
 #### group add-assets
-Curated: group add-assets
+Add assets to an asset group.
 ```bash
 turbine group add-assets --id GROUP_ID --input '{"assetIds":["ASSET_ID"]}'
 ```
 
 #### group create
-Curated: group create
+Create a named asset group.
 ```bash
 turbine group create --name my-group --description 'Example group'
 ```
 
 #### group delete
-Curated: group delete
+Delete an asset group (assets stay in the org).
 ```bash
 turbine group delete GROUP_ID
 ```
 
 #### group list
-Curated: group list
+List asset groups.
 ```bash
 turbine group list --limit 20
 ```
 
 #### group members
-Curated: group members
+List assets in an asset group.
 ```bash
 turbine group members GROUP_ID
 ```
 
 #### group remove-assets
-Curated: group remove-assets
+Remove assets from an asset group.
 ```bash
 turbine group remove-assets --id GROUP_ID --input '{"assetIds":["ASSET_ID"]}'
 ```
 
 #### group update
-Curated: group update
+Rename an asset group.
 ```bash
 turbine group update --id GROUP_ID --name renamed-group
 ```
 
 #### key list --type private
-Curated: key list --type private
+List private keys found in an asset.
 ```bash
 turbine key list ASSET_ID --type private
 ```
 
 #### key list --type public
-Curated: key list --type public
+List public keys found in an asset.
 ```bash
 turbine key list ASSET_ID --type public
 ```
 
 #### license list
-Curated: license list
+List license compliance issues on an asset.
 ```bash
 turbine license list ASSET_ID
 ```
 
 #### misconfig list --detail full
-Curated: misconfig list --detail full
+List misconfigurations with full correlation objects.
 ```bash
 turbine misconfig list ASSET_ID --detail full
 ```
 
 #### misconfig list --detail lite
-Curated: misconfig list --detail lite
+List misconfigurations with check ID and severity.
 ```bash
 turbine misconfig list ASSET_ID --detail lite
 ```
 
 #### notification list
-Curated: notification list
+List notification configurations.
 ```bash
 turbine notification list
 ```
 
 #### org info
-Curated: org info
+Show organization metadata.
 ```bash
 turbine org info
 ```
 
 #### org settings
-Curated: org settings
+Show organization settings.
 ```bash
 turbine org settings
 ```
 
 #### protection list
-Curated: protection list
+List binary hardening details for an asset.
 ```bash
 turbine protection list ASSET_ID
 ```
 
 #### report list
-Curated: report list
+List asset comparison reports.
 ```bash
 turbine report list
 ```
 
 #### search
-Curated: search
+Keyword-search artifacts and files across the org.
 ```bash
 turbine search search_term
 ```
 
 #### secret list
-Curated: secret list
+List secrets discovered in an asset.
 ```bash
 turbine secret list ASSET_ID --limit 50
 ```
 
 #### user delete
-Curated: user delete
+Delete a user account (dry-run first).
 ```bash
 turbine user delete USER_ID --dry-run
 ```
 
 #### user invite
-Curated: user invite
+Invite a user to the organization.
 ```bash
 turbine user invite --email user@example.com --role MEMBER
 ```
 
 #### user list
-Curated: user list
+List users in the organization.
 ```bash
 turbine user list --limit 20
 ```
 
 #### user remove
-Curated: user remove
+Remove a user from the org without deleting the account.
 ```bash
 turbine user remove USER_ID --dry-run
 ```
 
 #### vuln get
-Curated: vuln get
+Show one vulnerability by ID.
 ```bash
 turbine vuln get CVE_ID
 ```
 
 #### vuln get --detail lite
-Curated: vuln get --detail lite
+Show one vulnerability with preferred CVSS v3.1 only.
 ```bash
 turbine vuln get CVE_ID --detail lite
 ```
 
 #### vuln list --detail detailed
-Curated: vuln list --detail detailed
+List vulns with descriptions and full CVSS vectors.
 ```bash
 turbine vuln list ASSET_ID --detail detailed
 ```
 
 #### vuln list --detail detailed-lite
-Curated: vuln list --detail detailed-lite
+List vulns with description and preferred CVSS v3.1.
 ```bash
 turbine vuln list ASSET_ID --detail detailed-lite
 ```
 
 #### vuln list --detail full
-Curated: vuln list --detail full
+List vulns with correlations and remediation details.
 ```bash
 turbine vuln list ASSET_ID --detail full
 ```
 
 #### vuln list --detail lite
-Curated: vuln list --detail lite
+List vulns with CVE, severity, and scores (default).
 ```bash
 turbine vuln list ASSET_ID --detail lite --limit 50
 ```
 
 #### vuln overview
-Curated: vuln overview
+List vulnerability counts across assets.
 ```bash
 turbine vuln overview --limit 20
 ```
 
 #### vuln remediate
-Curated: vuln remediate
+Set VEX status for one asset vulnerability.
 ```bash
 turbine vuln remediate --asset ASSET_ID --input '{"remediationId":{"vulnerabilityId":"CVE_ID"},"status":"NOT_AFFECTED","justification":"CODE_NOT_PRESENT"}' --dry-run
 ```
 
 #### vuln remediate --all
-Curated: vuln remediate --all
+Apply VEX status to every vuln matching a filter.
 ```bash
 turbine vuln remediate --asset ASSET_ID --all --input '{"vulnerabilityFilter":{},"status":"NOT_AFFECTED","justification":"CODE_NOT_PRESENT"}' --dry-run
 ```
 
 #### vuln remediate --bulk
-Curated: vuln remediate --bulk
+Bulk-apply VEX status to selected asset vulns.
 ```bash
 turbine vuln remediate --asset ASSET_ID --bulk --input '{"remediationIds":[{"vulnerabilityId":"CVE_ID"}],"status":"NOT_AFFECTED","justification":"CODE_NOT_PRESENT"}' --dry-run
 ```
@@ -406,793 +406,811 @@ turbine vuln remediate --asset ASSET_ID --bulk --input '{"remediationIds":[{"vul
 ## API operations
 
 #### api activity
-Retrieve a comprehensive log of actions and events for assets.
+List activity-log events for an asset.
 ```bash
 turbine api activity --asset-id ASSET_ID
 ```
 
 #### api analytics
-Access high-level risk data and charts for organization dashboards.
+Get org dashboard risk metrics and chart data.
 ```bash
 turbine api analytics
 ```
 
 #### api asset-group-analytics
-View risk metrics and exploit counts for a specific group.
+Get risk metrics for one asset group.
 ```bash
 turbine api asset-group-analytics --group-id GROUP_ID
 ```
 
 #### api asset-group-members
-List all assets associated with a specific asset group container.
+List assets in an asset group.
 ```bash
 turbine api asset-group-members --input '{"group_id":"GROUP_ID","cursor":{"first":10}}'
 ```
 
 #### api asset-groups
-Retrieve a detailed paginated list of all asset groups available.
+List asset groups with pagination and filters.
 ```bash
 turbine api asset-groups --input '{"cursor":{"first":10}}'
 ```
 
 #### api asset-upload
-Obtain a secure pre-signed URL to upload files for analysis.
+Get a pre-signed URL to upload a file for analysis.
 ```bash
 turbine api asset-upload --upload-id UPLOAD_ID
 ```
 
 #### api asset-vulnerability-remediation
-Retrieve current VEX status and justification for a specific vulnerability.
+Get VEX status and justification for one vuln on an asset.
 ```bash
 turbine api asset-vulnerability-remediation --asset-id ASSET_ID --remediation-id VALUE --vulnerability-id CVE_ID
 ```
 
 #### api assets-overview
-View high-level risk and threat exposure metrics for multiple assets.
+Get risk and threat rollups across assets.
 ```bash
 turbine api assets-overview --input '{"cursor":{"first":10}}'
 ```
 
 #### api assets-relay
-Retrieve a paginated, sortable list of assets with filtering options.
+List assets with full nested fields (paginated).
 ```bash
 turbine api assets-relay --input '{"cursor":{"first":10}}'
 ```
 
 #### api assets-relay-lite
-Retrieve assets with trimmed fields — keeps identity, status, risk score, and analytic rollups; drops filesystems, SHA-256, exploit trees, and credential counts.
+List assets with identity, status, risk, and analytic rollups.
 ```bash
 turbine api assets-relay-lite --input '{"cursor":{"first":10}}'
 ```
 
 #### api assets-relay-summary
-Retrieve minimal asset data — ID, name, and analytic counts only — for fast org-wide sweeps to decide which assets need deeper queries.
+List assets as id, name, and analytic counts only.
 ```bash
 turbine api assets-relay-summary --input '{"cursor":{"first":10}}'
 ```
 
 #### api binary-protections
-List security hardening details for binaries found within the asset.
+List binary hardening details for an asset.
 ```bash
 turbine api binary-protections --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api binary-protections-summary
-Get aggregated counts of binary hardening features like NX or PIE.
+Get counts of hardening features such as NX or PIE.
 ```bash
 turbine api binary-protections-summary --composed-asset-id ASSET_ID
 ```
 
 #### api caas-availability
-Check for the availability of the RISE AI analysis report.
+Check whether a RiseAI analysis report is available.
 ```bash
 turbine api caas-availability --asset-id ASSET_ID
 ```
 
 #### api certificate-external-filters
-Retrieve available filter options for certificate queries.
+List filter options for certificate queries.
 ```bash
 turbine api certificate-external-filters --asset-id ASSET_ID
 ```
 
 #### api certificates
-List X.509 certificates and validity status found in the asset.
+List X.509 certificates found in an asset.
 ```bash
 turbine api certificates --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api credentials
-Identify user accounts and password hashes discovered within the filesystem.
+List accounts and password hashes found in an asset.
 ```bash
 turbine api credentials --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api dependencies
-List all software components and libraries identified in the asset.
+List software components identified in an asset.
 ```bash
 turbine api dependencies --composed-asset-id ASSET_ID
 ```
 
 #### api dependencies-lite
-List dependencies with trimmed fields — keeps identity, version, license, purls, and analytic rollups; drops file metadata, digests, and nested correlation details.
+List components with identity, version, license, and rollups.
 ```bash
 turbine api dependencies-lite --composed-asset-id ASSET_ID
 ```
 
 #### api dependency-known-exploits
-Check if specific dependencies are linked to known public exploits.
+Check whether dependencies link to known public exploits.
 ```bash
 turbine api dependency-known-exploits --input '{"identification_ids":["VALUE"],"composed_asset_id":"ASSET_ID"}'
 ```
 
 #### api detailed-vulnerabilities
-Retrieve in-depth vulnerability data including descriptions and CVSS vector strings.
+List vulns with descriptions and full CVSS vectors.
 ```bash
 turbine api detailed-vulnerabilities --asset-id ASSET_ID
 ```
 
 #### api detailed-vulnerabilities-lite
-Retrieve vulnerability descriptions with preferred CVSS v3.1 scores only — drops full v2/v4 impact blocks, exploit timelines, references, and problem type details.
+List vulns with description and preferred CVSS v3.1 only.
 ```bash
 turbine api detailed-vulnerabilities-lite --asset-id ASSET_ID
 ```
 
 #### api download-extracted-firmware
-Generate a URL to download the full unpacked file system.
+Get a URL to download the unpacked filesystem.
 ```bash
 turbine api download-extracted-firmware --asset-id ASSET_ID
 ```
 
 #### api download-file
-Create a secure link to download a specific individual file.
+Get a URL to download one extracted file.
 ```bash
 turbine api download-file --input '{"asset_id":"ASSET_ID","file_paths":["./path/to/file"]}'
 ```
 
 #### api download-file-list
-Generate a URL to download a list of all files.
+Get a URL to download the asset file listing.
 ```bash
 turbine api download-file-list --asset-id ASSET_ID
 ```
 
 #### api download-firmware
-Generate a link to download the original uploaded firmware image.
+Get a URL to download the original uploaded image.
 ```bash
 turbine api download-firmware --asset-id ASSET_ID
 ```
 
 #### api get-ai-model-data
-Retrieve configuration and metadata for a specific AI model integration.
+Get config and metadata for an AI model integration.
 ```bash
 turbine api get-ai-model-data --composed-asset-id ASSET_ID --component-id VALUE
 ```
 
 #### api get-asset-comparison-report
-Retrieve a completed asset comparison report including vulnerability, component, and summary diffs.
+Get a finished asset comparison report.
 ```bash
 turbine api get-asset-comparison-report --report-id VALUE
 ```
 
 #### api get-certificate-reachability
-Determine whether discovered certificates are reachable via executable scripts or system paths.
+Check whether certificates are reachable via paths or scripts.
 ```bash
 turbine api get-certificate-reachability --composed-asset-id ASSET_ID --file-path ./path/to/file --sha256 VALUE
 ```
 
 #### api get-dependency-reachability
-Determine whether a dependency is reachable via executable scripts or system paths.
+Check whether a dependency is reachable via paths or scripts.
 ```bash
 turbine api get-dependency-reachability --composed-asset-id ASSET_ID --component-id VALUE
 ```
 
 #### api get-my-permissions
-Retrieve the flat union of permission IDs the calling user holds across all their access grants.
+List permission IDs held by the calling user.
 ```bash
 turbine api get-my-permissions
 ```
 
 #### api get-resource-permissions
-Retrieve the caller's effective permissions on a specific resource, defaulting to the organization level.
+List the caller's effective permissions on a resource.
 ```bash
 turbine api get-resource-permissions
 ```
 
 #### api get-role
-Retrieve a single RBAC role by its ID.
+Get one RBAC role by ID.
 ```bash
 turbine api get-role
 ```
 
 #### api get-role-delete-impact
-Preview which users would retain or lose platform access if a custom role were deleted.
+Preview who loses access if a custom role is deleted.
 ```bash
 turbine api get-role-delete-impact
 ```
 
 #### api get-secret-reachability
-Determine whether discovered secrets are reachable via executable scripts or system paths.
+Check whether secrets are reachable via paths or scripts.
 ```bash
 turbine api get-secret-reachability --composed-asset-id ASSET_ID --secret-id VALUE
 ```
 
 #### api get-security-group-delete-impact
-Preview which members would retain or lose platform access if a security group were deleted.
+Preview who loses access if a security group is deleted.
 ```bash
 turbine api get-security-group-delete-impact
 ```
 
 #### api get-vuln-reachability
-Determine if a vulnerability can be executed via system paths.
+Check whether a vulnerability is reachable via system paths.
 ```bash
 turbine api get-vuln-reachability --input '{"asset_id":"ASSET_ID","advisory_id":"CVE_ID","identification_ids":["VALUE"]}'
 ```
 
 #### api grouped-dependencies
-View dependencies aggregated by vendor, license, or specific component type.
+List dependencies grouped by vendor, license, or type.
 ```bash
 turbine api grouped-dependencies --composed-asset-id ASSET_ID --grouped-by VENDOR
 ```
 
 #### api hashes
-List cryptographic hashes for files identified within the asset filesystem.
+List file hashes from an asset filesystem.
 ```bash
 turbine api hashes --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api identified-components-preview
-Return organization-wide component counts filtered by enabled identification methods, with before/after deltas when verification settings change.
+Preview org-wide component counts under identification settings.
 ```bash
 turbine api identified-components-preview
 ```
 
 #### api jira-integration
-Retrieve the Jira integration summary and connection health details.
+Get Jira integration summary and connection health.
 ```bash
 turbine api jira-integration
 ```
 
 #### api jira-integration-setup
-Retrieve the current state of the Jira integration setup wizard.
+Get the current Jira setup-wizard state.
 ```bash
 turbine api jira-integration-setup
 ```
 
 #### api jira-project-components
-List the Jira project components available for a connected space.
+List Jira project components for a connected space.
 ```bash
 turbine api jira-project-components --space-id VALUE
 ```
 
 #### api jira-project-labels
-Search the Jira labels available for a connected space; labels are instance-global.
+Search Jira labels for a connected space.
 ```bash
 turbine api jira-project-labels --space-id VALUE --query search_term
 ```
 
 #### api jira-project-sprints
-Search the Jira sprints available for a connected space.
+Search Jira sprints for a connected space.
 ```bash
 turbine api jira-project-sprints --space-id VALUE --query search_term
 ```
 
 #### api jira-project-teams
-Search the Atlassian Teams available for a connected Jira space.
+Search Atlassian Teams for a connected Jira space.
 ```bash
 turbine api jira-project-teams --space-id VALUE --query search_term
 ```
 
 #### api jira-project-users
-Search the assignable Jira users for a connected space.
+Search assignable Jira users for a connected space.
 ```bash
 turbine api jira-project-users --space-id VALUE --query search_term
 ```
 
 #### api jira-project-versions
-List the Jira project versions available for a connected space.
+List Jira project versions for a connected space.
 ```bash
 turbine api jira-project-versions --space-id VALUE
 ```
 
 #### api jira-space-issue-fields
-Retrieve the creatable fields, including priority options, for a Jira space and issue type.
+List creatable fields for a Jira space and issue type.
 ```bash
 turbine api jira-space-issue-fields --space-id VALUE --issue-type-id VALUE
 ```
 
 #### api jira-space-issue-types
-Retrieve the issue types available for a connected Jira space.
+List issue types for a connected Jira space.
 ```bash
 turbine api jira-space-issue-types --space-id VALUE
 ```
 
+#### api jira-space-workflow-config
+Get status mappings and workflow config for a Jira space.
+```bash
+turbine api jira-space-workflow-config --space-id VALUE --issue-type-id VALUE
+```
+
+#### api jira-status-mapping-problems
+List status-mapping problems across connected Jira spaces.
+```bash
+turbine api jira-status-mapping-problems
+```
+
 #### api license
-Retrieve detailed information for a specific software license.
+Get details for one software license.
 ```bash
 turbine api license --spdx-id VALUE --asset-id ASSET_ID
 ```
 
 #### api license-issue
-Get details about a specific license compliance issue.
+Get details for one license compliance issue.
 ```bash
 turbine api license-issue --asset-id ASSET_ID --issue-id VALUE
 ```
 
 #### api license-issues
-List license compliance issues identified across asset components.
+List license compliance issues on an asset.
 ```bash
 turbine api license-issues --asset-id ASSET_ID
 ```
 
 #### api license-issues-external-filters
-Retrieve available filter options for license issue queries.
+List filter options for license-issue queries.
 ```bash
 turbine api license-issues-external-filters --asset-id ASSET_ID
 ```
 
 #### api licenses-spdx-ids
-List available SPDX license identifiers for filtering and reference.
+List SPDX license identifiers.
 ```bash
 turbine api licenses-spdx-ids
 ```
 
 #### api list-ac-rs
-List access control records for the organization, optionally filtered to a specific user.
+List access control records, optionally for one user.
 ```bash
 turbine api list-ac-rs
 ```
 
 #### api list-ai-providers
-List available AI provider integrations and their current status.
+List AI provider integrations and their status.
 ```bash
 turbine api list-ai-providers
 ```
 
 #### api list-asset-comparison-reports
-List all asset comparison reports with pagination, filtering, and sorting.
+List asset comparison reports with filters and sorting.
 ```bash
 turbine api list-asset-comparison-reports --input '{"cursor":{"first":10}}'
 ```
 
 #### api list-asset-correlations
-Retrieve cross-asset correlation data linking shared components and vulnerabilities.
+List cross-asset correlations for shared components or vulns.
 ```bash
 turbine api list-asset-correlations --identifier VALUE --correlation-type UNSPECIFIED
 ```
 
 #### api list-asset-crypto-libraries
-List cryptographic libraries and algorithms detected within an asset.
+List crypto libraries detected in an asset.
 ```bash
 turbine api list-asset-crypto-libraries --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api list-entity-assets
-List the assets accessible to a specific user or security group.
+List assets a user or security group can access.
 ```bash
 turbine api list-entity-assets
 ```
 
 #### api list-my-ac-rs
-List the access control records that apply to the calling user.
+List access control records that apply to you.
 ```bash
 turbine api list-my-ac-rs
 ```
 
 #### api list-my-security-groups
-List the security groups the calling user belongs to.
+List security groups you belong to.
 ```bash
 turbine api list-my-security-groups
 ```
 
 #### api list-notification-configurations
-List all notification configurations with their channels, scopes, and triggers.
+List notification configurations and their triggers.
 ```bash
 turbine api list-notification-configurations --input '{"cursor":{"first":10}}'
 ```
 
 #### api list-notification-logs
-Retrieve a paginated log of notification delivery events and their statuses.
+List notification delivery events and statuses.
 ```bash
 turbine api list-notification-logs --input '{"cursor":{"first":10}}'
 ```
 
 #### api list-org-users
-List all users in the organization with their security groups and accessible asset counts.
+List org users with groups and accessible asset counts.
 ```bash
 turbine api list-org-users
 ```
 
 #### api list-permissions
-Retrieve the full permission catalog available for building custom roles.
+List the permission catalog for custom roles.
 ```bash
 turbine api list-permissions
 ```
 
 #### api list-roles
-List all RBAC roles defined for the current organization.
+List RBAC roles for the current organization.
 ```bash
 turbine api list-roles
 ```
 
 #### api list-security-group-members
-List the users who are members of a specific security group.
+List members of a security group.
 ```bash
 turbine api list-security-group-members
 ```
 
 #### api list-security-groups
-List all RBAC security groups defined for the current organization.
+List RBAC security groups for the current org.
 ```bash
 turbine api list-security-groups
 ```
 
 #### api match-vulnerabilities
-Find specific vulnerabilities matching a provided component identifier or package.
+Find vulnerabilities matching a component or package.
 ```bash
 turbine api match-vulnerabilities --identifier VALUE
 ```
 
 #### api me
-Retrieve the authenticated user's profile including their editable display name.
+Get the authenticated user's profile.
 ```bash
 turbine api me
 ```
 
 #### api metrics
-View organization-wide statistics on asset counts, processing, and risk.
+Get org-wide counts for assets, processing, and risk.
 ```bash
 turbine api metrics
 ```
 
 #### api misconfigurations
-List failed security checks and configuration risks found in assets.
+List failed security checks on an asset.
 ```bash
 turbine api misconfigurations --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api misconfigurations-lite
-List misconfigurations with trimmed fields — keeps check ID, name, severity, result, and correlation count; drops nested correlation objects.
+List misconfigs with check ID, severity, result, and counts.
 ```bash
 turbine api misconfigurations-lite --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api org-level-information
-Retrieve organization-level metadata such as last-updated time, optionally scoped by asset groups.
+Get org metadata such as last-updated time.
 ```bash
 turbine api org-level-information
 ```
 
 #### api org-level-settings
-Check how the tenant organization is configured.
+Get the tenant organization's settings.
 ```bash
 turbine api org-level-settings
 ```
 
 #### api package-dependencies-by-id
-View the dependency tree hierarchy for a specific software package.
+Get the dependency tree for one package.
 ```bash
 turbine api package-dependencies-by-id --composed-asset-id ASSET_ID
 ```
 
 #### api private-key-external-filters
-Retrieve available filter options for private key queries.
+List filter options for private-key queries.
 ```bash
 turbine api private-key-external-filters --asset-id ASSET_ID
 ```
 
 #### api private-keys
-Detect private cryptographic keys stored insecurely on the asset filesystem.
+List private keys found in an asset filesystem.
 ```bash
 turbine api private-keys --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api public-key-external-filters
-Retrieve available filter options for public key queries.
+List filter options for public-key queries.
 ```bash
 turbine api public-key-external-filters --asset-id ASSET_ID
 ```
 
 #### api public-keys
-List public cryptographic keys found within the asset's file system.
+List public keys found in an asset filesystem.
 ```bash
 turbine api public-keys --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api remediated-vulnerabilities-by-asset
-List remediated vulnerabilities grouped by asset for a single remediation-status bucket, with pagination, filtering, and sorting.
+List remediated vulns for one status bucket, by asset.
 ```bash
 turbine api remediated-vulnerabilities-by-asset --input '{"cursor":{"first":10},"status":"UNSPECIFIED"}'
 ```
 
 #### api rise-ai-analysis-data
-Check for the contents of the RISE AI analysis report.
+Get the contents of a RiseAI analysis report.
 ```bash
 turbine api rise-ai-analysis-data --asset-id ASSET_ID
 ```
 
 #### api rise-ai-availability
-Check eligibility and status of RISE AI analysis for an asset.
+Check RiseAI eligibility and status for an asset.
 ```bash
 turbine api rise-ai-availability --asset-id ASSET_ID
 ```
 
 #### api secret
-Retrieve detailed information about a specific discovered secret.
+Get details for one discovered secret.
 ```bash
 turbine api secret --id SECRET_ID
 ```
 
 #### api secret-categories-summary
-Get aggregated counts of secrets grouped by category type.
+Get secret counts grouped by category.
 ```bash
 turbine api secret-categories-summary --asset-id ASSET_ID
 ```
 
 #### api secret-status-count
-Retrieve counts of secrets grouped by remediation status.
+Get secret counts grouped by remediation status.
 ```bash
 turbine api secret-status-count --asset-id ASSET_ID
 ```
 
 #### api secret-types-and-count
-List secret types discovered with their occurrence counts.
+List secret types with occurrence counts.
 ```bash
 turbine api secret-types-and-count --asset-id ASSET_ID
 ```
 
 #### api secrets
-List all secrets and sensitive data discovered within an asset.
+List secrets discovered in an asset.
 ```bash
 turbine api secrets --input '{"asset_id":"ASSET_ID","cursor":{"first":10}}'
 ```
 
 #### api secrets-summary
-Get a high-level overview of secret findings and exposure metrics.
+Get a summary of secret findings on an asset.
 ```bash
 turbine api secrets-summary --asset-id ASSET_ID
 ```
 
 #### api sift
-Perform fuzzy hash matching to find similar code or files.
+Fuzzy-hash match to find similar code or files.
 ```bash
 turbine api sift
 ```
 
 #### api user-orgs
-List all organizations the current user is authorized to access.
+List organizations the current user can access.
 ```bash
 turbine api user-orgs
 ```
 
 #### api users
-Retrieve a detailed list of all users and their assigned roles.
+List users and their assigned roles.
 ```bash
 turbine api users --input '{"cursor":{"first":10}}'
 ```
 
 #### api vulnerabilities
-List CVEs and associated risks for components in an asset.
+List CVEs on an asset with scores and fix versions.
 ```bash
 turbine api vulnerabilities --asset-id ASSET_ID
 ```
 
 #### api vulnerabilities-lite
-List vulnerabilities with trimmed fields — keeps CVE, severity, CVSS/EPSS scores, fix versions, and correlation count; drops nested correlations and remediation details.
+List vulns with CVE, severity, scores, and counts.
 ```bash
 turbine api vulnerabilities-lite --asset-id ASSET_ID
 ```
 
 #### api vulnerabilities-overview
-Get a summary of vulnerability counts and severity across assets.
+Get vulnerability counts and severity across assets.
 ```bash
 turbine api vulnerabilities-overview --input '{"cursor":{"first":10}}'
 ```
 
 #### api vulnerability-external-filters
-Count vulnerabilities matching external threat feeds like CISA or botnets.
+Count vulns matching threat feeds such as CISA KEV.
 ```bash
 turbine api vulnerability-external-filters --asset-id ASSET_ID
 ```
 
 #### api vulnerability-jira-tickets
-Retrieve the Jira tickets linked to a vulnerability finding on an asset.
+List Jira tickets linked to a vuln on an asset.
 ```bash
 turbine api vulnerability-jira-tickets --asset-id ASSET_ID --advisory-id CVE_ID --component-id VALUE
 ```
 
 #### api vulnerability-remediation-summary
-Get org-wide counts of applied VEX remediation statuses, grouped into the overview remediation-status buckets.
+Get org-wide counts of applied VEX statuses.
 ```bash
 turbine api vulnerability-remediation-summary
 ```
 
 #### api add-asset-groups-to-assets
-Associate a list of existing asset groups with selected assets.
+Attach asset groups to one or more assets.
 ```bash
 turbine api add-asset-groups-to-assets --input '{"asset_ids":["ASSET_ID"]}'
 ```
 
 #### api add-security-group-member
-Add a user as a member of an RBAC security group.
+Add a user to an RBAC security group.
 ```bash
 turbine api add-security-group-member --security-group-id GROUP_ID --user-id USER_ID
 ```
 
 #### api asset-add-dependency
-Manually inject a missing dependency component into an asset's inventory.
+Add a manual dependency component to an asset.
 ```bash
 turbine api asset-add-dependency --input '{"composed_asset_id":"ASSET_ID","dependency_fields":{"name":"my-example","type":"UNSPECIFIED"}}'
 ```
 
 #### api asset-modify-dependency
-Update metadata or details for a manually added asset dependency.
+Update a manually added asset dependency.
 ```bash
 turbine api asset-modify-dependency --input '{"identification":{"composed_asset_id":"ASSET_ID","identification_ids":["VALUE"]},"dependency_fields":{"name":"my-example","type":"UNSPECIFIED"}}'
 ```
 
 #### api asset-remove-dependencies
-Remove specific dependencies from the component list of an asset.
+Remove selected dependencies from an asset.
 ```bash
 turbine api asset-remove-dependencies --input '{"composed_asset_id":"ASSET_ID","identification_ids":["VALUE"]}'
 ```
 
 #### api bulk-delete-ac-rs
-Delete multiple access control records in one call; already-deleted records are treated as success.
+Delete many access control records; missing ones count as success.
 ```bash
 turbine api bulk-delete-ac-rs --input '{"acr_ids":["VALUE"]}'
 ```
 
 #### api create-acr
-Create an access control record granting a user or security group a role on a resource.
+Grant a user or security group a role on a resource.
 ```bash
 turbine api create-acr --input '{"binding":{"entity_type":"USER","entity_id":"VALUE","resource_type":"ORGANIZATION"}}'
 ```
 
 #### api create-asset-comparison-report
-Create a new comparison report to diff vulnerabilities and components between two assets.
+Start a comparison report between two assets.
 ```bash
 turbine api create-asset-comparison-report --asset-a VALUE --asset-b VALUE
 ```
 
 #### api create-custom-role
-Create an org-scoped custom role with a chosen set of permissions.
+Create an org-scoped custom role with chosen permissions.
 ```bash
 turbine api create-custom-role --input '{"name":"my-example","permissions":["VALUE"]}'
 ```
 
 #### api create-notification-configuration
-Create a notification configuration defining channel, scopes, and triggers for alerts.
+Create a notification channel, scopes, and triggers.
 ```bash
 turbine api create-notification-configuration --input '{"configuration":{"type":"NOTIFICATION_TYPE_UNSPECIFIED","channel":"NOTIFICATION_CHANNEL_UNSPECIFIED","activity_scopes":[{}]}}'
 ```
 
 #### api create-security-group
-Create a new RBAC security group in the current organization.
+Create an RBAC security group in the current org.
 ```bash
 turbine api create-security-group --name my-example
 ```
 
 #### api delete-acr
-Delete a single access control record, revoking the associated grant.
+Delete one access control record.
 ```bash
 turbine api delete-acr --acr-id VALUE --dry-run
 ```
 
 #### api delete-asset-comparison-report
-Permanently delete an asset comparison report by its ID.
+Delete an asset comparison report by ID.
 ```bash
 turbine api delete-asset-comparison-report --report-id VALUE --dry-run
 ```
 
 #### api delete-custom-role
-Permanently delete a custom role from the organization.
+Delete a custom role from the organization.
 ```bash
 turbine api delete-custom-role --role-id VALUE --dry-run
 ```
 
 #### api delete-notification-configuration
-Permanently delete a notification configuration by its ID.
+Delete a notification configuration by ID.
 ```bash
 turbine api delete-notification-configuration --id CONFIG_ID --dry-run
 ```
 
 #### api delete-security-group
-Permanently delete a security group from the organization.
+Delete a security group from the organization.
 ```bash
 turbine api delete-security-group --security-group-id GROUP_ID --dry-run
 ```
 
 #### api invite-user
-Invite a user to the organization with a role and optional security group memberships.
+Invite a user with a role and optional security groups.
 ```bash
 turbine api invite-user --email user@example.com
 ```
 
 #### api jira-integration-add-connected-space
-Add a Jira space to the integration's connected spaces list.
+Connect a Jira space to the integration.
 ```bash
 turbine api jira-integration-add-connected-space
 ```
 
 #### api jira-integration-create-issue
-Create a Jira issue and optionally link it to a vulnerability finding.
+Create a Jira issue, optionally linked to a finding.
 ```bash
 turbine api jira-integration-create-issue --space-id VALUE --issue-type-id VALUE --summary VALUE --description VALUE
 ```
 
 #### api jira-integration-delete-connected-space
-Remove a connected Jira space from the integration.
+Disconnect a Jira space from the integration.
 ```bash
 turbine api jira-integration-delete-connected-space --space-id VALUE
 ```
 
 #### api jira-integration-disconnect
-Disconnect the Jira integration from the organization.
+Disconnect the Jira integration from the org.
 ```bash
 turbine api jira-integration-disconnect
 ```
 
 #### api jira-integration-reconnect
-Re-enable a Jira installation when the OAuth and app install steps are already complete.
+Re-enable Jira when OAuth and app install are already done.
 ```bash
 turbine api jira-integration-reconnect
 ```
 
+#### api jira-integration-set-status-mapping-auto-sync
+Enable or disable auto-sync for Jira status mappings.
+```bash
+turbine api jira-integration-set-status-mapping-auto-sync --enabled
+```
+
 #### api jira-integration-setup-action
-Perform an action in the Jira integration setup or reconnect flow.
+Run a step in the Jira setup or reconnect flow.
 ```bash
 turbine api jira-integration-setup-action --action START
 ```
 
 #### api jira-integration-test-connection
-Verify that the Jira integration connection is healthy.
+Check that the Jira integration connection is healthy.
 ```bash
 turbine api jira-integration-test-connection
 ```
 
 #### api notify-notification-configuration
-Send a test notification using an existing notification configuration.
+Send a test notification for a configuration.
 ```bash
 turbine api notify-notification-configuration --id CONFIG_ID
 ```
 
 #### api remediate-certificates
-Update remediation status and notes for certificate issues found in assets.
+Set remediation status and notes on certificate findings.
 ```bash
 turbine api remediate-certificates --input '{"asset_id":"ASSET_ID","certificates":[{"file_path":"./path/to/file","sha_256":"VALUE"}],"status":"UNSPECIFIED"}' --dry-run
 ```
 
 #### api remediate-license-issues
-Update status and add notes to resolve identified license issues.
+Set status and notes on license compliance issues.
 ```bash
 turbine api remediate-license-issues --input '{"asset_id":"ASSET_ID","issue_ids":["VALUE"],"status":"RESOLVED"}' --dry-run
 ```
 
 #### api remediate-private-keys
-Apply remediation status to private key exposures discovered in assets.
+Set remediation status on private key findings.
 ```bash
 turbine api remediate-private-keys --input '{"asset_id":"ASSET_ID","private_keys":[{"file_path":"./path/to/file","match_hash":"VALUE"}],"status":"UNSPECIFIED"}' --dry-run
 ```
 
 #### api remediate-public-keys
-Update remediation status for public key issues identified in assets.
+Set remediation status on public key findings.
 ```bash
 turbine api remediate-public-keys --input '{"asset_id":"ASSET_ID","public_keys":[{"file_path":"./path/to/file","match_hash":"VALUE"}],"status":"UNSPECIFIED"}' --dry-run
 ```
 
 #### api remediate-secrets
-Apply remediation status and justification to exposed secrets in assets.
+Set remediation status and justification on secrets.
 ```bash
 turbine api remediate-secrets --input '{"asset_id":"ASSET_ID","secret_ids":["VALUE"],"status":"UNSPECIFIED"}' --dry-run
 ```
 
 #### api remove-all-asset-groups-from-assets
-Disassociate all asset groups from a specified list of assets.
+Detach every asset group from the given assets.
 ```bash
 turbine api remove-all-asset-groups-from-assets --input '{"asset_ids":["ASSET_ID"]}' --dry-run
 ```
 
 #### api remove-org-user
-Permanently remove a user from the current organization.
+Remove a user from the current organization.
 ```bash
 turbine api remove-org-user --user-id USER_ID --dry-run
 ```
@@ -1204,79 +1222,85 @@ turbine api remove-security-group-member --security-group-id GROUP_ID --user-id 
 ```
 
 #### api replace-acr
-Replace an access control record with a new grant in one atomic delete-and-create operation.
+Replace an access control record in one delete-and-create.
 ```bash
 turbine api replace-acr --input '{"acr_id":"VALUE","binding":{"entity_type":"USER","entity_id":"VALUE","resource_type":"ORGANIZATION"}}'
 ```
 
+#### api save-jira-space-workflow-config
+Save status mappings and workflow config for a Jira space.
+```bash
+turbine api save-jira-space-workflow-config --input '{"space_id":"VALUE","issue_type_id":"VALUE","mappings":[{"jira_status_id":"VALUE"}],"resolution_status_ids":["VALUE"]}'
+```
+
 #### api set-asset-groups-to-asset
-Replace all current group associations for an asset with new ones.
+Replace an asset's group memberships.
 ```bash
 turbine api set-asset-groups-to-asset --asset-id ASSET_ID
 ```
 
 #### api set-assets-to-asset-group
-Overwrite the member list of an asset group with new assets.
+Replace an asset group's member list.
 ```bash
 turbine api set-assets-to-asset-group --group-id GROUP_ID
 ```
 
 #### api set-org-user-status
-Enable or disable a user account within the current organization.
+Enable or disable a user in the current org.
 ```bash
 turbine api set-org-user-status --user-id USER_ID --status ENABLED
 ```
 
 #### api submit-rise-ai-analysis
-Request a RISE AI analysis for an eligible asset to generate insights.
+Request a RiseAI analysis for an eligible asset.
 ```bash
 turbine api submit-rise-ai-analysis --asset-id ASSET_ID
 ```
 
 #### api update-custom-role
-Update the name, description, or permissions of an existing custom role.
+Update a custom role's name, description, or permissions.
 ```bash
 turbine api update-custom-role --input '{"role_id":"VALUE","name":"my-example","permissions":["VALUE"]}'
 ```
 
 #### api update-notification-configuration
-Update channel, scopes, triggers, or status for an existing notification configuration.
+Update a notification configuration's channel or triggers.
 ```bash
 turbine api update-notification-configuration --input '{"configuration":{"id":"CONFIG_ID","name":"my-example","disabled":true,"silenced":true,"type":"NOTIFICATION_TYPE_UNSPECIFIED","channel":"NOTIFICATION_CHANNEL_UNSPECIFIED","activity_scopes":[{}],"channel_configuration":{}}}'
 ```
 
 #### api update-org-level-settings
-Configure global organization settings such as idle session timeout duration.
+Update org settings such as idle session timeout.
 ```bash
 turbine api update-org-level-settings --idle-timout-enabled
 ```
 
 #### api update-security-group
-Update the name or description of an existing security group.
+Update a security group's name or description.
 ```bash
 turbine api update-security-group --security-group-id GROUP_ID --name my-example
 ```
 
 #### api user-action
-Perform administrative actions like enabling or disabling specific user accounts.
+Enable or disable a user account.
 ```bash
 turbine api user-action --type DISABLE --user-id USER_ID
 ```
 
 #### api user-reset-password
-Trigger a password reset email for a specific user account.
+Send a password-reset email to a user.
 ```bash
 turbine api user-reset-password --id USER_ID
 ```
 
 #### api user-set-user-role
-Assign a new permission role like Owner or Operator to users.
+Assign a role such as Owner or Operator.
 ```bash
 turbine api user-set-user-role --next-role VALUE --user-id USER_ID
 ```
 
 #### api user-update-user
-Modify user profile information including name and contact email details.
+Update a user's name or email.
 ```bash
 turbine api user-update-user --user-id USER_ID
 ```
