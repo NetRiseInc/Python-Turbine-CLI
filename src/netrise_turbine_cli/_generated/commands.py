@@ -6,6 +6,44 @@ from typing import Optional
 import typer
 
 
+def _cmd_mutation_activate_sso_connection(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+) -> None:
+    """Put a tested draft SSO connection into service."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import ActivateSsoConnectionInput
+        runtime.emit_schema(ActivateSsoConnectionInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import ActivateSsoConnectionInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    try:
+        model = ActivateSsoConnectionInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id'}))
+    kwargs = {'activate_sso_connection_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_activate_sso_connection',
+        method_name='mutation_activate_sso_connection',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_add_asset_groups_to_assets(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -116,6 +154,44 @@ def _cmd_mutation_add_security_group_member(
     runtime.run_graphql_op(
         op_name='mutation_add_security_group_member',
         method_name='mutation_add_security_group_member',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_add_sso_group_mapping(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+) -> None:
+    """Add one IdP group-to-security-group mapping rule."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import AddSsoGroupMappingInput
+        runtime.emit_schema(AddSsoGroupMappingInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import AddSsoGroupMappingInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    try:
+        model = AddSsoGroupMappingInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id'}))
+    kwargs = {'add_sso_group_mapping_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_add_sso_group_mapping',
+        method_name='mutation_add_sso_group_mapping',
         kwargs=kwargs,
         risk='write',
         dry_run=dry_run,
@@ -262,6 +338,7 @@ def _cmd_mutation_asset_submit(
     spdx_version: Optional[str] = typer.Option(None, '--spdx-version', help='Optional[SpdxVersion] (optional)'),
     sbom_format: Optional[str] = typer.Option(None, '--sbom-format', help='Optional[SbomFormat] (optional)'),
     license: Optional[str] = typer.Option(None, '--license', help='Optional[str] (optional)'),
+    classification: Optional[str] = typer.Option(None, '--classification', help='Optional[AssetClassification] (optional)'),
 ) -> None:
     """Submit firmware or an SBOM for analysis."""
     from pydantic import ValidationError
@@ -308,10 +385,12 @@ def _cmd_mutation_asset_submit(
         payload['sbom_format'] = sbom_format
     if license is not None:
         payload['license'] = license
+    if classification is not None:
+        payload['classification'] = classification
     try:
         model = SubmitAssetInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'architecture', 'asset-cpe', 'bitness', 'cyclonedx-version', 'family', 'kernel-version', 'license', 'manufacturer', 'model', 'name', 'os', 'sbom-format', 'sbom-type', 'spdx-version', 'type', 'version'}))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'architecture', 'asset-cpe', 'bitness', 'classification', 'cyclonedx-version', 'family', 'kernel-version', 'license', 'manufacturer', 'model', 'name', 'os', 'sbom-format', 'sbom-type', 'spdx-version', 'type', 'version'}))
     kwargs = {'asset_submit_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_submit',
@@ -335,6 +414,7 @@ def _cmd_mutation_asset_update(
     version: Optional[str] = typer.Option(None, '--version', help='Optional[str] (optional)'),
     product: Optional[str] = typer.Option(None, '--product', help='Optional[str] (optional)'),
     license: Optional[str] = typer.Option(None, '--license', help='Optional[str] (optional)'),
+    classification: Optional[str] = typer.Option(None, '--classification', help='Optional[AssetClassification] (optional)'),
 ) -> None:
     """Update asset metadata such as name, vendor, or version."""
     from pydantic import ValidationError
@@ -361,10 +441,12 @@ def _cmd_mutation_asset_update(
         payload['product'] = product
     if license is not None:
         payload['license'] = license
+    if classification is not None:
+        payload['classification'] = classification
     try:
         model = UpdateAssetInput.model_validate(payload)
     except ValidationError as exc:
-        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'id', 'license', 'name', 'product', 'vendor', 'version'}))
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'classification', 'id', 'license', 'name', 'product', 'vendor', 'version'}))
     kwargs = {'asset_update_args': model}
     runtime.run_graphql_op(
         op_name='mutation_asset_update',
@@ -650,6 +732,47 @@ def _cmd_mutation_create_security_group(
         yes=yes,
     )
 
+def _cmd_mutation_create_sso_connection(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_type: Optional[str] = typer.Option(None, '--connection-type', help='SsoConnectionType (required) [required]'),
+    identity_provider: Optional[str] = typer.Option(None, '--identity-provider', help='SsoIdentityProvider (required) [required]'),
+) -> None:
+    """Create the org's SSO connection as an inactive draft."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import CreateSsoConnectionInput
+        runtime.emit_schema(CreateSsoConnectionInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import CreateSsoConnectionInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_type is not None:
+        payload['connection_type'] = connection_type
+    if identity_provider is not None:
+        payload['identity_provider'] = identity_provider
+    try:
+        model = CreateSsoConnectionInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-type', 'identity-provider'}))
+    kwargs = {'create_sso_connection_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_create_sso_connection',
+        method_name='mutation_create_sso_connection',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_delete_acr(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -874,6 +997,199 @@ def _cmd_mutation_delete_security_group(
         method_name='mutation_delete_security_group',
         kwargs=kwargs,
         risk='destructive',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_delete_sso_connection(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+) -> None:
+    """Delete the SSO connection and its group mappings."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import DeleteSsoConnectionInput
+        runtime.emit_schema(DeleteSsoConnectionInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import DeleteSsoConnectionInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    try:
+        model = DeleteSsoConnectionInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id'}))
+    kwargs = {'delete_sso_connection_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_delete_sso_connection',
+        method_name='mutation_delete_sso_connection',
+        kwargs=kwargs,
+        risk='destructive',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_delete_sso_group_mapping(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    mapping_id: Optional[str] = typer.Option(None, '--mapping-id', help='str (required) [required]'),
+) -> None:
+    """Remove one IdP group mapping rule."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import DeleteSsoGroupMappingInput
+        runtime.emit_schema(DeleteSsoGroupMappingInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import DeleteSsoGroupMappingInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if mapping_id is not None:
+        payload['mapping_id'] = mapping_id
+    try:
+        model = DeleteSsoGroupMappingInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'mapping-id'}))
+    kwargs = {'delete_sso_group_mapping_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_delete_sso_group_mapping',
+        method_name='mutation_delete_sso_group_mapping',
+        kwargs=kwargs,
+        risk='destructive',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_disable_sso_connection(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+) -> None:
+    """Stop new SSO logins; existing sessions stay active."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import DisableSsoConnectionInput
+        runtime.emit_schema(DisableSsoConnectionInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import DisableSsoConnectionInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    try:
+        model = DisableSsoConnectionInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id'}))
+    kwargs = {'disable_sso_connection_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_disable_sso_connection',
+        method_name='mutation_disable_sso_connection',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_edit_sso_group_mapping(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+    mapping_id: Optional[str] = typer.Option(None, '--mapping-id', help='str (required) [required]'),
+) -> None:
+    """Replace one IdP group mapping rule in place."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import EditSsoGroupMappingInput
+        runtime.emit_schema(EditSsoGroupMappingInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import EditSsoGroupMappingInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    if mapping_id is not None:
+        payload['mapping_id'] = mapping_id
+    try:
+        model = EditSsoGroupMappingInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id', 'mapping-id'}))
+    kwargs = {'edit_sso_group_mapping_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_edit_sso_group_mapping',
+        method_name='mutation_edit_sso_group_mapping',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_enable_sso_connection(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+) -> None:
+    """Resume logins through an active SSO connection."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import EnableSsoConnectionInput
+        runtime.emit_schema(EnableSsoConnectionInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import EnableSsoConnectionInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    try:
+        model = EnableSsoConnectionInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id'}))
+    kwargs = {'enable_sso_connection_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_enable_sso_connection',
+        method_name='mutation_enable_sso_connection',
+        kwargs=kwargs,
+        risk='write',
         dry_run=dry_run,
         yes=yes,
     )
@@ -1811,6 +2127,88 @@ def _cmd_mutation_replace_acr(
         yes=yes,
     )
 
+def _cmd_mutation_replace_sso_connection_certificate(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+    etag: Optional[str] = typer.Option(None, '--etag', help='str (required) [required]'),
+    signing_certificate_pem: Optional[str] = typer.Option(None, '--signing-certificate-pem', help='str (required) [required]'),
+) -> None:
+    """Replace the SSO connection's signing certificate."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import ReplaceSsoConnectionCertificateInput
+        runtime.emit_schema(ReplaceSsoConnectionCertificateInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import ReplaceSsoConnectionCertificateInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    if etag is not None:
+        payload['etag'] = etag
+    if signing_certificate_pem is not None:
+        payload['signing_certificate_pem'] = signing_certificate_pem
+    try:
+        model = ReplaceSsoConnectionCertificateInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id', 'etag', 'signing-certificate-pem'}))
+    kwargs = {'replace_sso_connection_certificate_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_replace_sso_connection_certificate',
+        method_name='mutation_replace_sso_connection_certificate',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_replace_sso_group_mappings(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+) -> None:
+    """Replace the full set of IdP group mapping rules."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import ReplaceSsoGroupMappingsInput
+        runtime.emit_schema(ReplaceSsoGroupMappingsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import ReplaceSsoGroupMappingsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    try:
+        model = ReplaceSsoGroupMappingsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id'}))
+    kwargs = {'replace_sso_group_mappings_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_replace_sso_group_mappings',
+        method_name='mutation_replace_sso_group_mappings',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_save_jira_space_workflow_config(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -1846,6 +2244,50 @@ def _cmd_mutation_save_jira_space_workflow_config(
     runtime.run_graphql_op(
         op_name='mutation_save_jira_space_workflow_config',
         method_name='mutation_save_jira_space_workflow_config',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_select_sso_identity_provider(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+    connection_type: Optional[str] = typer.Option(None, '--connection-type', help='SsoConnectionType (required) [required]'),
+    identity_provider: Optional[str] = typer.Option(None, '--identity-provider', help='SsoIdentityProvider (required) [required]'),
+) -> None:
+    """Choose the identity provider for the SSO connection."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import SelectSsoIdentityProviderInput
+        runtime.emit_schema(SelectSsoIdentityProviderInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import SelectSsoIdentityProviderInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    if connection_type is not None:
+        payload['connection_type'] = connection_type
+    if identity_provider is not None:
+        payload['identity_provider'] = identity_provider
+    try:
+        model = SelectSsoIdentityProviderInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id', 'connection-type', 'identity-provider'}))
+    kwargs = {'select_sso_identity_provider_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_select_sso_identity_provider',
+        method_name='mutation_select_sso_identity_provider',
         kwargs=kwargs,
         risk='write',
         dry_run=dry_run,
@@ -1963,6 +2405,44 @@ def _cmd_mutation_set_org_user_status(
     runtime.run_graphql_op(
         op_name='mutation_set_org_user_status',
         method_name='mutation_set_org_user_status',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_start_sso_connection_test(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+) -> None:
+    """Start an SSO login test and get the URL to open."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import StartSsoConnectionTestInput
+        runtime.emit_schema(StartSsoConnectionTestInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import StartSsoConnectionTestInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    try:
+        model = StartSsoConnectionTestInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id'}))
+    kwargs = {'start_sso_connection_test_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_start_sso_connection_test',
+        method_name='mutation_start_sso_connection_test',
         kwargs=kwargs,
         risk='write',
         dry_run=dry_run,
@@ -2209,6 +2689,44 @@ def _cmd_mutation_update_org_level_settings(
         yes=yes,
     )
 
+def _cmd_mutation_update_org_sso_settings(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    user_pass_auth_disabled: Optional[bool] = typer.Option(None, '--user-pass-auth-disabled', help='Optional[bool] (optional)'),
+) -> None:
+    """Update org sign-in settings, such as SSO-only login."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import UpdateOrgSsoSettingsInput
+        runtime.emit_schema(UpdateOrgSsoSettingsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import UpdateOrgSsoSettingsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if user_pass_auth_disabled is not None:
+        payload['user_pass_auth_disabled'] = user_pass_auth_disabled
+    try:
+        model = UpdateOrgSsoSettingsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'user-pass-auth-disabled'}))
+    kwargs = {'update_org_sso_settings_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_update_org_sso_settings',
+        method_name='mutation_update_org_sso_settings',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_mutation_update_security_group(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -2247,6 +2765,77 @@ def _cmd_mutation_update_security_group(
     runtime.run_graphql_op(
         op_name='mutation_update_security_group',
         method_name='mutation_update_security_group',
+        kwargs=kwargs,
+        risk='write',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_mutation_update_sso_connection(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+    etag: Optional[str] = typer.Option(None, '--etag', help='str (required) [required]'),
+    idp_sign_in_url: Optional[str] = typer.Option(None, '--idp-sign-in-url', help='Optional[str] (optional)'),
+    idp_sign_out_url: Optional[str] = typer.Option(None, '--idp-sign-out-url', help='Optional[str] (optional)'),
+    idp_identifier: Optional[str] = typer.Option(None, '--idp-identifier', help='Optional[str] (optional)'),
+    signing_certificate_pem: Optional[str] = typer.Option(None, '--signing-certificate-pem', help='Optional[str] (optional)'),
+    email_claim: Optional[str] = typer.Option(None, '--email-claim', help='Optional[str] (optional)'),
+    name_claim: Optional[str] = typer.Option(None, '--name-claim', help='Optional[str] (optional)'),
+    groups_claim: Optional[str] = typer.Option(None, '--groups-claim', help='Optional[str] (optional)'),
+    group_key_type: Optional[str] = typer.Option(None, '--group-key-type', help='Optional[SsoGroupKeyType] (optional)'),
+    login_button_label: Optional[str] = typer.Option(None, '--login-button-label', help='Optional[str] (optional)'),
+    login_button_logo_url: Optional[str] = typer.Option(None, '--login-button-logo-url', help='Optional[str] (optional)'),
+) -> None:
+    """Update settings on a draft or disabled SSO connection."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import UpdateSsoConnectionInput
+        runtime.emit_schema(UpdateSsoConnectionInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import UpdateSsoConnectionInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    if etag is not None:
+        payload['etag'] = etag
+    if idp_sign_in_url is not None:
+        payload['idp_sign_in_url'] = idp_sign_in_url
+    if idp_sign_out_url is not None:
+        payload['idp_sign_out_url'] = idp_sign_out_url
+    if idp_identifier is not None:
+        payload['idp_identifier'] = idp_identifier
+    if signing_certificate_pem is not None:
+        payload['signing_certificate_pem'] = signing_certificate_pem
+    if email_claim is not None:
+        payload['email_claim'] = email_claim
+    if name_claim is not None:
+        payload['name_claim'] = name_claim
+    if groups_claim is not None:
+        payload['groups_claim'] = groups_claim
+    if group_key_type is not None:
+        payload['group_key_type'] = group_key_type
+    if login_button_label is not None:
+        payload['login_button_label'] = login_button_label
+    if login_button_logo_url is not None:
+        payload['login_button_logo_url'] = login_button_logo_url
+    try:
+        model = UpdateSsoConnectionInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id', 'email-claim', 'etag', 'group-key-type', 'groups-claim', 'idp-identifier', 'idp-sign-in-url', 'idp-sign-out-url', 'login-button-label', 'login-button-logo-url', 'name-claim', 'signing-certificate-pem'}))
+    kwargs = {'update_sso_connection_args': model}
+    runtime.run_graphql_op(
+        op_name='mutation_update_sso_connection',
+        method_name='mutation_update_sso_connection',
         kwargs=kwargs,
         risk='write',
         dry_run=dry_run,
@@ -3823,6 +4412,93 @@ def _cmd_query_get_my_permissions(
         yes=yes,
     )
 
+def _cmd_query_get_org_sso_settings(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Get the org's sign-in settings and enforced domains."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_org_sso_settings',
+        method_name='query_get_org_sso_settings',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_org_user(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Get one org user by ID."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_org_user',
+        method_name='query_get_org_user',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_resource_ac_rs(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """List access control records attached to one resource."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_resource_ac_rs',
+        method_name='query_get_resource_ac_rs',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_get_resource_permissions(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -3951,6 +4627,35 @@ def _cmd_query_get_secret_reachability(
         yes=yes,
     )
 
+def _cmd_query_get_security_group(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Get one security group by ID."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_security_group',
+        method_name='query_get_security_group',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_get_security_group_delete_impact(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -3974,6 +4679,122 @@ def _cmd_query_get_security_group_delete_impact(
     runtime.run_graphql_op(
         op_name='query_get_security_group_delete_impact',
         method_name='query_get_security_group_delete_impact',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_sso_activation_readiness(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Check whether the SSO connection can be activated."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_sso_activation_readiness',
+        method_name='query_get_sso_activation_readiness',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_sso_connection(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Get the org's SSO connection, or null if none exists."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_sso_connection',
+        method_name='query_get_sso_connection',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_sso_connection_test(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Get an SSO login test's status, claims, or failure."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_sso_connection_test',
+        method_name='query_get_sso_connection_test',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_get_sso_group_sync_summary(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """Show recent SSO group-sync membership changes per group."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_get_sso_group_sync_summary',
+        method_name='query_get_sso_group_sync_summary',
         kwargs=kwargs,
         risk='read',
         dry_run=dry_run,
@@ -5492,6 +6313,64 @@ def _cmd_query_list_security_groups(
         yes=yes,
     )
 
+def _cmd_query_list_sso_connections(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """List the org's SSO connections, including drafts."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_list_sso_connections',
+        method_name='query_list_sso_connections',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_list_sso_group_mappings(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+
+) -> None:
+    """List the IdP group mapping rules on the SSO connection."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        runtime.emit_result({"message": "No input schema for this operation."})
+        return
+    payload = runtime.load_input_payload(input_json, input_file)
+    kwargs = payload or {}
+    runtime.run_graphql_op(
+        op_name='query_list_sso_group_mappings',
+        method_name='query_list_sso_group_mappings',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
 def _cmd_query_match_vulnerabilities(
     ctx: typer.Context,
     input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
@@ -5768,6 +6647,47 @@ def _cmd_query_package_dependencies_by_id(
     runtime.run_graphql_op(
         op_name='query_package_dependencies_by_id',
         method_name='query_package_dependencies_by_id',
+        kwargs=kwargs,
+        risk='read',
+        dry_run=dry_run,
+        yes=yes,
+    )
+
+def _cmd_query_preview_sso_group_mappings(
+    ctx: typer.Context,
+    input_json: Optional[str] = typer.Option(None, "--input", "-i", help="Inline JSON input."),
+    input_file: Optional[Path] = typer.Option(None, "--input-file", help="JSON input file (- for stdin)."),
+    show_schema: bool = typer.Option(False, "--schema", help="Print input JSON Schema and exit."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate input without executing."),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation for write/destructive ops."),
+    connection_id: Optional[str] = typer.Option(None, '--connection-id', help='Optional[str] (optional)'),
+    test_id: Optional[str] = typer.Option(None, '--test-id', help='str (required) [required]'),
+) -> None:
+    """Test mapping rules against observed SSO claims without saving."""
+    from pydantic import ValidationError
+    from ..errors import format_validation_error
+    from ..runtime import ExitCode
+
+    runtime = ctx.obj
+    if show_schema:
+        from netrise_turbine_sdk_graphql.input_types import PreviewSsoGroupMappingsInput
+        runtime.emit_schema(PreviewSsoGroupMappingsInput)
+        return
+    from netrise_turbine_sdk_graphql.input_types import PreviewSsoGroupMappingsInput
+
+    payload = runtime.load_input_payload(input_json, input_file)
+    if connection_id is not None:
+        payload['connection_id'] = connection_id
+    if test_id is not None:
+        payload['test_id'] = test_id
+    try:
+        model = PreviewSsoGroupMappingsInput.model_validate(payload)
+    except ValidationError as exc:
+        runtime.emit_error(ExitCode.USAGE, format_validation_error(exc, known_flags={'connection-id', 'test-id'}))
+    kwargs = {'preview_sso_group_mappings_args': model}
+    runtime.run_graphql_op(
+        op_name='query_preview_sso_group_mappings',
+        method_name='query_preview_sso_group_mappings',
         kwargs=kwargs,
         risk='read',
         dry_run=dry_run,
@@ -6735,9 +7655,11 @@ def _cmd_query_vulnerability_remediation_summary(
 
 
 def register_api_commands(api_app) -> None:
+    api_app.command(name='activate-sso-connection', help='Put a tested draft SSO connection into service.')(_cmd_mutation_activate_sso_connection)
     api_app.command(name='add-asset-groups-to-assets', help='Attach asset groups to one or more assets.')(_cmd_mutation_add_asset_groups_to_assets)
     api_app.command(name='add-assets-to-asset-group', help='Add assets to an existing asset group.')(_cmd_mutation_add_assets_to_asset_group)
     api_app.command(name='add-security-group-member', help='Add a user to an RBAC security group.')(_cmd_mutation_add_security_group_member)
+    api_app.command(name='add-sso-group-mapping', help='Add one IdP group-to-security-group mapping rule.')(_cmd_mutation_add_sso_group_mapping)
     api_app.command(name='asset-add-dependency', help='Add a manual dependency component to an asset.')(_cmd_mutation_asset_add_dependency)
     api_app.command(name='asset-modify-dependency', help='Update a manually added asset dependency.')(_cmd_mutation_asset_modify_dependency)
     api_app.command(name='asset-remove-dependencies', help='Remove selected dependencies from an asset.')(_cmd_mutation_asset_remove_dependencies)
@@ -6750,12 +7672,18 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='create-custom-role', help='Create an org-scoped custom role with chosen permissions.')(_cmd_mutation_create_custom_role)
     api_app.command(name='create-notification-configuration', help='Create a notification channel, scopes, and triggers.')(_cmd_mutation_create_notification_configuration)
     api_app.command(name='create-security-group', help='Create an RBAC security group in the current org.')(_cmd_mutation_create_security_group)
+    api_app.command(name='create-sso-connection', help="Create the org's SSO connection as an inactive draft.")(_cmd_mutation_create_sso_connection)
     api_app.command(name='delete-acr', help='Delete one access control record.')(_cmd_mutation_delete_acr)
     api_app.command(name='delete-asset-comparison-report', help='Delete an asset comparison report by ID.')(_cmd_mutation_delete_asset_comparison_report)
     api_app.command(name='delete-asset-group', help='Delete an asset group; assets stay in the org.')(_cmd_mutation_delete_asset_group)
     api_app.command(name='delete-custom-role', help='Delete a custom role from the organization.')(_cmd_mutation_delete_custom_role)
     api_app.command(name='delete-notification-configuration', help='Delete a notification configuration by ID.')(_cmd_mutation_delete_notification_configuration)
     api_app.command(name='delete-security-group', help='Delete a security group from the organization.')(_cmd_mutation_delete_security_group)
+    api_app.command(name='delete-sso-connection', help='Delete the SSO connection and its group mappings.')(_cmd_mutation_delete_sso_connection)
+    api_app.command(name='delete-sso-group-mapping', help='Remove one IdP group mapping rule.')(_cmd_mutation_delete_sso_group_mapping)
+    api_app.command(name='disable-sso-connection', help='Stop new SSO logins; existing sessions stay active.')(_cmd_mutation_disable_sso_connection)
+    api_app.command(name='edit-sso-group-mapping', help='Replace one IdP group mapping rule in place.')(_cmd_mutation_edit_sso_group_mapping)
+    api_app.command(name='enable-sso-connection', help='Resume logins through an active SSO connection.')(_cmd_mutation_enable_sso_connection)
     api_app.command(name='invite-user', help='Invite a user with a role and optional security groups.')(_cmd_mutation_invite_user)
     api_app.command(name='jira-integration-add-connected-space', help='Connect a Jira space to the integration.')(_cmd_mutation_jira_integration_add_connected_space)
     api_app.command(name='jira-integration-create-issue', help='Create a Jira issue, optionally linked to a finding.')(_cmd_mutation_jira_integration_create_issue)
@@ -6779,16 +7707,22 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='remove-org-user', help='Remove a user from the current organization.')(_cmd_mutation_remove_org_user)
     api_app.command(name='remove-security-group-member', help='Remove a user from an RBAC security group.')(_cmd_mutation_remove_security_group_member)
     api_app.command(name='replace-acr', help='Replace an access control record in one delete-and-create.')(_cmd_mutation_replace_acr)
+    api_app.command(name='replace-sso-connection-certificate', help="Replace the SSO connection's signing certificate.")(_cmd_mutation_replace_sso_connection_certificate)
+    api_app.command(name='replace-sso-group-mappings', help='Replace the full set of IdP group mapping rules.')(_cmd_mutation_replace_sso_group_mappings)
     api_app.command(name='save-jira-space-workflow-config', help='Save status mappings and workflow config for a Jira space.')(_cmd_mutation_save_jira_space_workflow_config)
+    api_app.command(name='select-sso-identity-provider', help='Choose the identity provider for the SSO connection.')(_cmd_mutation_select_sso_identity_provider)
     api_app.command(name='set-asset-groups-to-asset', help="Replace an asset's group memberships.")(_cmd_mutation_set_asset_groups_to_asset)
     api_app.command(name='set-assets-to-asset-group', help="Replace an asset group's member list.")(_cmd_mutation_set_assets_to_asset_group)
     api_app.command(name='set-org-user-status', help='Enable or disable a user in the current org.')(_cmd_mutation_set_org_user_status)
+    api_app.command(name='start-sso-connection-test', help='Start an SSO login test and get the URL to open.')(_cmd_mutation_start_sso_connection_test)
     api_app.command(name='submit-rise-ai-analysis', help='Request a RiseAI analysis for an eligible asset.')(_cmd_mutation_submit_rise_ai_analysis)
     api_app.command(name='update-asset-group', help="Rename or update an asset group's description.")(_cmd_mutation_update_asset_group)
     api_app.command(name='update-custom-role', help="Update a custom role's name, description, or permissions.")(_cmd_mutation_update_custom_role)
     api_app.command(name='update-notification-configuration', help="Update a notification configuration's channel or triggers.")(_cmd_mutation_update_notification_configuration)
     api_app.command(name='update-org-level-settings', help='Update org settings such as idle session timeout.')(_cmd_mutation_update_org_level_settings)
+    api_app.command(name='update-org-sso-settings', help='Update org sign-in settings, such as SSO-only login.')(_cmd_mutation_update_org_sso_settings)
     api_app.command(name='update-security-group', help="Update a security group's name or description.")(_cmd_mutation_update_security_group)
+    api_app.command(name='update-sso-connection', help='Update settings on a draft or disabled SSO connection.')(_cmd_mutation_update_sso_connection)
     api_app.command(name='user-action', help='Enable or disable a user account.')(_cmd_mutation_user_action)
     api_app.command(name='user-delete', help='Delete a user account and revoke access.')(_cmd_mutation_user_delete)
     api_app.command(name='user-invite', help='Invite a user to the organization with a role.')(_cmd_mutation_user_invite)
@@ -6829,11 +7763,19 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='get-certificate-reachability', help='Check whether certificates are reachable via paths or scripts.')(_cmd_query_get_certificate_reachability)
     api_app.command(name='get-dependency-reachability', help='Check whether a dependency is reachable via paths or scripts.')(_cmd_query_get_dependency_reachability)
     api_app.command(name='get-my-permissions', help='List permission IDs held by the calling user.')(_cmd_query_get_my_permissions)
+    api_app.command(name='get-org-sso-settings', help="Get the org's sign-in settings and enforced domains.")(_cmd_query_get_org_sso_settings)
+    api_app.command(name='get-org-user', help='Get one org user by ID.')(_cmd_query_get_org_user)
+    api_app.command(name='get-resource-ac-rs', help='List access control records attached to one resource.')(_cmd_query_get_resource_ac_rs)
     api_app.command(name='get-resource-permissions', help="List the caller's effective permissions on a resource.")(_cmd_query_get_resource_permissions)
     api_app.command(name='get-role', help='Get one RBAC role by ID.')(_cmd_query_get_role)
     api_app.command(name='get-role-delete-impact', help='Preview who loses access if a custom role is deleted.')(_cmd_query_get_role_delete_impact)
     api_app.command(name='get-secret-reachability', help='Check whether secrets are reachable via paths or scripts.')(_cmd_query_get_secret_reachability)
+    api_app.command(name='get-security-group', help='Get one security group by ID.')(_cmd_query_get_security_group)
     api_app.command(name='get-security-group-delete-impact', help='Preview who loses access if a security group is deleted.')(_cmd_query_get_security_group_delete_impact)
+    api_app.command(name='get-sso-activation-readiness', help='Check whether the SSO connection can be activated.')(_cmd_query_get_sso_activation_readiness)
+    api_app.command(name='get-sso-connection', help="Get the org's SSO connection, or null if none exists.")(_cmd_query_get_sso_connection)
+    api_app.command(name='get-sso-connection-test', help="Get an SSO login test's status, claims, or failure.")(_cmd_query_get_sso_connection_test)
+    api_app.command(name='get-sso-group-sync-summary', help='Show recent SSO group-sync membership changes per group.')(_cmd_query_get_sso_group_sync_summary)
     api_app.command(name='get-vuln-reachability', help='Check whether a vulnerability is reachable via system paths.')(_cmd_query_get_vuln_reachability)
     api_app.command(name='grouped-dependencies', help='List dependencies grouped by vendor, license, or type.')(_cmd_query_grouped_dependencies)
     api_app.command(name='hashes', help='List file hashes from an asset filesystem.')(_cmd_query_hashes)
@@ -6870,6 +7812,8 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='list-roles', help='List RBAC roles for the current organization.')(_cmd_query_list_roles)
     api_app.command(name='list-security-group-members', help='List members of a security group.')(_cmd_query_list_security_group_members)
     api_app.command(name='list-security-groups', help='List RBAC security groups for the current org.')(_cmd_query_list_security_groups)
+    api_app.command(name='list-sso-connections', help="List the org's SSO connections, including drafts.")(_cmd_query_list_sso_connections)
+    api_app.command(name='list-sso-group-mappings', help='List the IdP group mapping rules on the SSO connection.')(_cmd_query_list_sso_group_mappings)
     api_app.command(name='match-vulnerabilities', help='Find vulnerabilities matching a component or package.')(_cmd_query_match_vulnerabilities)
     api_app.command(name='me', help="Get the authenticated user's profile.")(_cmd_query_me)
     api_app.command(name='metrics', help='Get org-wide counts for assets, processing, and risk.')(_cmd_query_metrics)
@@ -6878,6 +7822,7 @@ def register_api_commands(api_app) -> None:
     api_app.command(name='org-level-information', help='Get org metadata such as last-updated time.')(_cmd_query_org_level_information)
     api_app.command(name='org-level-settings', help="Get the tenant organization's settings.")(_cmd_query_org_level_settings)
     api_app.command(name='package-dependencies-by-id', help='Get the dependency tree for one package.')(_cmd_query_package_dependencies_by_id)
+    api_app.command(name='preview-sso-group-mappings', help='Test mapping rules against observed SSO claims without saving.')(_cmd_query_preview_sso_group_mappings)
     api_app.command(name='private-key-external-filters', help='List filter options for private-key queries.')(_cmd_query_private_key_external_filters)
     api_app.command(name='private-keys', help='List private keys found in an asset filesystem.')(_cmd_query_private_keys)
     api_app.command(name='public-key-external-filters', help='List filter options for public-key queries.')(_cmd_query_public_key_external_filters)

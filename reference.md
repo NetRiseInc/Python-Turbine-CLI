@@ -46,6 +46,16 @@ Map from SDK helpers to CLI commands:
 
 ## API operations (escape hatch)
 
+### `api activate-sso-connection`
+
+- **Operation:** `mutation_activate_sso_connection`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Put a tested draft SSO connection into service.
+- **Input model:** `ActivateSsoConnectionInput`
+- **Schema:** `turbine api activate-sso-connection --schema`
+- **Flags:** --connection-id
+
 ### `api add-asset-groups-to-assets`
 
 - **Operation:** `mutation_add_asset_groups_to_assets`
@@ -75,6 +85,16 @@ Map from SDK helpers to CLI commands:
 - **Input model:** `AddSecurityGroupMemberInput`
 - **Schema:** `turbine api add-security-group-member --schema`
 - **Flags:** --security-group-id, --user-id
+
+### `api add-sso-group-mapping`
+
+- **Operation:** `mutation_add_sso_group_mapping`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Add one IdP group-to-security-group mapping rule.
+- **Input model:** `AddSsoGroupMappingInput`
+- **Schema:** `turbine api add-sso-group-mapping --schema`
+- **Flags:** --connection-id
 
 ### `api asset-add-dependency`
 
@@ -115,7 +135,7 @@ Map from SDK helpers to CLI commands:
 - **Prefer:** `turbine asset submit`
 - **Input model:** `SubmitAssetInput`
 - **Schema:** `turbine api asset-submit --schema`
-- **Flags:** --name, --manufacturer, --model, --version, --asset-cpe, --architecture, --kernel-version, --os, --bitness, --family, --type, --sbom-type, --cyclonedx-version, --spdx-version, --sbom-format, --license
+- **Flags:** --name, --manufacturer, --model, --version, --asset-cpe, --architecture, --kernel-version, --os, --bitness, --family, --type, --sbom-type, --cyclonedx-version, --spdx-version, --sbom-format, --license, --classification
 
 ### `api asset-update`
 
@@ -126,7 +146,7 @@ Map from SDK helpers to CLI commands:
 - **Prefer:** `turbine asset update`
 - **Input model:** `UpdateAssetInput`
 - **Schema:** `turbine api asset-update --schema`
-- **Flags:** --id, --vendor, --name, --version, --product, --license
+- **Flags:** --id, --vendor, --name, --version, --product, --license, --classification
 
 ### `api bulk-delete-ac-rs`
 
@@ -196,6 +216,16 @@ Map from SDK helpers to CLI commands:
 - **Schema:** `turbine api create-security-group --schema`
 - **Flags:** --name, --description
 
+### `api create-sso-connection`
+
+- **Operation:** `mutation_create_sso_connection`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Create the org's SSO connection as an inactive draft.
+- **Input model:** `CreateSsoConnectionInput`
+- **Schema:** `turbine api create-sso-connection --schema`
+- **Flags:** --connection-type, --identity-provider
+
 ### `api delete-acr`
 
 - **Operation:** `mutation_delete_acr`
@@ -256,6 +286,56 @@ Map from SDK helpers to CLI commands:
 - **Input model:** `DeleteSecurityGroupInput`
 - **Schema:** `turbine api delete-security-group --schema`
 - **Flags:** --security-group-id
+
+### `api delete-sso-connection`
+
+- **Operation:** `mutation_delete_sso_connection`
+- **Kind:** mutation
+- **Risk:** destructive
+- **Summary:** Delete the SSO connection and its group mappings.
+- **Input model:** `DeleteSsoConnectionInput`
+- **Schema:** `turbine api delete-sso-connection --schema`
+- **Flags:** --connection-id
+
+### `api delete-sso-group-mapping`
+
+- **Operation:** `mutation_delete_sso_group_mapping`
+- **Kind:** mutation
+- **Risk:** destructive
+- **Summary:** Remove one IdP group mapping rule.
+- **Input model:** `DeleteSsoGroupMappingInput`
+- **Schema:** `turbine api delete-sso-group-mapping --schema`
+- **Flags:** --mapping-id
+
+### `api disable-sso-connection`
+
+- **Operation:** `mutation_disable_sso_connection`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Stop new SSO logins; existing sessions stay active.
+- **Input model:** `DisableSsoConnectionInput`
+- **Schema:** `turbine api disable-sso-connection --schema`
+- **Flags:** --connection-id
+
+### `api edit-sso-group-mapping`
+
+- **Operation:** `mutation_edit_sso_group_mapping`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Replace one IdP group mapping rule in place.
+- **Input model:** `EditSsoGroupMappingInput`
+- **Schema:** `turbine api edit-sso-group-mapping --schema`
+- **Flags:** --connection-id, --mapping-id
+
+### `api enable-sso-connection`
+
+- **Operation:** `mutation_enable_sso_connection`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Resume logins through an active SSO connection.
+- **Input model:** `EnableSsoConnectionInput`
+- **Schema:** `turbine api enable-sso-connection --schema`
+- **Flags:** --connection-id
 
 ### `api invite-user`
 
@@ -481,6 +561,26 @@ Map from SDK helpers to CLI commands:
 - **Schema:** `turbine api replace-acr --schema`
 - **Flags:** --acr-id
 
+### `api replace-sso-connection-certificate`
+
+- **Operation:** `mutation_replace_sso_connection_certificate`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Replace the SSO connection's signing certificate.
+- **Input model:** `ReplaceSsoConnectionCertificateInput`
+- **Schema:** `turbine api replace-sso-connection-certificate --schema`
+- **Flags:** --connection-id, --etag, --signing-certificate-pem
+
+### `api replace-sso-group-mappings`
+
+- **Operation:** `mutation_replace_sso_group_mappings`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Replace the full set of IdP group mapping rules.
+- **Input model:** `ReplaceSsoGroupMappingsInput`
+- **Schema:** `turbine api replace-sso-group-mappings --schema`
+- **Flags:** --connection-id
+
 ### `api save-jira-space-workflow-config`
 
 - **Operation:** `mutation_save_jira_space_workflow_config`
@@ -490,6 +590,16 @@ Map from SDK helpers to CLI commands:
 - **Input model:** `SaveJiraSpaceWorkflowConfigInput`
 - **Schema:** `turbine api save-jira-space-workflow-config --schema`
 - **Flags:** --space-id, --issue-type-id
+
+### `api select-sso-identity-provider`
+
+- **Operation:** `mutation_select_sso_identity_provider`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Choose the identity provider for the SSO connection.
+- **Input model:** `SelectSsoIdentityProviderInput`
+- **Schema:** `turbine api select-sso-identity-provider --schema`
+- **Flags:** --connection-id, --connection-type, --identity-provider
 
 ### `api set-asset-groups-to-asset`
 
@@ -520,6 +630,16 @@ Map from SDK helpers to CLI commands:
 - **Input model:** `SetOrgUserStatusInput`
 - **Schema:** `turbine api set-org-user-status --schema`
 - **Flags:** --user-id, --status
+
+### `api start-sso-connection-test`
+
+- **Operation:** `mutation_start_sso_connection_test`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Start an SSO login test and get the URL to open.
+- **Input model:** `StartSsoConnectionTestInput`
+- **Schema:** `turbine api start-sso-connection-test --schema`
+- **Flags:** --connection-id
 
 ### `api submit-rise-ai-analysis`
 
@@ -571,6 +691,16 @@ Map from SDK helpers to CLI commands:
 - **Schema:** `turbine api update-org-level-settings --schema`
 - **Flags:** --symbol-index-enabled, --kernel-module-enabled, --curated-hash-enabled, --legacy-hash-enabled, --package-manifest-enabled, --signature-enabled, --pe-meta-data-enabled, --library-version-enabled, --library-name-enabled, --binary-fingerprint-enabled, --idle-timout-enabled, --idle-timeout-seconds, --rise-ai-conversational-gpt-enabled, --rise-ai-insights-report-enabled
 
+### `api update-org-sso-settings`
+
+- **Operation:** `mutation_update_org_sso_settings`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Update org sign-in settings, such as SSO-only login.
+- **Input model:** `UpdateOrgSsoSettingsInput`
+- **Schema:** `turbine api update-org-sso-settings --schema`
+- **Flags:** --user-pass-auth-disabled
+
 ### `api update-security-group`
 
 - **Operation:** `mutation_update_security_group`
@@ -580,6 +710,16 @@ Map from SDK helpers to CLI commands:
 - **Input model:** `UpdateSecurityGroupInput`
 - **Schema:** `turbine api update-security-group --schema`
 - **Flags:** --security-group-id, --name, --description
+
+### `api update-sso-connection`
+
+- **Operation:** `mutation_update_sso_connection`
+- **Kind:** mutation
+- **Risk:** write
+- **Summary:** Update settings on a draft or disabled SSO connection.
+- **Input model:** `UpdateSsoConnectionInput`
+- **Schema:** `turbine api update-sso-connection --schema`
+- **Flags:** --connection-id, --etag, --idp-sign-in-url, --idp-sign-out-url, --idp-identifier, --signing-certificate-pem, --email-claim, --name-claim, --groups-claim, --group-key-type, --login-button-label, --login-button-logo-url
 
 ### `api user-action`
 
@@ -976,6 +1116,27 @@ Map from SDK helpers to CLI commands:
 - **Risk:** read
 - **Summary:** List permission IDs held by the calling user.
 
+### `api get-org-sso-settings`
+
+- **Operation:** `query_get_org_sso_settings`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Get the org's sign-in settings and enforced domains.
+
+### `api get-org-user`
+
+- **Operation:** `query_get_org_user`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Get one org user by ID.
+
+### `api get-resource-ac-rs`
+
+- **Operation:** `query_get_resource_ac_rs`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List access control records attached to one resource.
+
 ### `api get-resource-permissions`
 
 - **Operation:** `query_get_resource_permissions`
@@ -1007,12 +1168,47 @@ Map from SDK helpers to CLI commands:
 - **Schema:** `turbine api get-secret-reachability --schema`
 - **Flags:** --composed-asset-id, --secret-id
 
+### `api get-security-group`
+
+- **Operation:** `query_get_security_group`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Get one security group by ID.
+
 ### `api get-security-group-delete-impact`
 
 - **Operation:** `query_get_security_group_delete_impact`
 - **Kind:** query
 - **Risk:** read
 - **Summary:** Preview who loses access if a security group is deleted.
+
+### `api get-sso-activation-readiness`
+
+- **Operation:** `query_get_sso_activation_readiness`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Check whether the SSO connection can be activated.
+
+### `api get-sso-connection`
+
+- **Operation:** `query_get_sso_connection`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Get the org's SSO connection, or null if none exists.
+
+### `api get-sso-connection-test`
+
+- **Operation:** `query_get_sso_connection_test`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Get an SSO login test's status, claims, or failure.
+
+### `api get-sso-group-sync-summary`
+
+- **Operation:** `query_get_sso_group_sync_summary`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Show recent SSO group-sync membership changes per group.
 
 ### `api get-vuln-reachability`
 
@@ -1362,6 +1558,20 @@ Map from SDK helpers to CLI commands:
 - **Schema:** `turbine api list-security-groups --schema`
 - **Flags:** --first, --after, --last, --before
 
+### `api list-sso-connections`
+
+- **Operation:** `query_list_sso_connections`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List the org's SSO connections, including drafts.
+
+### `api list-sso-group-mappings`
+
+- **Operation:** `query_list_sso_group_mappings`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** List the IdP group mapping rules on the SSO connection.
+
 ### `api match-vulnerabilities`
 
 - **Operation:** `query_match_vulnerabilities`
@@ -1431,6 +1641,16 @@ Map from SDK helpers to CLI commands:
 - **Input model:** `packageDependenciesByIdInput`
 - **Schema:** `turbine api package-dependencies-by-id --schema`
 - **Flags:** --composed-asset-id
+
+### `api preview-sso-group-mappings`
+
+- **Operation:** `query_preview_sso_group_mappings`
+- **Kind:** query
+- **Risk:** read
+- **Summary:** Test mapping rules against observed SSO claims without saving.
+- **Input model:** `PreviewSsoGroupMappingsInput`
+- **Schema:** `turbine api preview-sso-group-mappings --schema`
+- **Flags:** --connection-id, --test-id
 
 ### `api private-key-external-filters`
 

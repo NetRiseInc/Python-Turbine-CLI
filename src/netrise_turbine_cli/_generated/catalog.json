@@ -1,5 +1,20 @@
 [
   {
+    "name": "activate-sso-connection",
+    "operation": "mutation_activate_sso_connection",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Put a tested draft SSO connection into service.",
+    "risk": "write",
+    "return_type": "MutationActivateSsoConnection",
+    "input_model": "ActivateSsoConnectionInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-id"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "add-asset-groups-to-assets",
     "operation": "mutation_add_asset_groups_to_assets",
     "group": "api",
@@ -40,6 +55,21 @@
     "promoted_flags": [
       "security-group-id",
       "user-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "add-sso-group-mapping",
+    "operation": "mutation_add_sso_group_mapping",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Add one IdP group-to-security-group mapping rule.",
+    "risk": "write",
+    "return_type": "MutationAddSsoGroupMapping",
+    "input_model": "AddSsoGroupMappingInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "connection-id"
     ],
     "curated_alias": null
   },
@@ -115,7 +145,8 @@
       "cyclonedx-version",
       "spdx-version",
       "sbom-format",
-      "license"
+      "license",
+      "classification"
     ],
     "curated_alias": "asset submit"
   },
@@ -135,7 +166,8 @@
       "name",
       "version",
       "product",
-      "license"
+      "license",
+      "classification"
     ],
     "curated_alias": "asset update"
   },
@@ -243,6 +275,22 @@
     "curated_alias": null
   },
   {
+    "name": "create-sso-connection",
+    "operation": "mutation_create_sso_connection",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Create the org's SSO connection as an inactive draft.",
+    "risk": "write",
+    "return_type": "MutationCreateSsoConnection",
+    "input_model": "CreateSsoConnectionInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-type",
+      "identity-provider"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "delete-acr",
     "operation": "mutation_delete_acr",
     "group": "api",
@@ -329,6 +377,82 @@
     "has_nested_input": false,
     "promoted_flags": [
       "security-group-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "delete-sso-connection",
+    "operation": "mutation_delete_sso_connection",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Delete the SSO connection and its group mappings.",
+    "risk": "destructive",
+    "return_type": "MutationDeleteSsoConnection",
+    "input_model": "DeleteSsoConnectionInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "delete-sso-group-mapping",
+    "operation": "mutation_delete_sso_group_mapping",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Remove one IdP group mapping rule.",
+    "risk": "destructive",
+    "return_type": "MutationDeleteSsoGroupMapping",
+    "input_model": "DeleteSsoGroupMappingInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "mapping-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "disable-sso-connection",
+    "operation": "mutation_disable_sso_connection",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Stop new SSO logins; existing sessions stay active.",
+    "risk": "write",
+    "return_type": "MutationDisableSsoConnection",
+    "input_model": "DisableSsoConnectionInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "edit-sso-group-mapping",
+    "operation": "mutation_edit_sso_group_mapping",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Replace one IdP group mapping rule in place.",
+    "risk": "write",
+    "return_type": "MutationEditSsoGroupMapping",
+    "input_model": "EditSsoGroupMappingInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "connection-id",
+      "mapping-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "enable-sso-connection",
+    "operation": "mutation_enable_sso_connection",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Resume logins through an active SSO connection.",
+    "risk": "write",
+    "return_type": "MutationEnableSsoConnection",
+    "input_model": "EnableSsoConnectionInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-id"
     ],
     "curated_alias": null
   },
@@ -699,6 +823,38 @@
     "curated_alias": null
   },
   {
+    "name": "replace-sso-connection-certificate",
+    "operation": "mutation_replace_sso_connection_certificate",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Replace the SSO connection's signing certificate.",
+    "risk": "write",
+    "return_type": "MutationReplaceSsoConnectionCertificate",
+    "input_model": "ReplaceSsoConnectionCertificateInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-id",
+      "etag",
+      "signing-certificate-pem"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "replace-sso-group-mappings",
+    "operation": "mutation_replace_sso_group_mappings",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Replace the full set of IdP group mapping rules.",
+    "risk": "write",
+    "return_type": "MutationReplaceSsoGroupMappings",
+    "input_model": "ReplaceSsoGroupMappingsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "connection-id"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "save-jira-space-workflow-config",
     "operation": "mutation_save_jira_space_workflow_config",
     "group": "api",
@@ -711,6 +867,23 @@
     "promoted_flags": [
       "space-id",
       "issue-type-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "select-sso-identity-provider",
+    "operation": "mutation_select_sso_identity_provider",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Choose the identity provider for the SSO connection.",
+    "risk": "write",
+    "return_type": "MutationSelectSsoIdentityProvider",
+    "input_model": "SelectSsoIdentityProviderInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-id",
+      "connection-type",
+      "identity-provider"
     ],
     "curated_alias": null
   },
@@ -757,6 +930,21 @@
     "promoted_flags": [
       "user-id",
       "status"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "start-sso-connection-test",
+    "operation": "mutation_start_sso_connection_test",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Start an SSO login test and get the URL to open.",
+    "risk": "write",
+    "return_type": "MutationStartSsoConnectionTest",
+    "input_model": "StartSsoConnectionTestInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-id"
     ],
     "curated_alias": null
   },
@@ -851,6 +1039,21 @@
     "curated_alias": null
   },
   {
+    "name": "update-org-sso-settings",
+    "operation": "mutation_update_org_sso_settings",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update org sign-in settings, such as SSO-only login.",
+    "risk": "write",
+    "return_type": "MutationUpdateOrgSsoSettings",
+    "input_model": "UpdateOrgSsoSettingsInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "user-pass-auth-disabled"
+    ],
+    "curated_alias": null
+  },
+  {
     "name": "update-security-group",
     "operation": "mutation_update_security_group",
     "group": "api",
@@ -864,6 +1067,32 @@
       "security-group-id",
       "name",
       "description"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "update-sso-connection",
+    "operation": "mutation_update_sso_connection",
+    "group": "api",
+    "kind": "mutation",
+    "summary": "Update settings on a draft or disabled SSO connection.",
+    "risk": "write",
+    "return_type": "MutationUpdateSsoConnection",
+    "input_model": "UpdateSsoConnectionInput",
+    "has_nested_input": false,
+    "promoted_flags": [
+      "connection-id",
+      "etag",
+      "idp-sign-in-url",
+      "idp-sign-out-url",
+      "idp-identifier",
+      "signing-certificate-pem",
+      "email-claim",
+      "name-claim",
+      "groups-claim",
+      "group-key-type",
+      "login-button-label",
+      "login-button-logo-url"
     ],
     "curated_alias": null
   },
@@ -1471,6 +1700,45 @@
     "curated_alias": null
   },
   {
+    "name": "get-org-sso-settings",
+    "operation": "query_get_org_sso_settings",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get the org's sign-in settings and enforced domains.",
+    "risk": "read",
+    "return_type": "QueryGetOrgSsoSettings",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-org-user",
+    "operation": "query_get_org_user",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get one org user by ID.",
+    "risk": "read",
+    "return_type": "QueryGetOrgUser",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-resource-ac-rs",
+    "operation": "query_get_resource_ac_rs",
+    "group": "api",
+    "kind": "query",
+    "summary": "List access control records attached to one resource.",
+    "risk": "read",
+    "return_type": "QueryGetResourceACRs",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
     "name": "get-resource-permissions",
     "operation": "query_get_resource_permissions",
     "group": "api",
@@ -1526,6 +1794,19 @@
     "curated_alias": null
   },
   {
+    "name": "get-security-group",
+    "operation": "query_get_security_group",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get one security group by ID.",
+    "risk": "read",
+    "return_type": "QueryGetSecurityGroup",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
     "name": "get-security-group-delete-impact",
     "operation": "query_get_security_group_delete_impact",
     "group": "api",
@@ -1533,6 +1814,58 @@
     "summary": "Preview who loses access if a security group is deleted.",
     "risk": "read",
     "return_type": "QueryGetSecurityGroupDeleteImpact",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-sso-activation-readiness",
+    "operation": "query_get_sso_activation_readiness",
+    "group": "api",
+    "kind": "query",
+    "summary": "Check whether the SSO connection can be activated.",
+    "risk": "read",
+    "return_type": "QueryGetSsoActivationReadiness",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-sso-connection",
+    "operation": "query_get_sso_connection",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get the org's SSO connection, or null if none exists.",
+    "risk": "read",
+    "return_type": "QueryGetSsoConnection",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-sso-connection-test",
+    "operation": "query_get_sso_connection_test",
+    "group": "api",
+    "kind": "query",
+    "summary": "Get an SSO login test's status, claims, or failure.",
+    "risk": "read",
+    "return_type": "QueryGetSsoConnectionTest",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "get-sso-group-sync-summary",
+    "operation": "query_get_sso_group_sync_summary",
+    "group": "api",
+    "kind": "query",
+    "summary": "Show recent SSO group-sync membership changes per group.",
+    "risk": "read",
+    "return_type": "QueryGetSsoGroupSyncSummary",
     "input_model": null,
     "has_nested_input": false,
     "promoted_flags": [],
@@ -2123,6 +2456,32 @@
     "curated_alias": null
   },
   {
+    "name": "list-sso-connections",
+    "operation": "query_list_sso_connections",
+    "group": "api",
+    "kind": "query",
+    "summary": "List the org's SSO connections, including drafts.",
+    "risk": "read",
+    "return_type": "QueryListSsoConnections",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
+    "name": "list-sso-group-mappings",
+    "operation": "query_list_sso_group_mappings",
+    "group": "api",
+    "kind": "query",
+    "summary": "List the IdP group mapping rules on the SSO connection.",
+    "risk": "read",
+    "return_type": "QueryListSsoGroupMappings",
+    "input_model": null,
+    "has_nested_input": false,
+    "promoted_flags": [],
+    "curated_alias": null
+  },
+  {
     "name": "match-vulnerabilities",
     "operation": "query_match_vulnerabilities",
     "group": "api",
@@ -2231,6 +2590,22 @@
     "has_nested_input": false,
     "promoted_flags": [
       "composed-asset-id"
+    ],
+    "curated_alias": null
+  },
+  {
+    "name": "preview-sso-group-mappings",
+    "operation": "query_preview_sso_group_mappings",
+    "group": "api",
+    "kind": "query",
+    "summary": "Test mapping rules against observed SSO claims without saving.",
+    "risk": "read",
+    "return_type": "QueryPreviewSsoGroupMappings",
+    "input_model": "PreviewSsoGroupMappingsInput",
+    "has_nested_input": true,
+    "promoted_flags": [
+      "connection-id",
+      "test-id"
     ],
     "curated_alias": null
   },

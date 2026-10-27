@@ -591,6 +591,24 @@ List permission IDs held by the calling user.
 turbine api get-my-permissions
 ```
 
+#### api get-org-sso-settings
+Get the org's sign-in settings and enforced domains.
+```bash
+turbine api get-org-sso-settings
+```
+
+#### api get-org-user
+Get one org user by ID.
+```bash
+turbine api get-org-user
+```
+
+#### api get-resource-ac-rs
+List access control records attached to one resource.
+```bash
+turbine api get-resource-ac-rs
+```
+
 #### api get-resource-permissions
 List the caller's effective permissions on a resource.
 ```bash
@@ -615,10 +633,40 @@ Check whether secrets are reachable via paths or scripts.
 turbine api get-secret-reachability --composed-asset-id ASSET_ID --secret-id VALUE
 ```
 
+#### api get-security-group
+Get one security group by ID.
+```bash
+turbine api get-security-group
+```
+
 #### api get-security-group-delete-impact
 Preview who loses access if a security group is deleted.
 ```bash
 turbine api get-security-group-delete-impact
+```
+
+#### api get-sso-activation-readiness
+Check whether the SSO connection can be activated.
+```bash
+turbine api get-sso-activation-readiness
+```
+
+#### api get-sso-connection
+Get the org's SSO connection, or null if none exists.
+```bash
+turbine api get-sso-connection
+```
+
+#### api get-sso-connection-test
+Get an SSO login test's status, claims, or failure.
+```bash
+turbine api get-sso-connection-test
+```
+
+#### api get-sso-group-sync-summary
+Show recent SSO group-sync membership changes per group.
+```bash
+turbine api get-sso-group-sync-summary
 ```
 
 #### api get-vuln-reachability
@@ -837,6 +885,18 @@ List RBAC security groups for the current org.
 turbine api list-security-groups
 ```
 
+#### api list-sso-connections
+List the org's SSO connections, including drafts.
+```bash
+turbine api list-sso-connections
+```
+
+#### api list-sso-group-mappings
+List the IdP group mapping rules on the SSO connection.
+```bash
+turbine api list-sso-group-mappings
+```
+
 #### api match-vulnerabilities
 Find vulnerabilities matching a component or package.
 ```bash
@@ -883,6 +943,12 @@ turbine api org-level-settings
 Get the dependency tree for one package.
 ```bash
 turbine api package-dependencies-by-id --composed-asset-id ASSET_ID
+```
+
+#### api preview-sso-group-mappings
+Test mapping rules against observed SSO claims without saving.
+```bash
+turbine api preview-sso-group-mappings --test-id VALUE
 ```
 
 #### api private-key-external-filters
@@ -1017,6 +1083,12 @@ Get org-wide counts of applied VEX statuses.
 turbine api vulnerability-remediation-summary
 ```
 
+#### api activate-sso-connection
+Put a tested draft SSO connection into service.
+```bash
+turbine api activate-sso-connection
+```
+
 #### api add-asset-groups-to-assets
 Attach asset groups to one or more assets.
 ```bash
@@ -1027,6 +1099,12 @@ turbine api add-asset-groups-to-assets --input '{"asset_ids":["ASSET_ID"]}'
 Add a user to an RBAC security group.
 ```bash
 turbine api add-security-group-member --security-group-id GROUP_ID --user-id USER_ID
+```
+
+#### api add-sso-group-mapping
+Add one IdP group-to-security-group mapping rule.
+```bash
+turbine api add-sso-group-mapping --input '{"mapping":{}}'
 ```
 
 #### api asset-add-dependency
@@ -1083,6 +1161,12 @@ Create an RBAC security group in the current org.
 turbine api create-security-group --name my-example
 ```
 
+#### api create-sso-connection
+Create the org's SSO connection as an inactive draft.
+```bash
+turbine api create-sso-connection --connection-type UNSPECIFIED --identity-provider UNSPECIFIED
+```
+
 #### api delete-acr
 Delete one access control record.
 ```bash
@@ -1111,6 +1195,36 @@ turbine api delete-notification-configuration --id CONFIG_ID --dry-run
 Delete a security group from the organization.
 ```bash
 turbine api delete-security-group --security-group-id GROUP_ID --dry-run
+```
+
+#### api delete-sso-connection
+Delete the SSO connection and its group mappings.
+```bash
+turbine api delete-sso-connection --dry-run
+```
+
+#### api delete-sso-group-mapping
+Remove one IdP group mapping rule.
+```bash
+turbine api delete-sso-group-mapping --mapping-id VALUE --dry-run
+```
+
+#### api disable-sso-connection
+Stop new SSO logins; existing sessions stay active.
+```bash
+turbine api disable-sso-connection
+```
+
+#### api edit-sso-group-mapping
+Replace one IdP group mapping rule in place.
+```bash
+turbine api edit-sso-group-mapping --input '{"mapping_id":"VALUE","mapping":{}}'
+```
+
+#### api enable-sso-connection
+Resume logins through an active SSO connection.
+```bash
+turbine api enable-sso-connection
 ```
 
 #### api invite-user
@@ -1227,10 +1341,28 @@ Replace an access control record in one delete-and-create.
 turbine api replace-acr --input '{"acr_id":"VALUE","binding":{"entity_type":"USER","entity_id":"VALUE","resource_type":"ORGANIZATION"}}'
 ```
 
+#### api replace-sso-connection-certificate
+Replace the SSO connection's signing certificate.
+```bash
+turbine api replace-sso-connection-certificate --etag VALUE --signing-certificate-pem VALUE
+```
+
+#### api replace-sso-group-mappings
+Replace the full set of IdP group mapping rules.
+```bash
+turbine api replace-sso-group-mappings --input '{"mappings":[{}]}'
+```
+
 #### api save-jira-space-workflow-config
 Save status mappings and workflow config for a Jira space.
 ```bash
 turbine api save-jira-space-workflow-config --input '{"space_id":"VALUE","issue_type_id":"VALUE","mappings":[{"jira_status_id":"VALUE"}],"resolution_status_ids":["VALUE"]}'
+```
+
+#### api select-sso-identity-provider
+Choose the identity provider for the SSO connection.
+```bash
+turbine api select-sso-identity-provider --connection-type UNSPECIFIED --identity-provider UNSPECIFIED
 ```
 
 #### api set-asset-groups-to-asset
@@ -1249,6 +1381,12 @@ turbine api set-assets-to-asset-group --group-id GROUP_ID
 Enable or disable a user in the current org.
 ```bash
 turbine api set-org-user-status --user-id USER_ID --status ENABLED
+```
+
+#### api start-sso-connection-test
+Start an SSO login test and get the URL to open.
+```bash
+turbine api start-sso-connection-test
 ```
 
 #### api submit-rise-ai-analysis
@@ -1275,10 +1413,22 @@ Update org settings such as idle session timeout.
 turbine api update-org-level-settings --idle-timout-enabled
 ```
 
+#### api update-org-sso-settings
+Update org sign-in settings, such as SSO-only login.
+```bash
+turbine api update-org-sso-settings
+```
+
 #### api update-security-group
 Update a security group's name or description.
 ```bash
 turbine api update-security-group --security-group-id GROUP_ID --name my-example
+```
+
+#### api update-sso-connection
+Update settings on a draft or disabled SSO connection.
+```bash
+turbine api update-sso-connection --etag VALUE
 ```
 
 #### api user-action

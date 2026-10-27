@@ -64,16 +64,18 @@ For broad "risk" questions, run `turbine asset risk` once, present counts, then 
 
 ## Generated API index
 
-**168** API operations (regenerated from the SDK).
+**193** API operations (regenerated from the SDK).
 
 Start with curated commands (`turbine asset list`, `turbine vuln remediate`, …).
 Use `turbine api <operation>` when you need an op the curated surface misses.
 
 | API command | Risk | Curated alias |
 | --- | --- | --- |
+| `activate-sso-connection` | write | — |
 | `add-asset-groups-to-assets` | write | — |
 | `add-assets-to-asset-group` | write | group add-assets |
 | `add-security-group-member` | write | — |
+| `add-sso-group-mapping` | write | — |
 | `asset-add-dependency` | write | — |
 | `asset-modify-dependency` | write | — |
 | `asset-remove-dependencies` | write | — |
@@ -86,12 +88,18 @@ Use `turbine api <operation>` when you need an op the curated surface misses.
 | `create-custom-role` | write | — |
 | `create-notification-configuration` | write | — |
 | `create-security-group` | write | — |
+| `create-sso-connection` | write | — |
 | `delete-acr` | destructive | — |
 | `delete-asset-comparison-report` | destructive | — |
 | `delete-asset-group` | destructive | group delete |
 | `delete-custom-role` | destructive | — |
 | `delete-notification-configuration` | destructive | — |
 | `delete-security-group` | destructive | — |
+| `delete-sso-connection` | destructive | — |
+| `delete-sso-group-mapping` | destructive | — |
+| `disable-sso-connection` | write | — |
+| `edit-sso-group-mapping` | write | — |
+| `enable-sso-connection` | write | — |
 | `invite-user` | write | — |
 | `jira-integration-add-connected-space` | write | — |
 | `jira-integration-create-issue` | write | — |
@@ -103,17 +111,9 @@ Use `turbine api <operation>` when you need an op the curated surface misses.
 | `jira-integration-test-connection` | write | — |
 | `notify-notification-configuration` | write | — |
 | `remediate-all-asset-vulnerabilities` | destructive | vuln remediate --all |
-| `remediate-asset-vulnerabilities` | destructive | vuln remediate --bulk |
-| `remediate-asset-vulnerability` | destructive | vuln remediate |
-| `remediate-certificates` | destructive | — |
-| `remediate-license-issues` | destructive | — |
-| `remediate-private-keys` | destructive | — |
-| `remediate-public-keys` | destructive | — |
-| `remediate-secrets` | destructive | — |
-| `remove-all-asset-groups-from-assets` | destructive | — |
 | … | … | … |
 
-See [reference.md](reference.md) for all 168 API operations.
+See [reference.md](reference.md) for all 193 API operations.
 
 <!-- AUTO-GENERATED-CLI-SECTION:END -->
 

@@ -428,6 +428,15 @@ type Query {
   """
   jiraIntegrationSetup(args: JiraIntegrationSetupInput): JiraIntegrationSetup!
 
+  """Retrieves a security group by id."""
+  getSecurityGroup(securityGroupId: ID!): SecurityGroup
+
+  """Retrieves an organization user by id."""
+  getOrgUser(userId: ID!): OrgUser
+
+  """Retrieves all access-control records attached to one resource."""
+  getResourceACRs(resourceType: AcrResourceType!, resourceId: String): [AccessControlRecord!]!
+
   """
   Retrieves a list of all RBAC security groups for the current organization.
   """
@@ -508,6 +517,46 @@ type Query {
   Execution-path reachability evidence for an exposed secret on the asset.
   """
   getSecretReachability(args: GetSecretReachabilityInput!): [ReachabilityEvidence!]
+
+  """
+  Retrieves the current organization's SSO connection. Null when none is configured.
+  """
+  getSsoConnection(connectionId: ID): SsoConnection
+
+  """
+  Lists the organization's SSO connections. Needed to resume a half-finished wizard or address
+  a legacy multi-connection org.
+  """
+  listSsoConnections: ListSsoConnectionsResponse!
+
+  """
+  Reports whether the SSO connection can be activated, and what is outstanding.
+  """
+  getSsoActivationReadiness(connectionId: ID): SsoActivationReadiness!
+
+  """
+  Retrieves one connection test's state, and the observed claims or the structured failure.
+  """
+  getSsoConnectionTest(testId: ID!): SsoConnectionTest
+
+  """Retrieves every identity provider group mapping on the SSO connection."""
+  listSsoGroupMappings(connectionId: ID): ListSsoGroupMappingsResponse!
+
+  """
+  Resolves candidate mappings against the claims a connection test observed, so the caller can
+  iterate before committing them. Nothing is saved.
+  """
+  previewSsoGroupMappings(args: PreviewSsoGroupMappingsInput!): PreviewSsoGroupMappingsResponse!
+
+  """Retrieves the current organization's authentication settings."""
+  getOrgSsoSettings: OrgSsoSettings!
+
+  """
+  Retrieves, per security group, when login-time identity provider group sync last changed its
+  membership and what it changed. Omitting `securityGroupIds` returns every group sync has
+  touched, which is what a mapping table wants.
+  """
+  getSsoGroupSyncSummary(securityGroupIds: [ID!]): GetSsoGroupSyncSummaryResponse!
 }
 
 """
@@ -1104,6 +1153,78 @@ type Mutation {
   Replaces an access control record (atomic delete + create) via the RBAC service.
   """
   replaceACR(args: ReplaceAcrInput!): ReplaceAcrResponse!
+
+  """
+  Creates the organization's SSO connection as a bare draft, reachable by no real login.
+  """
+  createSsoConnection(args: CreateSsoConnectionInput!): CreateSsoConnectionResponse!
+
+  """
+  Patches the supplied fields on the SSO connection. Invalidates any passing test.
+  
+  Refusals carry `extensions.reason`: `CONNECTION_ACTIVE` for an active connection, `STALE_ETAG`
+  for an outdated `etag`.
+  """
+  updateSsoConnection(args: UpdateSsoConnectionInput!): UpdateSsoConnectionResponse!
+
+  """
+  Replaces the signing certificate only. The only edit to an active connection's settings.
+  """
+  replaceSsoConnectionCertificate(args: ReplaceSsoConnectionCertificateInput!): ReplaceSsoConnectionCertificateResponse!
+
+  """
+  Selects the connection's identity provider, creating a draft when none exists. A draft resets
+  to fresh. A disabled connection takes the new provider's claim defaults. An active connection
+  is refused unless the provider is unchanged. A group key type change removes the mappings.
+  
+  Refusals carry `extensions.reason`: `CONNECTION_ACTIVE` for an active connection whose provider
+  would change.
+  """
+  selectSsoIdentityProvider(args: SelectSsoIdentityProviderInput!): SelectSsoIdentityProviderResponse!
+
+  """
+  Removes the SSO connection and its group mappings.
+  
+  Refusals carry `extensions.reason`: `LAST_AUTHENTICATION_METHOD` when it is the organization's
+  only remaining way to sign in.
+  """
+  deleteSsoConnection(args: DeleteSsoConnectionInput!): DeleteSsoConnectionResponse!
+
+  """Resumes logins through an active SSO connection. Idempotent."""
+  enableSsoConnection(args: EnableSsoConnectionInput!): EnableSsoConnectionResponse!
+
+  """
+  Stops new logins through the SSO connection. Existing sessions are unaffected.
+  """
+  disableSsoConnection(args: DisableSsoConnectionInput!): DisableSsoConnectionResponse!
+
+  """Promotes a tested draft SSO connection into service."""
+  activateSsoConnection(args: ActivateSsoConnectionInput!): ActivateSsoConnectionResponse!
+
+  """
+  Arms a one-shot capture of a real assertion and returns the URL the administrator must open.
+  """
+  startSsoConnectionTest(args: StartSsoConnectionTestInput!): StartSsoConnectionTestResponse!
+
+  """Replaces the whole identity provider group mapping set."""
+  replaceSsoGroupMappings(args: ReplaceSsoGroupMappingsInput!): ReplaceSsoGroupMappingsResponse!
+
+  """Adds one identity provider group mapping rule."""
+  addSsoGroupMapping(args: AddSsoGroupMappingInput!): AddSsoGroupMappingResponse!
+
+  """Replaces one identity provider group mapping rule in place."""
+  editSsoGroupMapping(args: EditSsoGroupMappingInput!): EditSsoGroupMappingResponse!
+
+  """Removes one identity provider group mapping rule."""
+  deleteSsoGroupMapping(args: DeleteSsoGroupMappingInput!): DeleteSsoGroupMappingResponse!
+
+  """
+  Patches the organization's authentication settings.
+  
+  Refusals carry `extensions.reason`: `SAML_SESSION_REQUIRED` when password sign-in is turned off
+  from a session that did not authenticate through SSO.
+  """
+  updateOrgSsoSettings(args: UpdateOrgSsoSettingsInput!): UpdateOrgSsoSettingsResponse!
 }
 
 """
@@ -2371,20 +2492,20 @@ enum NotificationActivityKind {
   NOTIFICATION_ACTIVITY_MISCONFIG_CHANGED
   NOTIFICATION_ACTIVITY_ORG_SETTINGS_UPDATED
   NOTIFICATION_ACTIVITY_SECRET_REMEDIATED
-  NOTIFICATION_ACTIVITY_RBAC_ACR_CREATED
-  NOTIFICATION_ACTIVITY_RBAC_ACR_DELETED
-  NOTIFICATION_ACTIVITY_RBAC_ACR_REPLACED
-  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_CREATED
-  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_UPDATED
-  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_DELETED
-  NOTIFICATION_ACTIVITY_RBAC_MEMBER_ADDED
-  NOTIFICATION_ACTIVITY_RBAC_MEMBER_REMOVED
-  NOTIFICATION_ACTIVITY_RBAC_ROLE_CREATED
-  NOTIFICATION_ACTIVITY_RBAC_ROLE_UPDATED
-  NOTIFICATION_ACTIVITY_RBAC_ROLE_DELETED
-  NOTIFICATION_ACTIVITY_RBAC_USER_INVITED
-  NOTIFICATION_ACTIVITY_RBAC_USER_REMOVED
-  NOTIFICATION_ACTIVITY_RBAC_USER_STATUS_CHANGED
+  NOTIFICATION_ACTIVITY_RBAC_ACR_CREATED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_ACR_DELETED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_ACR_REPLACED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_CREATED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_UPDATED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_SECURITY_GROUP_DELETED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_MEMBER_ADDED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_MEMBER_REMOVED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_ROLE_CREATED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_ROLE_UPDATED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_ROLE_DELETED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_USER_INVITED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_USER_REMOVED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  NOTIFICATION_ACTIVITY_RBAC_USER_STATUS_CHANGED @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
 }
 
 enum NotificationActivityThresholdField {
@@ -5004,20 +5125,20 @@ enum ActivityType {
   GROUP_DELETED
   GROUP_MEMBERSHIP_CHANGED
   ORG_SETTINGS_UPDATED
-  RBAC_ACR_CREATED
-  RBAC_ACR_DELETED
-  RBAC_ACR_REPLACED
-  RBAC_SECURITY_GROUP_CREATED
-  RBAC_SECURITY_GROUP_UPDATED
-  RBAC_SECURITY_GROUP_DELETED
-  RBAC_MEMBER_ADDED
-  RBAC_MEMBER_REMOVED
-  RBAC_ROLE_CREATED
-  RBAC_ROLE_UPDATED
-  RBAC_ROLE_DELETED
-  RBAC_USER_INVITED
-  RBAC_USER_REMOVED
-  RBAC_USER_STATUS_CHANGED
+  RBAC_ACR_CREATED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_ACR_DELETED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_ACR_REPLACED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_SECURITY_GROUP_CREATED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_SECURITY_GROUP_UPDATED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_SECURITY_GROUP_DELETED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_MEMBER_ADDED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_MEMBER_REMOVED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_ROLE_CREATED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_ROLE_UPDATED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_ROLE_DELETED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_USER_INVITED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_USER_REMOVED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
+  RBAC_USER_STATUS_CHANGED @deprecated(reason: "Temporarily unsupported. This value is retained for backwards compatibility and currently has no effect.")
 }
 
 enum ActivityEntityType {
@@ -5030,10 +5151,10 @@ enum ActivityEntityType {
   SECRET
   LICENSE_ISSUE
   ORGANIZATION
-  RBAC_ACR
-  RBAC_SECURITY_GROUP
-  RBAC_ROLE
-  RBAC_USER
+  RBAC_ACR @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  RBAC_SECURITY_GROUP @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  RBAC_ROLE @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
+  RBAC_USER @deprecated(reason: "Temporarily unsupported. Rejected with BAD_USER_INPUT when saved on a notification configuration.")
 }
 
 input ActivityInput {
@@ -5342,6 +5463,12 @@ type Asset {
   orgId: String
   id: String
   type: AssetType
+
+  """
+  CycloneDX component type the asset is classified as. Distinct from `type`,
+  which describes the uploaded file's format.
+  """
+  classification: AssetClassification
   name: String
   vendor: String
   product: String
@@ -5377,6 +5504,12 @@ type AssetListItem {
   orgId: String
   id: String
   type: AssetType
+
+  """
+  CycloneDX component type the asset is classified as. Distinct from `type`,
+  which describes the uploaded file's format.
+  """
+  classification: AssetClassification
   name: String
   vendor: String
   product: String
@@ -5422,6 +5555,27 @@ enum AssetType {
   CYCLONE_DX_XML
   SPDX_JSON
   SPDX_TAG
+}
+
+"""
+Mirrors the CycloneDX component type taxonomy. Values are declared in the order
+defined by the `turbinepp.admin.v1.AssetClassification` proto.
+"""
+enum AssetClassification {
+  UNSPECIFIED
+  APPLICATION
+  FRAMEWORK
+  LIBRARY
+  CONTAINER
+  PLATFORM
+  OPERATING_SYSTEM
+  DEVICE
+  DEVICE_DRIVER
+  FIRMWARE
+  FILE
+  MACHINE_LEARNING_MODEL
+  DATA
+  CRYPTOGRAPHIC_ASSET
 }
 
 type Filesystem {
@@ -5712,6 +5866,7 @@ enum AssetsFilterField {
   PRODUCT
   VERSION
   TYPE
+  CLASSIFICATION
   SHA256
   PROCESSINGSTATUS
   RISKCATEGORY
@@ -5737,6 +5892,7 @@ enum AssetsSortField {
   ENDTIME
   PROCESSINGSTATUS
   TYPE
+  CLASSIFICATION
   RISKCATEGORY
   RISKSCORE
   ASSETGROUPCOUNT
@@ -6090,6 +6246,9 @@ input UpdateAssetInput {
   """Ordered CPE 2.3 strings. Empty list clears all CPEs."""
   assetCpes: [String!]
   license: String
+
+  """CycloneDX component type the asset is classified as."""
+  classification: AssetClassification
 }
 
 input SubmitAssetInput {
@@ -6124,6 +6283,12 @@ input SubmitAssetInput {
   sbomFormat: SbomFormat
   assetGroupIds: [ID!]
   license: String
+
+  """
+  CycloneDX component type. Mapped to T++ AssetClassification int32 on InitializeAssetUploadRequest.
+  Defaults to FILE when omitted.
+  """
+  classification: AssetClassification
 }
 
 enum SbomType {
@@ -7550,24 +7715,6 @@ type RoleDeleteImpact {
 }
 
 """
-Represents an IDP (Identity Provider) group → NetRise security group mapping used during SSO sync.
-"""
-type IDPGroupMapping {
-  id: ID!
-  idpGroupName: String!
-  securityGroupId: String!
-  securityGroupName: String!
-  lastSyncTime: String
-  createdTime: String
-  createdBy: String
-}
-
-"""Response payload for the `listIDPGroupMappings` query."""
-type ListIDPGroupMappingsResponse {
-  mappings: [IDPGroupMapping!]!
-}
-
-"""
 Input payload for the `inviteUser` mutation. Invites a user to the current organization
 through the RBAC service.
 """
@@ -8026,6 +8173,839 @@ type RemoveOrgUserResponse {
 input GetSecretReachabilityInput {
   composedAssetId: String!
   secretId: String!
+}
+
+"""
+The federation protocol a connection speaks.
+Maps to the SSO service `ConnectionType` proto enum.
+"""
+enum SsoConnectionType {
+  UNSPECIFIED
+  SAML2_0
+}
+
+"""
+A connection's lifecycle state. A problem never changes the status: it is listed in
+`SsoConnection.issues`.
+
+`PROVISIONING` is stored rather than computed: it is persisted at create and cleared once the
+connection is confirmed to resolve, so a read knows whether confirmation is still outstanding.
+Maps to the SSO service `ConnectionStatus` proto enum.
+"""
+enum SsoConnectionStatus {
+  UNSPECIFIED
+  PROVISIONING
+  DRAFT
+  ACTIVE
+  DISABLED
+}
+
+"""
+A problem with a connection. It never changes `SsoConnection.status`.
+Maps to the SSO service `SsoConnectionIssue` proto enum.
+"""
+enum SsoConnectionIssue {
+  UNSPECIFIED
+
+  """No signing certificate is stored."""
+  CERTIFICATE_MISSING
+
+  """The stored certificate cannot be parsed."""
+  CERTIFICATE_UNREADABLE
+
+  """The stored certificate is past expiry."""
+  CERTIFICATE_EXPIRED
+
+  """
+  A failed save may have left the identity provider's copy differing from ours.
+  """
+  OUT_OF_STEP
+
+  """
+  The abandoned draft was retired and can no longer be tested or activated.
+  """
+  DRAFT_RETIRED
+}
+
+"""
+The customer's identity provider product. Selects claim defaults and setup instructions.
+Maps to the SSO service `IdentityProvider` proto enum.
+"""
+enum SsoIdentityProvider {
+  UNSPECIFIED
+  ENTRA
+  OKTA
+  GOOGLE
+  GENERIC
+}
+
+"""
+Something the caller may do to a connection now. The server computes it from the connection's
+state and the organization's other connections, so a client reads it instead of re-deriving
+those rules. An offered `ACTIVATE` can still fail readiness, and an offered `DISABLE` or
+`DELETE` can still be refused by the guard that keeps the organization a way to sign in.
+An `ACTIVE` connection is offered only `REPLACE_CERTIFICATE`, `DISABLE` and `DELETE`.
+Maps to the SSO service `SsoAction` proto enum.
+"""
+enum SsoAction {
+  UNSPECIFIED
+  SELECT_IDENTITY_PROVIDER
+
+  """
+  Offered on a draft and a disabled connection, through `updateSsoConnection`.
+  """
+  EDIT
+  REPLACE_CERTIFICATE
+  START_TEST
+  ACTIVATE
+  ENABLE
+  DISABLE
+
+  """
+  Offered on a draft. Deletes the draft and leaves the serving connection, if any, untouched.
+  """
+  DISCARD
+
+  """
+  Offered on a connection that is not a draft. A draft is removed with `DISCARD` instead.
+  """
+  DELETE
+}
+
+"""
+A connection field that selecting a different identity provider resets.
+Maps to the SSO service `ResetField` proto enum.
+"""
+enum SsoResetField {
+  UNSPECIFIED
+  SIGN_IN_URL
+  SIGN_OUT_URL
+  IDENTIFIER
+  SIGNING_CERTIFICATE
+  EMAIL_CLAIM
+  NAME_CLAIM
+  GROUPS_CLAIM
+  GROUP_KEY_TYPE
+}
+
+"""
+Whether the identity provider emits group identifiers or group names.
+Maps to the SSO service `GroupKeyType` proto enum.
+"""
+enum SsoGroupKeyType {
+  UNSPECIFIED
+  ID
+  NAME
+}
+
+"""
+How a mapping rule decides whether it applies to a user.
+
+The type is the discriminator rather than the group key, which is what lets `UNMATCHED` and
+`ALL_USERS` rules carry no key at all instead of a reserved key value that an identity provider
+could itself assert. `UNSPECIFIED` means `IDP_GROUP`, which is what a mapping meant before the
+type existed. Maps to the SSO service `SsoGroupRuleType` proto enum.
+"""
+enum SsoGroupRuleType {
+  UNSPECIFIED
+
+  """Applies when the identity provider asserts `idpGroupKey`."""
+  IDP_GROUP
+
+  """Applies when no `IDP_GROUP` rule matched. The "everyone else" row."""
+  UNMATCHED
+
+  """
+  Applies to every authenticated user, on top of whatever their `IDP_GROUP` rules grant.
+  """
+  ALL_USERS
+}
+
+"""
+The outcome of one connection test.
+Maps to the SSO service `TestState` proto enum.
+"""
+enum SsoTestState {
+  UNSPECIFIED
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+"""
+A claim the connection requires on a valid assertion.
+Maps to the SSO service `RequiredClaim` proto enum.
+
+`GROUPS` is only meaningful when the connection has a groups claim configured: the groups claim is
+optional, and a connection without one is never reported as missing it.
+"""
+enum SsoRequiredClaim {
+  UNSPECIFIED
+  EMAIL
+  GROUPS
+}
+
+"""
+Why a connection cannot be activated yet.
+Maps to the SSO service `ReadinessBlockerReason` proto enum.
+"""
+enum SsoReadinessBlockerReason {
+  UNSPECIFIED
+  CONNECTION_NOT_READY
+  NEEDS_TESTING
+  TEST_EXPIRED
+  CONFIGURATION_CHANGED_SINCE_TEST
+  NO_GROUP_MAPPINGS
+  MAPPINGS_MATCH_NO_USER
+  CERTIFICATE_EXPIRED
+}
+
+"""
+An organization's SSO connection. Mirrors the `SsoConnection` proto message.
+
+Carries no signing certificate: that field appears on the update input and on no
+response in the SSO service, so there is no shape in which a read returns it.
+"""
+type SsoConnection {
+  """Opaque server-assigned handle. Compare for equality only."""
+  connectionId: ID!
+  orgId: String!
+
+  """
+  The provider-side name, settled before the connection exists and immutable for its life.
+  Display and support only.
+  """
+  connectionName: String!
+  connectionType: SsoConnectionType!
+  status: SsoConnectionStatus!
+
+  """Displayable text explaining the current status."""
+  statusDetail: String
+
+  """
+  Reads GENERIC when no provider is recorded. The stored value stays empty until an operator
+  selects one or it is inferred.
+  """
+  identityProvider: SsoIdentityProvider!
+
+  """Where the user is sent to authenticate."""
+  idpSignInUrl: String
+
+  """The identity provider's single-logout endpoint. Optional."""
+  idpSignOutUrl: String
+
+  """The identity provider's entity id."""
+  idpIdentifier: String
+
+  """Names the assertion claim carrying the user's email address."""
+  emailClaim: String
+
+  """Names the assertion claim carrying the user's display name."""
+  nameClaim: String
+
+  """
+  Names the assertion claim carrying the user's group memberships. Empty means groups are not
+  mapped: no mappings are needed to activate, and login grants nothing from them.
+  """
+  groupsClaim: String
+  groupKeyType: SsoGroupKeyType!
+
+  """SHA-256 fingerprint of the identity provider signing certificate."""
+  certFingerprint: String
+
+  """Subject of the identity provider signing certificate."""
+  certSubject: String
+  certExpiry: String
+
+  """Overrides the SSO button text on the login page. Optional."""
+  loginButtonLabel: String
+
+  """Logo shown on the SSO button. Optional."""
+  loginButtonLogoUrl: String
+
+  """
+  The assertion consumer service URL to register with the identity provider.
+  """
+  acsUrl: String
+
+  """The service provider entity id to register with the identity provider."""
+  spEntityId: String
+
+  """
+  The service provider metadata document to import into the identity provider.
+  """
+  spMetadataUrl: String
+
+  """
+  Guards concurrent updates. Send the value last read back on `updateSsoConnection`.
+  """
+  etag: String
+
+  """
+  What the caller may do to this connection now. Empty when nothing is permitted. Populated on
+  every connection an administrator reads or changes, and not on the login path.
+  """
+  allowedActions: [SsoAction!]!
+
+  """
+  The connection's own group mappings, in the order `listSsoGroupMappings` returns them. The
+  RBAC-joined fields are null here.
+  """
+  groupMappings: [SsoGroupMapping!]!
+
+  """
+  PEM certificate the identity provider encrypts assertions to, registered alongside `acsUrl`.
+  Null when the connection does not carry our key.
+  """
+  encryptionCertificatePem: String
+
+  """
+  Whether the identity layer can serve `spMetadataUrl` yet. False while the connection is
+  provisioning, so do not offer the URL for import until it is true.
+  """
+  metadataAvailable: Boolean!
+
+  """
+  What a provider switch would clear now. Meaningful only when `SELECT_IDENTITY_PROVIDER` is
+  offered: a draft clears every provider-owned field that holds data, and a disabled connection
+  only the claims the switch would replace. Empty then means a switch clears nothing.
+  """
+  resettableFields: [SsoResetField!]!
+
+  """
+  Problems with the connection. Empty when there are none. They never change `status`: a serving
+  connection with a problem is `ACTIVE`.
+  """
+  issues: [SsoConnectionIssue!]!
+}
+
+"""
+What selecting an identity provider did to the connection. Mirrors the `IdentityProviderChange`
+proto message.
+"""
+type SsoIdentityProviderChange {
+  """
+  False when the selected provider was already the connection's provider (GENERIC when none is
+  recorded) and nothing was touched.
+  """
+  providerChanged: Boolean!
+
+  """
+  True when the new provider's claim defaults replaced the connection's own. False when nothing
+  changed.
+  """
+  claimDefaultsApplied: Boolean!
+
+  """
+  How many group mappings the returned connection lost because the selection changed the group
+  key type. The serving connection's own mappings are never touched.
+  """
+  mappingsDropped: Int!
+
+  """The fields the selection reset."""
+  clearedFields: [SsoResetField!]!
+}
+
+"""
+One claim exactly as the identity provider emitted it, with no normalization.
+Mirrors the `ObservedClaim` proto message.
+"""
+type SsoObservedClaim {
+  name: String!
+  values: [String!]!
+}
+
+"""
+Grants one security group to the users a rule applies to. Mirrors the `SsoGroupMapping` proto
+message: one entry per row of the mapping table, whatever kind of row it is.
+
+`mappingId`, `idpGroupKey`, `idpGroupLabel`, `securityGroupId`, `createdAt` and `ruleType` come
+from the SSO service. `securityGroupName`, `memberCount` and `lastSyncedAt` do not: the SSO
+service holds no security groups and does not run login-time sync. `listSsoGroupMappings` joins
+those from RBAC (`ListSecurityGroups` and `GetSsoGroupSyncSummary`) for display. Null means the
+group is missing or sync has never touched it.
+"""
+type SsoGroupMapping {
+  """Opaque server-assigned handle. Compare for equality only."""
+  mappingId: ID!
+
+  """
+  The group value exactly as the identity provider emits it. Present on an `IDP_GROUP` rule and
+  empty on every other kind.
+  """
+  idpGroupKey: String
+
+  """A human-readable name, for display when the key is opaque."""
+  idpGroupLabel: String
+
+  """
+  Required on `IDP_GROUP`. Omit only on `UNMATCHED`/`ALL_USERS` for an explicit "no access"
+  catch-all.
+  """
+  securityGroupId: String
+  createdAt: String
+  ruleType: SsoGroupRuleType!
+
+  """
+  RBAC join. Null when the security group cannot be loaded or the rule grants nothing.
+  """
+  securityGroupName: String
+
+  """
+  RBAC join from `SecurityGroup.member_count`. Null when the security group cannot be loaded.
+  """
+  memberCount: Int
+
+  """
+  RBAC join from `GetSsoGroupSyncSummary.last_synced_at`. Null when sync has never changed
+  this group's membership.
+  """
+  lastSyncedAt: String
+}
+
+"""
+The identity provider could not be reached.
+Mirrors `SsoConnectionTest.NetworkFailure`.
+"""
+type SsoTestNetworkFailure {
+  detail: String
+}
+
+"""
+The identity provider returned a SAML error.
+Mirrors `SsoConnectionTest.IdpErrorResponse`.
+"""
+type SsoTestIdpError {
+  statusCode: String
+  subStatusCode: String
+  idpMessage: String
+}
+
+"""
+The assertion was validly signed but a required claim was absent. This fails the test; it is
+not a completed test with a gap.
+Mirrors `SsoConnectionTest.MissingRequiredClaims`.
+"""
+type SsoTestMissingRequiredClaims {
+  claims: [SsoRequiredClaim!]!
+}
+
+"""
+Why a connection test failed. Set only when `state` is `FAILED`.
+Mirrors the `SsoConnectionTest.failure` oneof.
+"""
+union SsoConnectionTestFailure = SsoTestNetworkFailure | SsoTestIdpError | SsoTestMissingRequiredClaims
+
+"""
+One rehearsal of the SAML handshake. Mirrors the `SsoConnectionTest` proto message.
+"""
+type SsoConnectionTest {
+  testId: ID!
+  state: SsoTestState!
+
+  """What the identity provider sent. Present once the test completes."""
+  observedClaims: [SsoObservedClaim!]!
+
+  """Set only when `state` is `FAILED`."""
+  failure: SsoConnectionTestFailure
+  initiatedBy: String
+  createdAt: String
+
+  """When an untaken test is abandoned."""
+  expiresAt: String
+}
+
+"""
+One asserted identity provider group that a mapping matched.
+Mirrors the `MatchedIdpGroup` proto message.
+"""
+type SsoMatchedIdpGroup {
+  idpGroupKey: String!
+  idpGroupLabel: String
+  securityGroupId: String!
+}
+
+"""
+The user a claims snapshot resolves to, read through the connection's configured email and name
+claims. Mirrors the `ResolvedIdentity` proto message.
+"""
+type SsoResolvedIdentity {
+  """Empty when the configured email claim is absent from the snapshot."""
+  email: String
+  displayName: String
+}
+
+"""
+One reason a connection cannot be activated. Mirrors the `ReadinessBlocker` proto message.
+"""
+type SsoReadinessBlocker {
+  reason: SsoReadinessBlockerReason!
+
+  """Displayable text. Render this when the reason is unrecognized."""
+  message: String
+}
+
+"""
+Whether a connection can be activated, and what is outstanding. This is the same evaluation
+`activateSsoConnection` enforces. Mirrors the `ActivationReadiness` proto message.
+"""
+type SsoActivationReadiness {
+  ready: Boolean!
+  blockers: [SsoReadinessBlocker!]!
+}
+
+"""
+Organization-wide authentication configuration. Mirrors the `OrgSsoSettings` proto message.
+"""
+type OrgSsoSettings {
+  """Restricts the organization to SSO logins when true."""
+  userPassAuthDisabled: Boolean!
+
+  """
+  NetRise-set; read-only here by design (no domain-ownership verification).
+  """
+  enforcedDomains: [String!]!
+}
+
+"""
+When login-time identity provider group sync last changed one security group's membership.
+Mirrors the `SsoGroupSyncSummary` proto message.
+
+Groups that sync has never touched are absent from the response entirely, which a client should
+render as "never" rather than as zero.
+"""
+type SsoGroupSyncSummary {
+  securityGroupId: String!
+  lastSyncedAt: String
+
+  """The counts from that most recent change, not running totals."""
+  lastAdded: Int!
+  lastRemoved: Int!
+}
+
+"""
+One mapping rule to save. Mirrors the `SsoGroupMappingInput` proto message.
+
+`idpGroupKey` is required on an `IDP_GROUP` rule and must be empty on any other kind: a
+non-empty key on a rule that ignores it is rejected rather than dropped, or two rules differing
+only in an ignored field would look distinct and behave identically. An omitted `ruleType` means
+`IDP_GROUP`, so omitting both the type and the key is rejected rather than quietly creating a
+catch-all.
+
+`securityGroupId` is required on `IDP_GROUP`. Omit only on `UNMATCHED`/`ALL_USERS` for an
+explicit "no access" catch-all.
+"""
+input SsoGroupMappingInput {
+  idpGroupKey: String
+  idpGroupLabel: String
+  securityGroupId: String
+  ruleType: SsoGroupRuleType
+}
+
+"""
+Input payload for the `createSsoConnection` mutation. Creates a bare draft holding no IdP
+configuration yet; IdP-sourced fields belong on `updateSsoConnection`.
+"""
+input CreateSsoConnectionInput {
+  """
+  Required. `UNSPECIFIED` is rejected rather than defaulted, so adding a second protocol later
+  cannot silently reinterpret an existing caller.
+  """
+  connectionType: SsoConnectionType!
+  identityProvider: SsoIdentityProvider!
+}
+
+"""
+Input payload for the `updateSsoConnection` mutation. Patches the supplied fields and
+invalidates any passing test.
+
+Refused with `CONNECTION_ACTIVE` when the connection is active, and with `STALE_ETAG` when
+`etag` is no longer current.
+"""
+input UpdateSsoConnectionInput {
+  """Omitted, the organization's connection is resolved."""
+  connectionId: String
+
+  """
+  The value last read. A stale etag fails, and an empty one is rejected rather than treated as
+  an unconditional write.
+  """
+  etag: String!
+  idpSignInUrl: String
+  idpSignOutUrl: String
+  idpIdentifier: String
+
+  """
+  Replaces the identity provider signing certificate. Write-only. PEM-only until TURB-6478.
+  
+  For a draft or a disabled connection only. An active connection's certificate is replaced
+  through `replaceSsoConnectionCertificate`, and sending it here is refused with
+  `CONNECTION_ACTIVE`.
+  """
+  signingCertificatePem: String
+  emailClaim: String
+  nameClaim: String
+
+  """
+  The claim that carries the user's groups. Optional: a connection without one maps no groups, needs
+  no mappings to activate, and its logins grant nothing from them.
+  
+  Omitted or null leaves the claim unchanged. An empty string clears it.
+  """
+  groupsClaim: String
+  groupKeyType: SsoGroupKeyType
+  loginButtonLabel: String
+  loginButtonLogoUrl: String
+}
+
+"""
+Input payload for the `replaceSsoConnectionCertificate` mutation. Replaces the signing
+certificate only, including on an active connection.
+"""
+input ReplaceSsoConnectionCertificateInput {
+  connectionId: String
+
+  """
+  The value last read. A stale etag fails, and an empty one is rejected rather than treated as
+  an unconditional write.
+  """
+  etag: String!
+
+  """The replacement identity provider signing certificate. PEM."""
+  signingCertificatePem: String!
+}
+
+"""
+Input payload for the `selectSsoIdentityProvider` mutation.
+
+Refused with `CONNECTION_ACTIVE` when the connection is active and the provider would change.
+"""
+input SelectSsoIdentityProviderInput {
+  """
+  Omitted, the organization's pending draft is resolved, else its serving connection.
+  """
+  connectionId: String
+
+  """
+  Required. `UNSPECIFIED` is rejected rather than defaulted, matching `createSsoConnection`.
+  """
+  connectionType: SsoConnectionType!
+
+  """Required. `UNSPECIFIED` is rejected."""
+  identityProvider: SsoIdentityProvider!
+}
+
+"""
+Input payload for the `deleteSsoConnection` mutation. Removes the connection and its group
+mappings. Refused with `LAST_AUTHENTICATION_METHOD` when it is the organization's only remaining
+way to sign in.
+"""
+input DeleteSsoConnectionInput {
+  connectionId: String
+}
+
+"""
+Input payload for the `enableSsoConnection` mutation. Resumes logins through an active
+connection. Idempotent.
+"""
+input EnableSsoConnectionInput {
+  connectionId: String
+}
+
+"""
+Input payload for the `disableSsoConnection` mutation. Stops new logins through the connection
+and leaves existing sessions alone. Refused when it is the organization's only remaining way to
+sign in.
+"""
+input DisableSsoConnectionInput {
+  connectionId: String
+}
+
+"""
+Input payload for the `activateSsoConnection` mutation. Promotes a tested draft into service,
+re-evaluating activation readiness and refusing when it no longer holds.
+"""
+input ActivateSsoConnectionInput {
+  connectionId: String
+}
+
+"""
+Input payload for the `startSsoConnectionTest` mutation. Arms a one-shot capture of a real
+assertion. Refused when the connection is already in service.
+"""
+input StartSsoConnectionTestInput {
+  connectionId: String
+}
+
+"""
+Input payload for the `replaceSsoGroupMappings` mutation. Replaces the whole mapping set.
+"""
+input ReplaceSsoGroupMappingsInput {
+  connectionId: String
+  mappings: [SsoGroupMappingInput!]!
+}
+
+"""
+Input payload for the `addSsoGroupMapping` mutation. Adds one rule; an identical rule is a
+no-op.
+"""
+input AddSsoGroupMappingInput {
+  connectionId: String
+  mapping: SsoGroupMappingInput!
+}
+
+"""
+Input payload for the `editSsoGroupMapping` mutation. Replaces one existing rule in place.
+"""
+input EditSsoGroupMappingInput {
+  connectionId: String
+  mappingId: String!
+  mapping: SsoGroupMappingInput!
+}
+
+"""
+Input payload for the `deleteSsoGroupMapping` mutation. An already-absent mapping is a no-op.
+"""
+input DeleteSsoGroupMappingInput {
+  mappingId: String!
+}
+
+"""Input payload for the `previewSsoGroupMappings` query."""
+input PreviewSsoGroupMappingsInput {
+  connectionId: String
+
+  """
+  Names the completed connection test whose observed claims are resolved against.
+  """
+  testId: String!
+
+  """
+  The candidate rules to evaluate, of every kind, so a rule can be previewed before it is saved.
+  Empty evaluates the saved set instead.
+  """
+  mappings: [SsoGroupMappingInput!]
+}
+
+"""
+Input payload for the `updateOrgSsoSettings` mutation. Disabling password authentication
+requires a caller who authenticated through SSO, and is refused with `SAML_SESSION_REQUIRED`
+otherwise.
+"""
+input UpdateOrgSsoSettingsInput {
+  userPassAuthDisabled: Boolean
+}
+
+"""Response payload for the `createSsoConnection` mutation."""
+type CreateSsoConnectionResponse {
+  connection: SsoConnection
+}
+
+"""Response payload for the `updateSsoConnection` mutation."""
+type UpdateSsoConnectionResponse {
+  connection: SsoConnection
+}
+
+"""Response payload for the `replaceSsoConnectionCertificate` mutation."""
+type ReplaceSsoConnectionCertificateResponse {
+  connection: SsoConnection
+}
+
+"""Response payload for the `selectSsoIdentityProvider` mutation."""
+type SelectSsoIdentityProviderResponse {
+  """
+  The connection now carrying the selection: a new draft, the existing draft, or the serving
+  connection. Check `change` to tell which.
+  """
+  connection: SsoConnection
+  change: SsoIdentityProviderChange
+}
+
+"""Response payload for the `deleteSsoConnection` mutation."""
+type DeleteSsoConnectionResponse {
+  success: Boolean!
+}
+
+"""Response payload for the `enableSsoConnection` mutation."""
+type EnableSsoConnectionResponse {
+  connection: SsoConnection
+}
+
+"""Response payload for the `disableSsoConnection` mutation."""
+type DisableSsoConnectionResponse {
+  connection: SsoConnection
+}
+
+"""Response payload for the `activateSsoConnection` mutation."""
+type ActivateSsoConnectionResponse {
+  connection: SsoConnection
+}
+
+"""Response payload for the `startSsoConnectionTest` mutation."""
+type StartSsoConnectionTestResponse {
+  testId: ID!
+
+  """Opened in a new window to perform the test login."""
+  authorizeUrl: String!
+
+  """When the arming lapses."""
+  expiresAt: String
+}
+
+"""Response payload for the `listSsoConnections` query."""
+type ListSsoConnectionsResponse {
+  connections: [SsoConnection!]!
+}
+
+"""Response payload for the `listSsoGroupMappings` query."""
+type ListSsoGroupMappingsResponse {
+  mappings: [SsoGroupMapping!]!
+}
+
+"""Response payload for the `replaceSsoGroupMappings` mutation."""
+type ReplaceSsoGroupMappingsResponse {
+  mappings: [SsoGroupMapping!]!
+}
+
+"""Response payload for the `addSsoGroupMapping` mutation."""
+type AddSsoGroupMappingResponse {
+  mapping: SsoGroupMapping
+}
+
+"""Response payload for the `editSsoGroupMapping` mutation."""
+type EditSsoGroupMappingResponse {
+  mapping: SsoGroupMapping
+}
+
+"""Response payload for the `deleteSsoGroupMapping` mutation."""
+type DeleteSsoGroupMappingResponse {
+  mappingId: String!
+  success: Boolean!
+}
+
+"""Response payload for the `previewSsoGroupMappings` query."""
+type PreviewSsoGroupMappingsResponse {
+  identity: SsoResolvedIdentity
+  matchedGroups: [SsoMatchedIdpGroup!]!
+
+  """Asserted groups that no candidate mapping covers."""
+  unmatchedGroupKeys: [String!]!
+
+  """
+  What the rules other than `IDP_GROUP` grant this identity. An `UNMATCHED` rule contributes
+  only when nothing matched; an `ALL_USERS` rule contributes either way, because that grant is
+  additive.
+  """
+  catchAllSecurityGroupIds: [String!]!
+}
+
+"""Response payload for the `updateOrgSsoSettings` mutation."""
+type UpdateOrgSsoSettingsResponse {
+  settings: OrgSsoSettings
+}
+
+"""Response payload for the `getSsoGroupSyncSummary` query."""
+type GetSsoGroupSyncSummaryResponse {
+  summaries: [SsoGroupSyncSummary!]!
 }
 
 type UserOrganization {
